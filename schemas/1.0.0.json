@@ -1,0 +1,99 @@
+{
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "required": true
+    },
+    "processes": {
+      "type": "array",
+      "required": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "urls": {
+      "type": "object",
+      "required": false,
+      "properties": {
+        "documentation": {
+          "type": "string",
+          "required": false
+        },
+        "support": {
+          "type": "string",
+          "required": false
+        },
+        "feedback": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "install": {
+      "type": "array",
+      "required": true,
+      "items": {
+        "type": "object",
+        "required": true,
+        "properties": {
+          "action": {
+            "type": "string",
+            "required": true,
+            "enum": ["run", "copy"]
+          },
+          "destination": {
+            "type": "string",
+            "required": false
+          },
+          "source": {
+            "required": true,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "uninstall": {
+      "type": "array",
+      "required": true,
+      "items": {
+        "type": "object",
+        "required": true,
+        "properties": {
+          "action": {
+            "type": "string",
+            "required": true,
+            "enum": ["run", "delete"]
+          },
+          "source": {
+            "required": true,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "dependson": {
+      "type": "array",
+      "required": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
