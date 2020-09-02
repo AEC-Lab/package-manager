@@ -2,6 +2,7 @@
 *the new package manager*
 
 ## Project setup
+*you will need a .env file in your root directory with the necessary environment variables*
 ```
 yarn install
 ```

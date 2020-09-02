@@ -40,9 +40,9 @@
         </template>
       </v-navigation-drawer>
     </v-card>
-    <!-- <div id="router">
+    <div id="router">
       <router-view></router-view>
-    </div> -->
+    </div>
   </v-app>
 </template>
 
