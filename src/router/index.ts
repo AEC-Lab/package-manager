@@ -1,13 +1,23 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
-import Home from "../views/Home.vue";
+import Browse from "../views/Browse.vue";
+import Settings from "../views/Settings.vue";
+import Admin from "../views/Admin.vue";
 
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
   {
-    path: "/",
-    component: Home
+    path: "/browse",
+    component: Browse
+  },
+  {
+    path: "/settings",
+    component: Settings
+  },
+  {
+    path: "/admin",
+    component: Admin
   }
 ];
 
@@ -16,4 +26,5 @@ const router = new VueRouter({
   routes
 });
 
+router.replace("browse");
 export default router;
