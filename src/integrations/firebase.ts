@@ -1,8 +1,6 @@
 import * as firebase from "firebase/app";
-import "firebase/storage";
+// import "firebase/storage";
 import "firebase/firestore";
-
-console.log(process.env);
 
 const config = {
   apiKey: process.env.VUE_APP_APIKEY,

@@ -29,7 +29,7 @@ const mutations: MutationTree<IState> = {
 };
 
 const actions: ActionTree<IState, IState> = {
-  async repositoriesListener({ commit }) {
+  repositoriesListener({ commit }) {
     try {
       firestore.collection("repositories").onSnapshot(snapshot => {
         const repositories = snapshot.docs.map(doc => doc.data());
