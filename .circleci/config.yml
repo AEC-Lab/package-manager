@@ -1,0 +1,89 @@
+version: 2
+jobs:
+  build:
+    docker:
+      # use a wine image to successfully build a windows application
+      # circle ci only supports mac and linux environments, so this is necessary
+      - image: electronuserland/builder:wine-mono
+
+    # set working directory
+    working_directory: ~/repo
+    
+    # specify steps for build job
+    steps:
+
+      # checkout codebase
+      - checkout
+
+      # download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      # install yarn packages
+      - run:
+          name: "Install Packages"
+          command: yarn install
+
+      # cache node modules for faster builds
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+        
+      # run tests!
+
+      # build electron application
+      # package.json build script forces a windows build
+      - run:
+          name: "Build Application"
+          command: yarn electron:build
+
+      # get version from package.json
+      - run:
+          name: "Get Code Version"
+          command: |
+            node -p -e "require('./package.json').version" > ./dist_electron/version.txt
+      
+      # persist installer to workspace so release job can access
+      - persist_to_workspace:
+          root: ./dist_electron
+          paths: 
+            - releaser-3dmm-setup.exe
+            - releaser-3dmm-setup.exe.blockmap
+            - latest.yml
+            - version.txt
+
+  release:
+    docker:
+      # use docker go image to leverage ghr library
+      - image: circleci/golang:1.8
+
+    steps:      
+      # mount workspace from build job
+      - attach_workspace:
+          at: ./dist_electron
+
+      # publish github release with package.json version and client installer
+      - run:
+          name: "Publish Installer on GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            echo 'export TAG=$(more ./dist_electron/version.txt)' >> $BASH_ENV
+            source $BASH_ENV
+            ghr -n "Upgraded To Reduce Vulnerabilities" -b "Upgraded growl and webpack-dev-server in yarn.lock" -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${TAG} ./dist_electron
+
+workflows:
+  version: 2
+  build-and-release:
+    jobs:
+      - build
+      - release:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build
