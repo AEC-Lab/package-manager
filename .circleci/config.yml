@@ -59,7 +59,7 @@ jobs:
   release:
     docker:
       # use docker go image to leverage ghr library
-      - image: circleci/golang:1.8
+      - image: circleci/golang:1.10
 
     steps:      
       # mount workspace from build job
