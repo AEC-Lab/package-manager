@@ -39,7 +39,7 @@ jobs:
       # package.json build script forces a windows build
       - run:
           name: "Build Application"
-          command: yarn electron:build
+          command: yarn build
 
       # get version from package.json
       - run:

@@ -1,5 +1,5 @@
 # Package Manager
-*deploy and update AEC tools automatically*
+*an AEC standard for tool deployment and management*
 
 ## Project setup
 *you will need a .env file in your root directory with the necessary environment variables*
