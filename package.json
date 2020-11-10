@@ -1,7 +1,7 @@
 {
-  "name": "warehouse",
-  "version": "0.1.0",
-  "private": true,
+  "name": "package-manager",
+  "version": "0.0.1",
+  "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

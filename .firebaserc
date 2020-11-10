@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "development": "package-manager-development",
+    "production": "package-manager-417d1"
+  }
+}

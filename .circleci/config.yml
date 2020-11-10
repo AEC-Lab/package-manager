@@ -51,8 +51,8 @@ jobs:
       - persist_to_workspace:
           root: ./dist_electron
           paths: 
-            - releaser-3dmm-setup.exe
-            - releaser-3dmm-setup.exe.blockmap
+            - package-manager-setup.exe
+            - package-manager-setup.exe.blockmap
             - latest.yml
             - version.txt
 
@@ -73,7 +73,7 @@ jobs:
             go get github.com/tcnksm/ghr
             echo 'export TAG=$(more ./dist_electron/version.txt)' >> $BASH_ENV
             source $BASH_ENV
-            ghr -n "Upgraded To Reduce Vulnerabilities" -b "Upgraded growl and webpack-dev-server in yarn.lock" -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${TAG} ./dist_electron
+            ghr -n "Test Release" -b "Test Comment" -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${TAG} ./dist_electron
 
 workflows:
   version: 2
