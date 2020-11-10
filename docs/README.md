@@ -1,20 +1,15 @@
-# Warehouse
-*the new package manager*
+# Package Manager
+*deploy and update AEC tools automatically*
 
 ## Project setup
 *you will need a .env file in your root directory with the necessary environment variables*
 ```
-yarn install
+yarn setup
 ```
 
 ### Compiles and hot-reloads for development
 ```
 yarn electron:serve
-```
-
-### Compiles and minifies for production
-```
-yarn electron:build
 ```
 
 ### Run your unit tests

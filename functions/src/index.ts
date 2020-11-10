@@ -83,35 +83,37 @@ exports.github = functions.https.onRequest((request, response) => {
 
 // validation endpoint for deployer data
 // TODO store deployer schemas in google firestore!
-exports.validate = functions.https.onRequest((request: functions.https.Request, response: GenericObject) => {
-  // handle invalid request method
-  if (request.method !== "POST") {
-    return response.status(405).send("Only POST Requests Are Accepted");
-  }
-  const deployerData = request.body;
-  const version = deployerData.version;
-  helpers
-    .getData("schemas")
-    .then((schemas: object[]) => {
-      const schema = _.find(schemas, ["version", version]) as GenericObject;
-      if (schema) {
-        const v = new Validator();
-        const result = v.validate(deployerData, schema.schema);
-        result.valid
-          ? response.status(200).send("Validated!")
-          : response.status(400).send(result.errors);
-      } else {
+exports.validate = functions.https.onRequest(
+  (request: functions.https.Request, response: GenericObject) => {
+    // handle invalid request method
+    if (request.method !== "POST") {
+      return response.status(405).send("Only POST Requests Are Accepted");
+    }
+    const deployerData = request.body;
+    const version = deployerData.version;
+    helpers
+      .getData("schemas")
+      .then((schemas: object[]) => {
+        const schema = _.find(schemas, ["version", version]) as GenericObject;
+        if (schema) {
+          const v = new Validator();
+          const result = v.validate(deployerData, schema.schema);
+          result.valid
+            ? response.status(200).send("Validated!")
+            : response.status(400).send(result.errors);
+        } else {
+          response
+            .status(400)
+            .send(`Can't Find a Deployer Schema With Version ${version}`);
+        }
+      })
+      .catch((error: string) => {
         response
-          .status(400)
-          .send(`Can't Find a Deployer Schema With Version ${version}`);
-      }
-    })
-    .catch((error: string) => {
-      response
-        .status(500)
-        .send(`Error Getting Deployer Schemas to Validate With: ${error}`);
-    });
-});
+          .status(500)
+          .send(`Error Getting Deployer Schemas to Validate With: ${error}`);
+      });
+  }
+);
 
 // delete the release event, deletion event will trigger client to update live
 exports.processReleaseEvent = functions.database
@@ -166,29 +168,25 @@ exports.processRepositoryEvent = functions.database
   });
 
 // cloud function to create user profile upon signin for the first time
-exports.createUser = functions.auth
-  .user()
-  .onCreate(async (user: any) => {
-    const payload: User = {
-      name: user.displayName,
-      email: user.email,
-      roles: ["user"],
-      uid: user.uid
-    };
-    return await admin
-      .firestore()
-      .collection("users")
-      .doc(user.uid)
-      .set(payload);
-  });
+exports.createUser = functions.auth.user().onCreate(async (user: any) => {
+  const payload: User = {
+    name: user.displayName,
+    email: user.email,
+    roles: ["user"],
+    uid: user.uid
+  };
+  return await admin
+    .firestore()
+    .collection("users")
+    .doc(user.uid)
+    .set(payload);
+});
 
 // cloud function to delete user metadata on auth delete
-exports.deleteUser = functions.auth
-  .user()
-  .onDelete(async (user: any) => {
-    return await admin
-      .firestore()
-      .collection("users")
-      .doc(user.uid)
-      .delete();
-  });
+exports.deleteUser = functions.auth.user().onDelete(async (user: any) => {
+  return await admin
+    .firestore()
+    .collection("users")
+    .doc(user.uid)
+    .delete();
+});
