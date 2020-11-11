@@ -4,7 +4,7 @@
     <div id="router">
       <router-view></router-view>
     </div>
-    <Menu id="menu"></Menu>
+    <Menu v-if="user" id="menu"></Menu>
   </v-app>
 </template>
 
@@ -31,6 +31,9 @@ export default Vue.extend({
   computed: {
     height() {
       return window.innerHeight;
+    },
+    user() {
+      return this.$store.state.auth.user
     }
   }
 });
