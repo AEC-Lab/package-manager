@@ -4,7 +4,7 @@
             <v-form>
                 <v-text-field label="Email" v-model="user.email" />
                 <v-text-field label="Password" type="password" v-model="user.password" />
-                <v-btn @submit="login" @click="login">
+                <v-btn @submit="signInWithEmail" @click="signInWithEmail">
                     Login
                 </v-btn>
             </v-form>
@@ -13,8 +13,24 @@
             <div class="link" @click="toggleMode">Sign in with Third Party Provider</div>
         </v-card-text>
         <v-card-text v-else-if="mode === 'provider'">
-            <v-btn>Sign in with Google</v-btn>
-            <v-btn>Sign in with GitHub</v-btn>
+            <v-btn @click="signInWithGoogle" :loading="btnLoadingGoogle">
+                Sign in with Google
+                <v-icon
+                    right
+                    dark
+                >
+                    mdi-google
+                </v-icon>
+            </v-btn>
+            <v-btn @click="signInWithGithub" :loading="btnLoadingGithub">
+                Sign in with GitHub
+                <v-icon
+                    right
+                    dark
+                >
+                    mdi-github
+                </v-icon>
+            </v-btn>
             <div class="link" @click="toggleMode">Sign in with Email and Password</div>
         </v-card-text>
         <v-snackbar v-model="snackbar">
@@ -39,6 +55,7 @@ import { LoginCredentials } from "../../../types/auth"
 
 @Component
 export default class Login extends Vue {
+    // DATA PROPERTIES
     user: LoginCredentials = {
         email: '',
         password: ''
@@ -47,22 +64,41 @@ export default class Login extends Vue {
     snackbar = false
     snackbarText = ''
 
+    btnLoadingGoogle = false
+    btnLoadingGithub = false
+
     mode: 'email' | 'provider' = 'email'
 
+    // METHODS
     toggleMode() {
         this.mode = this.mode === 'email' ? 'provider' : 'email'
     }
 
-    async login() {
+    async signInWithEmail() {
         try {
-            const _user = await this.$store.dispatch("auth/loginWithEmailAndPassword", this.user);
-            this.$router.push({
-                path: "/browse"
-            });
+            await this.$store.dispatch("auth/loginWithEmailAndPassword", this.user);
         } catch (error) {
             this.snackbarText = error
             this.snackbar = true
             console.log(error);
+        }
+    }
+
+    async signInWithGoogle() {
+        this.btnLoadingGoogle = true
+        try {
+            await this.$store.dispatch("auth/loginWithGoogle")
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async signInWithGithub() {
+        this.btnLoadingGithub = true
+        try {
+            await this.$store.dispatch("auth/loginWithGithub")
+        } catch (error) {
+            console.log(error)
         }
     }
 }

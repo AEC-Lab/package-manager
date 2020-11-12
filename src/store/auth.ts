@@ -1,7 +1,10 @@
 import { Module, GetterTree, MutationTree, ActionTree } from 'vuex'
+import { ipcRenderer } from 'electron'
+// const {ipcRenderer} = window.require('electron')
 import { IRootState } from '.'
 import { User, LoginCredentials, RegisterCredentials } from '../../types/auth'
-import { fireAuth, firestore } from '../integrations/firebase'
+import firebase, { fireAuth, firestore } from '../integrations/firebase'
+import router from '../router'
 
 export interface IAuthState {
     user: User | null
@@ -28,6 +31,7 @@ let unsubscribe: () => void;
 export const actions: ActionTree<IAuthState, IRootState> = {
     async onAuthStateChangedAction(context, user: firebase.User | null) {
         if (user) {
+            console.log(user)
             unsubscribe = await firestore.collection('users').doc(user.uid).onSnapshot(snapshot => {
                 const docData = snapshot.data()
                 const _user: User = {
@@ -43,9 +47,28 @@ export const actions: ActionTree<IAuthState, IRootState> = {
             context.commit("setUser", null)
         }
     },
+    async loginWithGoogle(context) {
+        try {
+            _authenticate("google")
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    },
+    async loginWithGithub(context) {
+        try {
+            _authenticate("github")
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    },
     async loginWithEmailAndPassword(context, credentials: LoginCredentials) {
         try {
             const user = await fireAuth.signInWithEmailAndPassword(credentials.email, credentials.password)
+            router.push({
+                path: "/browse"
+            });
             return user
         } catch (error) {
             console.log(error)
@@ -62,6 +85,9 @@ export const actions: ActionTree<IAuthState, IRootState> = {
                 }
                 await firestore.collection('users').doc(user.user.uid).update({name: credentials.name})
             }
+            router.push({
+                path: "/browse"
+            });
         } catch (error) {
             console.log(error)
             throw error
@@ -94,4 +120,44 @@ export const auth: Module<IAuthState, IRootState> = {
     getters,
     mutations,
     actions
+}
+
+// PRIVATE FUNCTIONS
+function _authenticate(provider: "google" | "github") {
+    const authParams = _getAuthParams(provider)
+    ipcRenderer.send("authenticate", provider, authParams);
+    ipcRenderer.on("tokens", (event, tokens) => {
+        _signInWithTokens(provider, tokens);
+    });
+}
+
+async function _signInWithTokens(provider: "google" | "github", tokens: any) {
+    let credential: firebase.auth.AuthCredential
+    if (provider === "google") {
+        credential = firebase.auth.GoogleAuthProvider.credential(
+          tokens.id_token,
+          tokens.access_token
+        );
+    } else if (provider === "github") {
+        credential = firebase.auth.GithubAuthProvider.credential(tokens)
+    } else return
+    await fireAuth.signInWithCredential(credential);
+    router.push({
+        path: "/browse"
+    });
+}
+
+function _getAuthParams(provider: "google" | "github") {
+    switch(provider) {
+        case "google":
+            return {
+                id: process.env.VUE_APP_GOOGLECLIENTID,
+                secret: process.env.VUE_APP_GOOGLECLIENTSECRET,
+            }
+        case "github":
+            return {
+                id: process.env.VUE_APP_GITHUBCLIENTID,
+                secret: process.env.VUE_APP_GITHUBCLIENTSECRET,
+            }
+    }
 }

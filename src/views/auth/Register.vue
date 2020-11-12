@@ -62,9 +62,6 @@ export default class Register extends Vue {
         if (!isValid) return;
         try {
             await this.$store.dispatch("auth/registerWithEmailAndPassword", this.user);
-            this.$router.push({
-                path: "/browse"
-            });
         } catch (error) {
             this.snackbarText = error
             this.snackbar = true
