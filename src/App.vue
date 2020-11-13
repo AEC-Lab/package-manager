@@ -1,9 +1,9 @@
 <template>
   <v-app>
     <!-- <v-app-bar app color="primary" dark></v-app-bar> -->
-    <div id="router">
-      <router-view></router-view>
-    </div>
+    <v-main id="router">
+        <router-view></router-view>
+    </v-main>
     <Menu v-if="user" id="menu"></Menu>
   </v-app>
 </template>

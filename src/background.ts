@@ -52,6 +52,7 @@ ipcMain.on('authenticate', (event, provider, client) => {
     })
     destroyer(server)
   } else if (provider === "github") {
+    // https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps
     const authorizeUrl = _getGithubAuthorizeUrl({
       client_id: client.id,
       redirect_uri: 'http://localhost:3000/oauth2callback',
