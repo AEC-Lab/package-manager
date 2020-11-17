@@ -105,7 +105,11 @@ workflows:
   main:
     jobs:
       - build
-      - deploy-functions
+      - deploy-functions:
+          filters:
+            branches:
+              only:
+                - master
       - release:
           filters:
             branches:
