@@ -3,7 +3,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 admin.initializeApp(functions.config().firebase);
 
-import { getGithubUsername } from "./utils"
+import { getGithubUsername } from "./utils";
 
 const helpers: { [key: string]: Function } = {};
 
@@ -170,23 +170,25 @@ exports.processRepositoryEvent = functions.database
   });
 
 // cloud function to create user profile upon signin for the first time
-exports.createUser = functions.auth.user().onCreate(async (user: admin.auth.UserRecord) => {
-  const payload: User = {
-    name: user.displayName || null,
-    email: user.email || null,
-    roles: ["user"],
-    uid: user.uid
-  };
-  // If provider is GitHub, and user has no public name, use username for name
-  if (user.providerData[0].providerId === "github.com" && !user.displayName) {
-    payload.name = await getGithubUsername(user.providerData[0].uid)
-  }
-  return await admin
-    .firestore()
-    .collection("users")
-    .doc(user.uid)
-    .set(payload);
-});
+exports.createUser = functions.auth
+  .user()
+  .onCreate(async (user: admin.auth.UserRecord) => {
+    const payload: User = {
+      name: user.displayName || null,
+      email: user.email || null,
+      roles: ["user"],
+      uid: user.uid
+    };
+    // If provider is GitHub, and user has no public name, use username for name
+    if (user.providerData[0].providerId === "github.com" && !user.displayName) {
+      payload.name = await getGithubUsername(user.providerData[0].uid);
+    }
+    return await admin
+      .firestore()
+      .collection("users")
+      .doc(user.uid)
+      .set(payload);
+  });
 
 // cloud function to delete user metadata on auth delete
 exports.deleteUser = functions.auth.user().onDelete(async (user: any) => {

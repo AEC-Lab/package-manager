@@ -14,9 +14,10 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@types/node-fetch": "^2.5.7",
     "firebase": "^8.0.1",
     "firebase-admin": "^8.10.0",
-    "firebase-functions": "^3.6.1",
+    "firebase-functions": "^3.11.0",
     "jsonschema": "^1.2.6",
     "lodash": "^4.17.20",
     "node-fetch": "^2.6.1"
