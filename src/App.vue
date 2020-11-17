@@ -1,10 +1,10 @@
 <template>
   <v-app>
     <!-- <v-app-bar app color="primary" dark></v-app-bar> -->
-    <div id="router">
-      <router-view></router-view>
-    </div>
-    <Menu id="menu"></Menu>
+    <v-main id="router">
+        <router-view></router-view>
+    </v-main>
+    <Menu v-if="user" id="menu"></Menu>
   </v-app>
 </template>
 
@@ -31,6 +31,9 @@ export default Vue.extend({
   computed: {
     height() {
       return window.innerHeight;
+    },
+    user() {
+      return this.$store.state.auth.user
     }
   }
 });

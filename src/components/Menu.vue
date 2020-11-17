@@ -11,11 +11,14 @@
       <v-list dense nav class="py-0">
         <v-list-item two-line :class="true && 'px-0'">
           <v-list-item-avatar>
-            <v-avatar color="indigo" size="36">G</v-avatar>
+            <v-avatar color="indigo" size="36">
+              <img v-if="userDisplay.photoURL" :src="userDisplay.photoURL" :alt="userDisplay.initials">
+              <span v-else>{{ userDisplay.initials }}</span>
+            </v-avatar>
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-list-item-title>Grant Foster</v-list-item-title>
+            <v-list-item-title>{{ userDisplay.title }}</v-list-item-title>
             <v-list-item-subtitle>AEC Lab</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
@@ -38,7 +41,7 @@
       </v-list>
       <template v-slot:append>
         <div v-if="!mini" class="pa-2">
-          <v-btn block>Logout</v-btn>
+          <v-btn block @click="logout">Logout</v-btn>
         </div>
       </template>
     </v-navigation-drawer>
@@ -46,24 +49,54 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { Component, Vue } from "vue-property-decorator";
+import { User } from 'types/auth';
+import { fireAuth } from "../integrations/firebase"
 
-export default Vue.extend({
-  name: "Menu",
-  data: () => ({
-    drawer: true,
-    mini: true,
-    items: [
-      { title: "Browse", icon: "mdi-archive" },
-      { title: "Settings", icon: "mdi-cog" },
-      { title: "Admin", icon: "mdi-shield" }
-    ]
-  }),
-  methods: {
-    route(name: string) {
-      this.$router.push(name);
+@Component({name: "Menu"})
+export default class Register extends Vue {
+  // DATA PROPERTIES
+  drawer = true
+  mini = true
+  items = [
+    { title: "Browse", icon: "mdi-archive" },
+    { title: "Settings", icon: "mdi-cog" },
+    { title: "Admin", icon: "mdi-shield" }
+  ]
+
+  // COMPUTED PROPERTIES
+  get user(): User {
+    return this.$store.state.auth.user
+  }
+  get authUser() {
+    return fireAuth.currentUser
+  }
+  get userDisplay() {
+    if (this.user === null || this.authUser === null) return null
+    return {
+      title: this.user.name || this.user.email,
+      photoURL: this.authUser.photoURL || null,
+      initials: this.parseInitials(this.user.name) || this.authUser.email?.toUpperCase()[0] || "?"
     }
   }
-});
+
+  // METHODS
+  route(name: string) {
+    this.$router.push(name);
+  }
+  async logout() {
+    const loggedOut = await this.$store.dispatch("auth/logout")
+    if (loggedOut) {
+      const r = this.$router.resolve({
+          path: this.$route.path
+      });
+      window.location.assign(r.href)
+    }
+  }
+  parseInitials(name: string | null) {
+    if (!name) return null;
+    return name.split(' ').map(x => x[0].toUpperCase()).join('').slice(0, 3)
+  }
+}
 </script>
 <style lang="scss" scoped></style>
