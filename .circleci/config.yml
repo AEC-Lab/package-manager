@@ -8,24 +8,11 @@ jobs:
       # checkout codebase
       - checkout
 
-      # download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "functions/package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
       # install yarn packages for firebase functions
       - run:
           name: "Install Functions Packages"
           working_directory: ~/project/functions
           command: yarn install --ignore-engines
-
-      # cache node modules for faster builds
-      - save_cache:
-          paths:
-            - ~/project/functions/node_modules
-          key: v1-dependencies-
 
       # deploy firebase functions
       - run:
