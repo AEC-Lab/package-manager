@@ -6,104 +6,116 @@ import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 // import necessary modules for authenticator
-import * as http from 'http'
-import * as url from 'url'
-import * as querystring from 'querystring'
-import open from 'open'
-import destroyer from 'server-destroy'
-import { google } from 'googleapis'
-import { ipcMain } from 'electron'
-import fetch from 'node-fetch';
+import * as http from "http";
+import * as url from "url";
+import * as querystring from "querystring";
+import open from "open";
+import destroyer from "server-destroy";
+import { google } from "googleapis";
+import { ipcMain } from "electron";
+import fetch from "node-fetch";
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null;
 
 // setup authenticator in the main process
-ipcMain.on('authenticate', (event, provider, client) => {
+ipcMain.on("authenticate", (event, provider, client) => {
   if (provider === "google") {
     const oauth2Client = new google.auth.OAuth2(
       client.id,
       client.secret,
-      'http://localhost:3000/oauth2callback'
-    )
+      "http://localhost:3000/oauth2callback"
+    );
     google.options({
       auth: oauth2Client
-    })
+    });
     const authorizeUrl = oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      prompt: 'select_account',
-      scope: 'profile email'
-    })
-    const server = http.createServer(async (req: any, res: any) => {
-      if (req.url.indexOf('/oauth2callback') > -1) {
-        const qs = querystring.parse(url.parse(req.url).query!)
-        
-        res.end('Successfully Authenticated!  You can close this tab and return to the Package Manager application!')
-        server.destroy()
-        // @ts-ignore
-        const { tokens } = await oauth2Client.getToken(qs.code)
-        event.sender.send('tokens', tokens)
-      }
-    }).listen(3000, () => {
-      open(authorizeUrl, {
-        wait: false
-      }).then((cp: any) => cp.unref())
-    })
-    destroyer(server)
+      access_type: "offline",
+      prompt: "select_account",
+      scope: "profile email"
+    });
+    const server = http
+      .createServer(async (req: any, res: any) => {
+        if (req.url.indexOf("/oauth2callback") > -1) {
+          const qs = querystring.parse(url.parse(req.url).query!);
+
+          res.end(
+            "Successfully Authenticated!  You can close this tab and return to the Package Manager application!"
+          );
+          server.destroy();
+          // @ts-ignore
+          const { tokens } = await oauth2Client.getToken(qs.code);
+          event.sender.send("tokens", tokens);
+        }
+      })
+      .listen(3000, () => {
+        open(authorizeUrl, {
+          wait: false
+        }).then((cp: any) => cp.unref());
+      });
+    destroyer(server);
   } else if (provider === "github") {
     // https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps
     const authorizeUrl = _getGithubAuthorizeUrl({
       client_id: client.id,
-      redirect_uri: 'http://localhost:3000/oauth2callback',
+      redirect_uri: "http://localhost:3000/oauth2callback",
       scope: "read:user"
-    })
-    const server = http.createServer(async (req: any, res: any) => {
-      if (req.url.indexOf('/oauth2callback') > -1) {
-        const qs = querystring.parse(url.parse(req.url).query!)
-        
-        res.end('Successfully Authenticated!  You can close this tab and return to the Package Manager application!')
-        server.destroy()
-        const code = qs.code
-        const params = {
-          client_id: client.id,
-          client_secret: client.secret,
-          code
+    });
+    const server = http
+      .createServer(async (req: any, res: any) => {
+        if (req.url.indexOf("/oauth2callback") > -1) {
+          const qs = querystring.parse(url.parse(req.url).query!);
+
+          res.end(
+            "Successfully Authenticated!  You can close this tab and return to the Package Manager application!"
+          );
+          server.destroy();
+          const code = qs.code;
+          const params = {
+            client_id: client.id,
+            client_secret: client.secret,
+            code
+          };
+          const token = await _getGithubToken(params);
+          event.sender.send("tokens", token);
         }
-        const token = await _getGithubToken(params)
-        event.sender.send('tokens', token)
-      }
-    }).listen(3000, () => {
-      open(authorizeUrl, {
-        wait: false
-      }).then((cp: any) => cp.unref())
-    })
-    destroyer(server)
+      })
+      .listen(3000, () => {
+        open(authorizeUrl, {
+          wait: false
+        }).then((cp: any) => cp.unref());
+      });
+    destroyer(server);
   }
-})
+});
 
 function _getGithubAuthorizeUrl(params: any) {
-  const url = new URL("https://github.com/login/oauth/authorize")
+  const url = new URL("https://github.com/login/oauth/authorize");
   for (const p in params) {
-    url.searchParams.append(p, params[p])
+    url.searchParams.append(p, params[p]);
   }
-  return url.href
+  return url.href;
 }
 
 async function _getGithubToken(params: any) {
   try {
-    const response = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'},
-      body: JSON.stringify(params)
-    })
-    const jsonBody = await response.json()
-    return jsonBody.access_token
+    const response = await fetch(
+      "https://github.com/login/oauth/access_token",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(params)
+      }
+    );
+    const jsonBody = await response.json();
+    return jsonBody.access_token;
   } catch (error) {
-    console.log(error)
-    throw error
+    console.log(error);
+    throw error;
   }
 }
 

@@ -1,7 +1,7 @@
 import Vue from "vue";
-import Vuex, { ActionTree, MutationTree } from "vuex";
+import Vuex from "vuex";
 
-import { repos } from "./repos"
+import { repos } from "./repos";
 import { auth } from "./auth";
 
 Vue.use(Vuex);

@@ -1,7 +1,7 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 
-import { fireAuth } from "../integrations/firebase"
+import { fireAuth } from "../integrations/firebase";
 
 import Browse from "../views/Browse.vue";
 import Settings from "../views/Settings.vue";
@@ -70,26 +70,26 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   const user = fireAuth.currentUser;
   if (to.matched.some(route => route.meta.requiresAuth)) {
-      if (user) {
-          next();
-      } else {
-          next({
-              name: "Login"
-          });
-      }
-  } else {
+    if (user) {
       next();
+    } else {
+      next({
+        name: "Login"
+      });
+    }
+  } else {
+    next();
   }
   if (to.matched.some(route => route.meta.requiresGuest)) {
-      if (!user) {
-          next();
-      } else {
-          next({
-              name: "Browse"
-          });
-      }
-  } else {
+    if (!user) {
       next();
+    } else {
+      next({
+        name: "Browse"
+      });
+    }
+  } else {
+    next();
   }
 });
 
