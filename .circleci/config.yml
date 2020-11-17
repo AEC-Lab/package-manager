@@ -49,13 +49,12 @@ jobs:
       # install yarn packages for electron
       - run:
           name: "Install Electron Packages"
-          working_directory: ~/project
-          command: yarn install --ignore-engines
+          command: yarn install
 
       # cache node modules for faster builds
       - save_cache:
           paths:
-            - ~/project/node_modules
+            - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
         
       # run tests!
