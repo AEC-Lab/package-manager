@@ -26,10 +26,10 @@ export default defineComponent({
     const test = ref("test");
     const $store = context.root.$store;
 
-    $store.dispatch("repositoriesListener");
+    $store.dispatch("repos/repositoriesListener");
 
     const repositories = computed(() => {
-      return $store.state.repositories;
+      return $store.state.repos.repositories;
     });
 
     return {
