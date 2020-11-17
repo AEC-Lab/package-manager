@@ -2,7 +2,7 @@
   "name": "package-manager",
   "description": "does things",
   "author": "AEC Lab",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": false,
   "scripts": {
     "setup": "yarn install && cd functions & yarn install --ignore-engines",

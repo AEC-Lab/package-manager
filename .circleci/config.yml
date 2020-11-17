@@ -1,5 +1,29 @@
 version: 2
 jobs:
+  deploy-functions:
+    docker:
+      - image: circleci/node:10.10.0
+
+    steps:
+      # checkout codebase
+      - checkout
+
+      # install yarn packages for firebase functions
+      - run:
+          name: "Install Functions Packages"
+          working_directory: ~/project/functions
+          command: yarn install --ignore-engines
+
+      # deploy firebase functions
+      - run:
+          name: Deploy Firebase Functions"
+          working_directory: ~/project
+          command: |
+            sudo npm install -g firebase-tools
+            firebase use production
+            firebase deploy --token=$FIREBASE_TOKEN --non-interactive
+
+
   build:
     docker:
       # use a wine image to successfully build a windows application
@@ -22,9 +46,9 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      # install yarn packages
+      # install yarn packages for electron
       - run:
-          name: "Install Packages"
+          name: "Install Electron Packages"
           command: yarn install
 
       # cache node modules for faster builds
@@ -77,9 +101,14 @@ jobs:
 
 workflows:
   version: 2
-  build-and-release:
+  main:
     jobs:
       - build
+      - deploy-functions:
+          filters:
+            branches:
+              only:
+                - master
       - release:
           filters:
             branches:
