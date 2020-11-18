@@ -100,17 +100,14 @@ function _getGithubAuthorizeUrl(params: any) {
 
 async function _getGithubToken(params: any) {
   try {
-    const response = await fetch(
-      "https://github.com/login/oauth/access_token",
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(params)
-      }
-    );
+    const response = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(params)
+    });
     const jsonBody = await response.json();
     return jsonBody.access_token;
   } catch (error) {
@@ -120,9 +117,7 @@ async function _getGithubToken(params: any) {
 }
 
 // Scheme must be registered before the app is ready
-protocol.registerSchemesAsPrivileged([
-  { scheme: "app", privileges: { secure: true, standard: true } }
-]);
+protocol.registerSchemesAsPrivileged([{ scheme: "app", privileges: { secure: true, standard: true } }]);
 
 function createWindow() {
   // Create the browser window.
@@ -132,8 +127,7 @@ function createWindow() {
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: (process.env
-        .ELECTRON_NODE_INTEGRATION as unknown) as boolean
+      nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean
     }
   });
 

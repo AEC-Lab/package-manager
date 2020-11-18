@@ -68,61 +68,47 @@ exports.github = functions.https.onRequest((request, response) => {
   const eventHeader = request.get("X-GitHub-Event");
   const approvedHeaders = ["release", "installation_repositories"];
   if (eventHeader && !approvedHeaders.includes(eventHeader)) {
-    return response
-      .status(405)
-      .send(`Only Accepting GitHub Events: ${approvedHeaders}`);
+    return response.status(405).send(`Only Accepting GitHub Events: ${approvedHeaders}`);
   }
   // write data from github webhook to database
   const writeData = helpers.pushData(eventHeader)(request.body);
   // return write promise
   return writeData.then(
-    (result: any) =>
-      response.status(200).send(`Successfully Pushed Github Event: ${result}`),
-    (error: any) =>
-      response.status(500).send(`Error in Pushing GitHub Event: ${error}`)
+    (result: any) => response.status(200).send(`Successfully Pushed Github Event: ${result}`),
+    (error: any) => response.status(500).send(`Error in Pushing GitHub Event: ${error}`)
   );
 });
 
 // validation endpoint for deployer data
 // TODO store deployer schemas in google firestore!
-exports.validate = functions.https.onRequest(
-  (request: functions.https.Request, response: GenericObject) => {
-    // handle invalid request method
-    if (request.method !== "POST") {
-      return response.status(405).send("Only POST Requests Are Accepted");
-    }
-    const deployerData = request.body;
-    const version = deployerData.version;
-    helpers
-      .getData("schemas")
-      .then((schemas: object[]) => {
-        const schema = _.find(schemas, ["version", version]) as GenericObject;
-        if (schema) {
-          const v = new Validator();
-          const result = v.validate(deployerData, schema.schema);
-          result.valid
-            ? response.status(200).send("Validated!")
-            : response.status(400).send(result.errors);
-        } else {
-          response
-            .status(400)
-            .send(`Can't Find a Deployer Schema With Version ${version}`);
-        }
-      })
-      .catch((error: string) => {
-        response
-          .status(500)
-          .send(`Error Getting Deployer Schemas to Validate With: ${error}`);
-      });
+exports.validate = functions.https.onRequest((request: functions.https.Request, response: GenericObject) => {
+  // handle invalid request method
+  if (request.method !== "POST") {
+    return response.status(405).send("Only POST Requests Are Accepted");
   }
-);
+  const deployerData = request.body;
+  const version = deployerData.version;
+  helpers
+    .getData("schemas")
+    .then((schemas: object[]) => {
+      const schema = _.find(schemas, ["version", version]) as GenericObject;
+      if (schema) {
+        const v = new Validator();
+        const result = v.validate(deployerData, schema.schema);
+        result.valid ? response.status(200).send("Validated!") : response.status(400).send(result.errors);
+      } else {
+        response.status(400).send(`Can't Find a Deployer Schema With Version ${version}`);
+      }
+    })
+    .catch((error: string) => {
+      response.status(500).send(`Error Getting Deployer Schemas to Validate With: ${error}`);
+    });
+});
 
 // delete the release event, deletion event will trigger client to update live
-exports.processReleaseEvent = functions.database
-  .ref("/release/{key}")
-  .onCreate((snapshot: any) => {
-    return snapshot.ref.remove();
-  });
+exports.processReleaseEvent = functions.database.ref("/release/{key}").onCreate((snapshot: any) => {
+  return snapshot.ref.remove();
+});
 
 // process repository event from github app installation
 exports.processRepositoryEvent = functions.database
@@ -170,25 +156,23 @@ exports.processRepositoryEvent = functions.database
   });
 
 // cloud function to create user profile upon signin for the first time
-exports.createUser = functions.auth
-  .user()
-  .onCreate(async (user: admin.auth.UserRecord) => {
-    const payload: User = {
-      name: user.displayName || null,
-      email: user.email || null,
-      roles: ["user"],
-      uid: user.uid
-    };
-    // If provider is GitHub, and user has no public name, use username for name
-    if (user.providerData[0].providerId === "github.com" && !user.displayName) {
-      payload.name = await getGithubUsername(user.providerData[0].uid);
-    }
-    return await admin
-      .firestore()
-      .collection("users")
-      .doc(user.uid)
-      .set(payload);
-  });
+exports.createUser = functions.auth.user().onCreate(async (user: admin.auth.UserRecord) => {
+  const payload: User = {
+    name: user.displayName || null,
+    email: user.email || null,
+    roles: ["user"],
+    uid: user.uid,
+  };
+  // If provider is GitHub, and user has no public name, use username for name
+  if (user.providerData[0].providerId === "github.com" && !user.displayName) {
+    payload.name = await getGithubUsername(user.providerData[0].uid);
+  }
+  return await admin
+    .firestore()
+    .collection("users")
+    .doc(user.uid)
+    .set(payload);
+});
 
 // cloud function to delete user metadata on auth delete
 exports.deleteUser = functions.auth.user().onDelete(async (user: any) => {

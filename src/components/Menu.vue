@@ -12,11 +12,7 @@
         <v-list-item two-line :class="true && 'px-0'">
           <v-list-item-avatar>
             <v-avatar color="indigo" size="36">
-              <img
-                v-if="userDisplay.photoURL"
-                :src="userDisplay.photoURL"
-                :alt="userDisplay.initials"
-              />
+              <img v-if="userDisplay.photoURL" :src="userDisplay.photoURL" :alt="userDisplay.initials" />
               <span v-else>{{ userDisplay.initials }}</span>
             </v-avatar>
           </v-list-item-avatar>
@@ -29,12 +25,7 @@
 
         <v-divider></v-divider>
 
-        <v-list-item
-          @click="route(item.title)"
-          v-for="item in items"
-          :key="item.title"
-          link
-        >
+        <v-list-item @click="route(item.title)" v-for="item in items" :key="item.title" link>
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
@@ -80,10 +71,7 @@ export default class Register extends Vue {
     return {
       title: this.user.name || this.user.email,
       photoURL: this.authUser.photoURL || null,
-      initials:
-        this.parseInitials(this.user.name) ||
-        this.authUser.email?.toUpperCase()[0] ||
-        "?"
+      initials: this.parseInitials(this.user.name) || this.authUser.email?.toUpperCase()[0] || "?"
     };
   }
 

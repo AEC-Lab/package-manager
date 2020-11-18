@@ -68,10 +68,7 @@ export const actions: ActionTree<IAuthState, IRootState> = {
   },
   async loginWithEmailAndPassword(context, credentials: LoginCredentials) {
     try {
-      const user = await fireAuth.signInWithEmailAndPassword(
-        credentials.email,
-        credentials.password
-      );
+      const user = await fireAuth.signInWithEmailAndPassword(credentials.email, credentials.password);
       router.push({
         path: "/browse"
       });
@@ -81,15 +78,9 @@ export const actions: ActionTree<IAuthState, IRootState> = {
       throw error;
     }
   },
-  async registerWithEmailAndPassword(
-    context,
-    credentials: RegisterCredentials
-  ) {
+  async registerWithEmailAndPassword(context, credentials: RegisterCredentials) {
     try {
-      const user = await fireAuth.createUserWithEmailAndPassword(
-        credentials.email,
-        credentials.password
-      );
+      const user = await fireAuth.createUserWithEmailAndPassword(credentials.email, credentials.password);
       if (user.user && Boolean(credentials.name)) {
         // Wait for document to be created by cloud function before updating 'name' field
         while (!(await context.dispatch("checkUserDocExists", user.user.uid))) {
@@ -152,10 +143,7 @@ function _authenticate(provider: "google" | "github") {
 async function _signInWithTokens(provider: "google" | "github", tokens: any) {
   let credential: firebase.auth.AuthCredential;
   if (provider === "google") {
-    credential = firebase.auth.GoogleAuthProvider.credential(
-      tokens.id_token,
-      tokens.access_token
-    );
+    credential = firebase.auth.GoogleAuthProvider.credential(tokens.id_token, tokens.access_token);
   } else if (provider === "github") {
     credential = firebase.auth.GithubAuthProvider.credential(tokens);
   } else return;

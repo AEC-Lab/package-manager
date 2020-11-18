@@ -13,28 +13,15 @@
           <v-card-text v-if="mode === 'email'">
             <v-form>
               <v-text-field label="Email" v-model="user.email" />
-              <v-text-field
-                label="Password"
-                type="password"
-                v-model="user.password"
-              />
+              <v-text-field label="Password" type="password" v-model="user.password" />
             </v-form>
             <v-card-actions>
-              <v-btn
-                @submit="signInWithEmail"
-                @click="signInWithEmail"
-                color="teal darken-1"
-                dark
-              >
+              <v-btn @submit="signInWithEmail" @click="signInWithEmail" color="teal darken-1" dark>
                 Sign In
               </v-btn>
               <v-spacer />
               <div class="text-end">
-                <div
-                  class="link"
-                  @click="() => $router.push('/register')"
-                  color="teal darken-1"
-                >
+                <div class="link" @click="() => $router.push('/register')" color="teal darken-1">
                   Register
                 </div>
                 <div class="link" @click="() => {}">Forgot password?</div>

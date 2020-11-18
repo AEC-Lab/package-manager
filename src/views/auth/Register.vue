@@ -13,13 +13,7 @@
           <v-card-text>
             <v-form v-model="isFormValid" ref="form" lazy-validation>
               <v-text-field label="Name" v-model="user.name" />
-              <v-text-field
-                label="Email"
-                v-model="user.email"
-                :rules="emailRules"
-                required
-                lazy-validation
-              />
+              <v-text-field label="Email" v-model="user.email" :rules="emailRules" required lazy-validation />
               <v-text-field
                 label="Password"
                 type="password"
@@ -36,12 +30,7 @@
               />
             </v-form>
             <v-card-actions>
-              <v-btn
-                @submit="register"
-                @click="register"
-                color="teal darken-1"
-                dark
-              >
+              <v-btn @submit="register" @click="register" color="teal darken-1" dark>
                 Register
               </v-btn>
               <v-spacer />
@@ -89,9 +78,7 @@ export default class Register extends Vue {
     (v: string) => this.isValidEmail(v) || "Invalid email"
   ];
   passwordRules = [(v: string) => !!v || "Field is required"];
-  passwordConfirmationRules = [
-    (v: string) => v === this.user.password || "Passwords do not match"
-  ];
+  passwordConfirmationRules = [(v: string) => v === this.user.password || "Passwords do not match"];
 
   async register() {
     const isValid = (this.$refs.form as Vue & {
@@ -99,10 +86,7 @@ export default class Register extends Vue {
     }).validate();
     if (!isValid) return;
     try {
-      await this.$store.dispatch(
-        "auth/registerWithEmailAndPassword",
-        this.user
-      );
+      await this.$store.dispatch("auth/registerWithEmailAndPassword", this.user);
     } catch (error) {
       this.snackbarText = error;
       this.snackbar = true;
@@ -110,7 +94,7 @@ export default class Register extends Vue {
     }
   }
   isValidEmail(email: string) {
-        const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
+    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
     return re.test(email);
   }
 }

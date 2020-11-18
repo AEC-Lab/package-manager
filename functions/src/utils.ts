@@ -5,8 +5,8 @@ export async function getGithubUsername(githubId: string) {
     const response = await fetch(`https://api.github.com/user/${githubId}`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json"
-      }
+        "Content-Type": "application/json",
+      },
     });
     const jsonBody = await response.json();
     return jsonBody.login;
