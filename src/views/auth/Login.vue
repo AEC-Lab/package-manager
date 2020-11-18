@@ -114,6 +114,12 @@ export default class Login extends Vue {
 
   mode: "email" | "provider" = "email";
 
+  // MOUNTED
+  mounted() {
+    this.snackbar = true;
+    this.snackbarText = "Checking for updates...";
+  }
+
   // COMPUTED
   get authUser() {
     return this.$store.state.auth.user;
