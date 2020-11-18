@@ -5,7 +5,6 @@ node_modules
 /tests/e2e/videos/
 /tests/e2e/screenshots/
 
-
 # local env files
 .env
 .env.local
@@ -27,4 +26,5 @@ pnpm-debug.log*
 *.sw?
 
 #Electron-builder output
-/dist_electron
+dist_electron/*
+!dist_electron/dev-app-update.yml

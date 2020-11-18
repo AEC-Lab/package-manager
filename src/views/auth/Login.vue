@@ -84,10 +84,14 @@
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
 import { LoginCredentials, User } from "../../../types/auth";
+import { fireAuth } from "@/integrations/firebase";
+import { ipcRenderer } from "electron";
 
 @Component
 export default class Login extends Vue {
   // DATA PROPERTIES
+  loading = true;
+
   user: LoginCredentials = {
     email: "",
     password: ""
@@ -102,9 +106,11 @@ export default class Login extends Vue {
   mode: "email" | "provider" = "email";
 
   // MOUNTED
-  mounted() {
-    this.snackbar = true;
-    this.snackbarText = "Checking for updates...";
+  async mounted() {
+    //   process.env.NODE_ENV === "production"
+    // ? this.checkForUpdates()
+    // : this.firebaseAuthListener();
+    this.checkForUpdates();
   }
 
   // COMPUTED
@@ -121,6 +127,36 @@ export default class Login extends Vue {
   }
 
   // METHODS
+  flashMessage(message: string) {
+    this.snackbar = true;
+    this.snackbarText = message;
+  }
+
+  async firebaseAuthListener() {
+    const unsubscribe = await fireAuth.onAuthStateChanged(async user => {
+      console.log("auth state changed: ", user);
+      await this.$store.dispatch("auth/onAuthStateChangedAction", user);
+      if (user) unsubscribe;
+      else this.loading = false;
+    });
+  }
+
+  checkForUpdates() {
+    ipcRenderer.send("check-for-updates");
+    // wait for response
+    ipcRenderer.on("auto-updater-message", (event, payload) => {
+      this.flashMessage(payload.message);
+    });
+    ipcRenderer.once("update-not-available", () => {
+      this.flashMessage("Signing In...");
+      this.firebaseAuthListener();
+    });
+    ipcRenderer.on("auto-updater-error", (event, payload) => {
+      this.flashMessage(payload.message);
+      this.firebaseAuthListener();
+    });
+  }
+
   toggleMode() {
     this.mode = this.mode === "email" ? "provider" : "email";
   }

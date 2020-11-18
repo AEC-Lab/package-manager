@@ -1,6 +1,7 @@
 "use strict";
 
 import { app, protocol, BrowserWindow } from "electron";
+import { autoUpdater } from "electron-updater";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -18,6 +19,50 @@ import fetch from "node-fetch";
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null;
+
+// messaging system for autoUpdater to render process
+ipcMain.on("check-for-updates", event => {
+  autoUpdater.on("checking-for-update", () => {
+    event.sender.send("auto-updater-message", {
+      message: "checking for updates..."
+    });
+  });
+
+  autoUpdater.on("update-not-available", () => {
+    event.sender.send("update-not-available");
+  });
+
+  autoUpdater.on("update-available", () => {
+    event.sender.send("auto-updater-message", {
+      message: "update downloading..."
+    });
+  });
+
+  autoUpdater.on("error", error => {
+    console.error(error);
+    event.sender.send("auto-updater-error", {
+      message: error.message
+    });
+  });
+
+  autoUpdater.on("update-downloaded", () => {
+    // trigger app to close and update install
+    event.sender.send("auto-updater-message", {
+      message: "installing update..."
+    });
+    autoUpdater.quitAndInstall();
+  });
+
+  const data = {
+    provider: "github",
+    owner: "AEC-Lab",
+    repo: "package-manager",
+    token: process.env.GH_TOKEN
+  };
+
+  autoUpdater.setFeedURL(data as any);
+  autoUpdater.checkForUpdates();
+});
 
 // setup authenticator in the main process
 ipcMain.on("authenticate", (event, provider, client) => {
