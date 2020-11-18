@@ -95,8 +95,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { LoginCredentials } from "../../../types/auth";
+import { Component, Vue, Watch } from "vue-property-decorator";
+import { LoginCredentials, User } from "../../../types/auth";
 
 @Component
 export default class Login extends Vue {
@@ -113,6 +113,19 @@ export default class Login extends Vue {
   btnLoadingGithub = false;
 
   mode: "email" | "provider" = "email";
+
+  // COMPUTED
+  get authUser() {
+    return this.$store.state.auth.user;
+  }
+
+  // WATCH
+  @Watch("authUser")
+  onUserChanged(val: User | null, oldVal: User | null) {
+    if (oldVal == null && val) {
+      this.$router.push("browse");
+    }
+  }
 
   // METHODS
   toggleMode() {

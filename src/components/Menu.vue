@@ -94,10 +94,11 @@ export default class Register extends Vue {
   async logout() {
     const loggedOut = await this.$store.dispatch("auth/logout");
     if (loggedOut) {
-      const r = this.$router.resolve({
-        path: this.$route.path
-      });
-      window.location.assign(r.href);
+      // const r = this.$router.resolve({
+      //   path: this.$route.path
+      // });
+      // window.location.assign(r.href);
+      this.route("login");
     }
   }
   parseInitials(name: string | null) {
