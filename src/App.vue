@@ -2,7 +2,7 @@
   <v-app>
     <!-- <v-app-bar app color="primary" dark></v-app-bar> -->
     <v-main id="router">
-        <router-view></router-view>
+      <router-view></router-view>
     </v-main>
     <Menu v-if="user" id="menu"></Menu>
   </v-app>
@@ -33,15 +33,15 @@ export default Vue.extend({
       return window.innerHeight;
     },
     user() {
-      return this.$store.state.auth.user
+      return this.$store.state.auth.user;
     }
   }
 });
 </script>
 <style lang="scss" scoped>
-#router {
-  margin-left: 55px;
-}
+// #router {
+//   margin-left: 55px;
+// }
 #menu {
   position: absolute;
   height: 100%;

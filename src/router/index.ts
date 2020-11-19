@@ -1,7 +1,7 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 
-import { fireAuth } from "../integrations/firebase"
+import { fireAuth } from "../integrations/firebase";
 
 import Browse from "../views/Browse.vue";
 import Settings from "../views/Settings.vue";
@@ -12,14 +12,6 @@ import Register from "../views/auth/Register.vue";
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
-  {
-    path: "/",
-    name: "Home",
-    component: Browse,
-    meta: {
-      requiresAuth: true
-    }
-  },
   {
     path: "/browse",
     name: "Browse",
@@ -47,50 +39,38 @@ const routes: Array<RouteConfig> = [
   {
     path: "/login",
     name: "Login",
-    component: Login,
-    meta: {
-      requiresGuest: true
-    }
+    component: Login
   },
   {
     path: "/register",
     name: "Register",
-    component: Register,
-    meta: {
-      requiresGuest: true
-    }
+    component: Register
   }
 ];
 
 const router = new VueRouter({
-  mode: "history",
+  mode: "hash",
   routes
 });
 
-router.beforeEach((to, from, next) => {
-  const user = fireAuth.currentUser;
-  if (to.matched.some(route => route.meta.requiresAuth)) {
-      if (user) {
-          next();
-      } else {
-          next({
-              name: "Login"
-          });
-      }
+const getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = fireAuth.onAuthStateChanged(user => {
+      unsubscribe();
+      resolve(user);
+    }, reject);
+  });
+};
+
+// TODO might not be necessary given you can't visit paths directly
+router.beforeEach(async (to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  if (requiresAuth && !(await getCurrentUser())) {
+    next("/login");
   } else {
-      next();
-  }
-  if (to.matched.some(route => route.meta.requiresGuest)) {
-      if (!user) {
-          next();
-      } else {
-          next({
-              name: "Browse"
-          });
-      }
-  } else {
-      next();
+    next();
   }
 });
 
+router.replace("login");
 export default router;
