@@ -2,7 +2,7 @@
   "name": "package-manager",
   "description": "does things",
   "author": "AEC Lab",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": false,
   "scripts": {
     "setup": "yarn install && cd functions & yarn install --ignore-engines",
@@ -19,6 +19,7 @@
     "@vue/composition-api": "^1.0.0-beta.11",
     "core-js": "^3.6.5",
     "dotenv": "^8.2.0",
+    "electron-updater": "^4.3.5",
     "firebase": "^7.19.1",
     "googleapis": "^64.0.0",
     "http": "0.0.1-security",
