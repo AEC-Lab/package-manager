@@ -24,7 +24,7 @@ let win: BrowserWindow | null;
 ipcMain.on("check-for-updates", event => {
   autoUpdater.on("checking-for-update", () => {
     event.sender.send("auto-updater-message", {
-      message: "checking for updates..."
+      message: "Checking for updates..."
     });
   });
 

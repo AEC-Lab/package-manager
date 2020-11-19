@@ -39,9 +39,9 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scoped>
-#router {
-  margin-left: 55px;
-}
+// #router {
+//   margin-left: 55px;
+// }
 #menu {
   position: absolute;
   height: 100%;

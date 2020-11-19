@@ -16,7 +16,13 @@
               <v-text-field label="Password" type="password" v-model="user.password" />
             </v-form>
             <v-card-actions>
-              <v-btn @submit="signInWithEmail" @click="signInWithEmail" color="teal darken-1" dark>
+              <v-btn
+                @submit="signInWithEmail"
+                @click="signInWithEmail"
+                :loading="btnLoadingSignIn"
+                color="teal darken-1"
+                dark
+              >
                 Sign In
               </v-btn>
               <v-spacer />
@@ -70,20 +76,18 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-snackbar v-model="snackbar">
-      {{ snackbarText }}
-      <template v-slot:action="{ attrs }">
-        <v-btn color="red" text v-bind="attrs" @click="snackbar = false">
-          Close
-        </v-btn>
-      </template>
+    <v-snackbar color="grey lighten-3" v-model="snackbar">
+      <div id="snackText">{{ snackbarText }}</div>
     </v-snackbar>
+    <v-overlay color="white" :opacity="0.75" :value="loading">
+      <v-progress-circular :size="50" color="teal" indeterminate></v-progress-circular>
+    </v-overlay>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
-import { LoginCredentials, User } from "../../../types/auth";
+import { Component, Vue } from "vue-property-decorator";
+import { LoginCredentials } from "../../../types/auth";
 import { fireAuth } from "@/integrations/firebase";
 import { ipcRenderer } from "electron";
 
@@ -100,6 +104,7 @@ export default class Login extends Vue {
   snackbar = false;
   snackbarText = "";
 
+  btnLoadingSignIn = false;
   btnLoadingGoogle = false;
   btnLoadingGithub = false;
 
@@ -111,19 +116,7 @@ export default class Login extends Vue {
     // ? this.checkForUpdates()
     // : this.firebaseAuthListener();
     this.checkForUpdates();
-  }
-
-  // COMPUTED
-  get authUser() {
-    return this.$store.state.auth.user;
-  }
-
-  // WATCH
-  @Watch("authUser")
-  onUserChanged(val: User | null, oldVal: User | null) {
-    if (oldVal == null && val) {
-      this.$router.push("browse");
-    }
+    // lol
   }
 
   // METHODS
@@ -134,10 +127,14 @@ export default class Login extends Vue {
 
   async firebaseAuthListener() {
     const unsubscribe = await fireAuth.onAuthStateChanged(async user => {
-      console.log("auth state changed: ", user);
       await this.$store.dispatch("auth/onAuthStateChangedAction", user);
-      if (user) unsubscribe;
-      else this.loading = false;
+      if (user) {
+        unsubscribe();
+        this.$router.push("browse");
+      } else {
+        this.loading = false;
+        this.snackbar = false;
+      }
     });
   }
 
@@ -148,12 +145,11 @@ export default class Login extends Vue {
       this.flashMessage(payload.message);
     });
     ipcRenderer.once("update-not-available", () => {
-      this.flashMessage("Signing In...");
       this.firebaseAuthListener();
     });
     ipcRenderer.on("auto-updater-error", (event, payload) => {
       this.flashMessage(payload.message);
-      this.firebaseAuthListener();
+      // this.firebaseAuthListener();
     });
   }
 
@@ -162,9 +158,11 @@ export default class Login extends Vue {
   }
 
   async signInWithEmail() {
+    this.btnLoadingSignIn = true;
     try {
       await this.$store.dispatch("auth/loginWithEmailAndPassword", this.user);
     } catch (error) {
+      this.btnLoadingSignIn = false;
       this.snackbarText = error;
       this.snackbar = true;
       console.log(error);
@@ -198,5 +196,8 @@ export default class Login extends Vue {
   &:hover {
     color: #13aa9b;
   }
+}
+#snackText {
+  color: teal;
 }
 </style>

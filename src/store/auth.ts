@@ -1,10 +1,8 @@
 import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
 import { ipcRenderer } from "electron";
-// const {ipcRenderer} = window.require('electron')
 import { IRootState } from ".";
 import { User, LoginCredentials, RegisterCredentials } from "../../types/auth";
 import firebase, { fireAuth, firestore } from "../integrations/firebase";
-import router from "../router";
 
 export interface IAuthState {
   user: User | null;
@@ -31,7 +29,6 @@ let unsubscribe: () => void;
 export const actions: ActionTree<IAuthState, IRootState> = {
   async onAuthStateChangedAction(context, user: firebase.User | null) {
     if (user) {
-      console.log(user);
       unsubscribe = await firestore
         .collection("users")
         .doc(user.uid)
@@ -43,6 +40,7 @@ export const actions: ActionTree<IAuthState, IRootState> = {
             roles: docData?.roles,
             uid: user.uid
           };
+          console.log(_user);
           context.commit("setUser", _user);
         });
     } else {
@@ -69,9 +67,6 @@ export const actions: ActionTree<IAuthState, IRootState> = {
   async loginWithEmailAndPassword(context, credentials: LoginCredentials) {
     try {
       const user = await fireAuth.signInWithEmailAndPassword(credentials.email, credentials.password);
-      router.push({
-        path: "/browse"
-      });
       return user;
     } catch (error) {
       console.log(error);
@@ -91,9 +86,6 @@ export const actions: ActionTree<IAuthState, IRootState> = {
           .doc(user.user.uid)
           .update({ name: credentials.name });
       }
-      router.push({
-        path: "/browse"
-      });
     } catch (error) {
       console.log(error);
       throw error;
@@ -148,9 +140,6 @@ async function _signInWithTokens(provider: "google" | "github", tokens: any) {
     credential = firebase.auth.GithubAuthProvider.credential(tokens);
   } else return;
   await fireAuth.signInWithCredential(credential);
-  router.push({
-    path: "/browse"
-  });
 }
 
 function _getAuthParams(provider: "google" | "github") {

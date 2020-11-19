@@ -58,7 +58,6 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { RegisterCredentials } from "../../../types/auth";
-// import { fireAuth } from "../../integrations/firebase";
 
 @Component
 export default class Register extends Vue {

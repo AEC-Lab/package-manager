@@ -13,14 +13,6 @@ Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
   {
-    path: "/",
-    name: "Home",
-    component: Browse,
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
     path: "/browse",
     name: "Browse",
     component: Browse,
@@ -47,18 +39,12 @@ const routes: Array<RouteConfig> = [
   {
     path: "/login",
     name: "Login",
-    component: Login,
-    meta: {
-      requiresGuest: true
-    }
+    component: Login
   },
   {
     path: "/register",
     name: "Register",
-    component: Register,
-    meta: {
-      requiresGuest: true
-    }
+    component: Register
   }
 ];
 
@@ -67,30 +53,24 @@ const router = new VueRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
-  const user = fireAuth.currentUser;
-  if (to.matched.some(route => route.meta.requiresAuth)) {
-    if (user) {
-      next();
-    } else {
-      next({
-        name: "Login"
-      });
-    }
-  } else {
-    next();
-  }
-  if (to.matched.some(route => route.meta.requiresGuest)) {
-    if (!user) {
-      next();
-    } else {
-      next({
-        name: "Browse"
-      });
-    }
+const getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = fireAuth.onAuthStateChanged(user => {
+      unsubscribe();
+      resolve(user);
+    }, reject);
+  });
+};
+
+// TODO might not be necessary given you can't visit paths directly
+router.beforeEach(async (to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  if (requiresAuth && !(await getCurrentUser())) {
+    next("/login");
   } else {
     next();
   }
 });
 
+router.replace("login");
 export default router;
