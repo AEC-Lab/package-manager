@@ -148,8 +148,9 @@ export default class Login extends Vue {
       this.firebaseAuthListener();
     });
     ipcRenderer.on("auto-updater-error", (event, payload) => {
+      console.error(payload.message);
       this.flashMessage(payload.message);
-      // this.firebaseAuthListener();
+      this.firebaseAuthListener();
     });
   }
 
