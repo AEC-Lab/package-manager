@@ -1,4 +1,5 @@
 require("dotenv").config();
+// eslint-disable-next-line
 const admin = require("firebase-admin");
 
 // eslint-disable-next-line
