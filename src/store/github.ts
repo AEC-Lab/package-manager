@@ -23,7 +23,7 @@ export const mutations: MutationTree<IGitHubState> = {
     state.repositories = repositories;
   },
   setReleases(state, payload: GenericObject) {
-    Vue.set(state.releases, payload.name, payload.releases);
+    Vue.set(state.releases, payload.id, payload.releases);
   }
 };
 
@@ -33,10 +33,10 @@ export const actions: ActionTree<IGitHubState, IRootState> = {
     commit("setRepositories", repositories);
   },
   async getReleases({ commit }, repository) {
-    const identity = helpers.ownerId(repository);
-    const identityName = helpers.ownerName(repository);
-    const releases = await GitHub.getReleases(identityName);
-    commit("setReleases", { name: identity, releases });
+    const id = helpers.ownerId(repository);
+    const name = helpers.ownerName(repository);
+    const releases = await GitHub.getReleases(name);
+    commit("setReleases", { id, releases });
   },
   async init({ dispatch, state }) {
     await dispatch("getRepositories");

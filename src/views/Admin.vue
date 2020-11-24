@@ -1,6 +1,6 @@
 <template>
   <v-container id="container">
-    <v-btn @click="test">GitHub Resources</v-btn>
+    <v-btn @click="test">GitHub Init</v-btn>
     <v-snackbar color="grey lighten-3" v-model="snackbar">
       <div id="snackText">{{ snackbarText }}</div>
     </v-snackbar>
