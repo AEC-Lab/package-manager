@@ -2,7 +2,7 @@
   "type": "object",
   "properties": {
     "schema": {
-      "type": "string",
+      "type": "number",
       "required": true
     },
     "processes": {
@@ -11,7 +11,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "name": {
+          "id": {
             "type": "string",
             "required": true
           }
@@ -88,7 +88,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "name": {
+          "id": {
             "type": "string"
           }
         }
