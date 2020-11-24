@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 
 import { repos } from "./repos";
+import { github } from "./github";
 import { auth } from "./auth";
 
 Vue.use(Vuex);
@@ -14,6 +15,7 @@ export default new Vuex.Store({
   state,
   modules: {
     repos,
+    github,
     auth
   }
 });
