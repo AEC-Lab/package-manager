@@ -1,6 +1,6 @@
 <template>
   <v-container id="container">
-    <v-btn @click="test">Get Repositories</v-btn>
+    <v-btn @click="test">GitHub Resources</v-btn>
     <v-snackbar color="grey lighten-3" v-model="snackbar">
       <div id="snackText">{{ snackbarText }}</div>
     </v-snackbar>
@@ -21,10 +21,18 @@ export default class Admin extends Vue {
   get repositories() {
     return this.$store.state.github.repositories;
   }
+  get releases() {
+    return this.$store.state.github.releases;
+  }
 
   @Watch("repositories")
-  onTokenChanged(val: string) {
+  onRepositoriesChanged(val: string) {
     console.log("Repositories: ", val);
+  }
+
+  @Watch("releases")
+  onReleasesChanged(val: string) {
+    console.log("Releases: ", val);
   }
 
   // METHODS
@@ -34,7 +42,7 @@ export default class Admin extends Vue {
   }
 
   async test() {
-    this.$store.dispatch("github/getRepositories");
+    this.$store.dispatch("github/init");
   }
 }
 </script>

@@ -91,7 +91,7 @@ GitHub.getReleases = (repoName: string) => {
 //         headers: {
 //           Authorization: `token ${token}`,
 //           Accept: "application/octet-stream",
-//           "User-Agent": "Dot Deployer"
+//           "User-Agent": "Package Manager"
 //         }
 //       };
 //       requestPromise(options)
@@ -115,7 +115,7 @@ GitHub.getReleases = (repoName: string) => {
 //         headers: {
 //           Authorization: `token ${token}`,
 //           Accept: "application/vnd.github.machine-man-preview+json",
-//           "User-Agent": "Dot Deployer"
+//           "User-Agent": "Package Manager"
 //         }
 //       };
 //       requestPromise(options)
