@@ -2,7 +2,7 @@
   <v-container id="container">
     <div v-for="r in repositories" :key="r.id">
       <div class="card">
-        <Card :name="r.name"></Card>
+        <Card :name="r.name" :owner="r.full_name"></Card>
       </div>
     </div>
   </v-container>

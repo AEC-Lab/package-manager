@@ -3,9 +3,13 @@ const GitHub: { [key: string]: Function } = {};
 import { Base64 } from "js-base64";
 import axios from "axios";
 import jwt from "jsonwebtoken";
-// import { GenericObject } from "../../types/github";
 
-// creates an axios backend for github api calls
+import $store from "@/store";
+import { find } from "lodash";
+import helpers from "../utils/helpers";
+
+import { GenericObject } from "types/github";
+
 const $backend = axios.create({
   baseURL: "https://api.github.com",
   timeout: 30000,
@@ -14,71 +18,68 @@ const $backend = axios.create({
   }
 });
 
-$backend.interceptors.request.use(async config => {
-  // fetches new token on every github request - could improve this logic
-  const token = await requestToken();
-  config.headers["Authorization"] = `token ${token}`;
-  return config;
-});
-
+// stubs for request and response interceptors if needed
+$backend.interceptors.request.use(config => config);
 $backend.interceptors.response.use(
   response => response,
-  async error => {
-    console.error(new Error(error));
-    return error;
-  }
+  error => error
 );
 
 // this environment variable is a base64 encoded PEM file (from GitHub app page)
 // https://www.base64encode.org/
-const applicationKey = Base64.decode(process.env.VUE_APP_GITHUBAPPLICATIONKEY || "");
-const applicationId = process.env.VUE_APP_GITHUBAPPLICATIONID;
-const installationId = process.env.VUE_APP_GITHUBINSTALLATIONID;
+const APPLICATIONKEY = Base64.decode(process.env.VUE_APP_GITHUBAPPLICATIONKEY || "");
+const APPLICATIONID = process.env.VUE_APP_GITHUBAPPLICATIONID;
 
-const generateJWT = () => {
-  const token = jwt.sign({}, applicationKey, {
+const createJWT = () => {
+  const token = jwt.sign({}, APPLICATIONKEY, {
     algorithm: "RS256",
-    issuer: applicationId,
-    expiresIn: 20 // seconds
+    issuer: APPLICATIONID,
+    expiresIn: 10 * 60 // ten minutes, maximum expiration time per GitHub docs
   });
   return token;
 };
 
-const requestToken = async () => {
-  const url = `https://api.github.com/app/installations/${installationId}/access_tokens`;
-  const options = {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${generateJWT()}`,
-      Accept: "application/vnd.github.machine-man-preview+json",
-      "User-Agent": "Package Manager"
-    }
-  };
-  try {
-    const response = await fetch(url, options);
-    const data = await response.json();
-    return data.token;
-  } catch (error) {
-    throw new Error(error);
-  }
+GitHub.getInstallationToken = async (installationId: string) => {
+  const Authorization = `Bearer ${createJWT()}`;
+  const headers = { Authorization };
+  const response = await $backend.post(`app/installations/${installationId}/access_tokens`, null, {
+    headers
+  });
+  const token = response.data.token;
+  return token;
 };
 
-GitHub.getRepositories = () => {
-  return new Promise((resolve, reject) => {
-    $backend.get("installation/repositories").then(
-      response => resolve(response.data.repositories),
-      error => reject(error)
-    );
-  });
+GitHub.getInstallations = async () => {
+  const Authorization = `Bearer ${createJWT()}`;
+  const headers = { Authorization };
+  const response = await $backend.get("app/installations", { headers });
+  const installations = response.data;
+  const promises = installations.map(
+    async (i: GenericObject) => (i.token = await GitHub.getInstallationToken(i.id))
+  );
+  await Promise.all(promises);
+  return installations;
 };
 
-GitHub.getReleases = (repoName: string) => {
-  return new Promise((resolve, reject) => {
-    $backend.get(`repos/${repoName}/releases`).then(
-      response => resolve(response.data),
-      error => reject(error)
-    );
-  });
+GitHub.getRepositories = async (installation: GenericObject) => {
+  const Authorization = `token ${installation.token}`;
+  const headers = { Authorization };
+  const response = await $backend.get("installation/repositories", { headers });
+  const repositories = response.data.repositories;
+  repositories.forEach((r: GenericObject) => (r.installation = installation.id));
+  return repositories;
+};
+
+GitHub.getReleases = async (repository: GenericObject) => {
+  const { installation } = repository;
+  const token = find($store.state.github.installations, ["id", installation]).token;
+  const Authorization = `token ${token}`;
+  const headers = { Authorization };
+  const id = helpers.ownerName(repository);
+  const response = await $backend.get(`repos/${id}/releases`, { headers });
+  const releases = response.data;
+  releases.forEach((r: GenericObject) => (r.repository = repository.id));
+  return releases;
 };
 
 // GitHub.getAsset = (repoName, assetId) => {
