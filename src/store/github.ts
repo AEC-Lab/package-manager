@@ -5,7 +5,7 @@ import GitHub from "../integrations/github";
 
 export interface IGitHubState {
   repositories: GenericObject[];
-  releases: GenericObject;
+  releases: GenericObject[];
   installations: GenericObject[];
 }
 
