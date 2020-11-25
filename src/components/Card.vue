@@ -7,7 +7,7 @@
     >
     </v-img>
     <v-card-title id="title" class="text-truncate">{{ name }}</v-card-title>
-    <v-card-subtitle class="pb-0">AEC Lab</v-card-subtitle>
+    <v-card-subtitle class="pb-0">{{ owner }}</v-card-subtitle>
     <v-card-actions>
       <v-btn block color="orange" text>
         Install
@@ -21,7 +21,7 @@ import Vue from "vue";
 
 export default Vue.extend({
   name: "Card",
-  props: ["name"],
+  props: ["name", "owner"],
   data: () => ({}),
   methods: {}
 });

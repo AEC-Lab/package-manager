@@ -1,46 +1,58 @@
-import Vue from "vue";
-
 import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
 import { IRootState } from ".";
 import { GenericObject } from "../../types/github";
 import GitHub from "../integrations/github";
-import helpers from "../utils/helpers";
 
 export interface IGitHubState {
   repositories: GenericObject[];
-  releases: GenericObject;
+  releases: GenericObject[];
+  installations: GenericObject[];
 }
 
 export const state: IGitHubState = {
   repositories: [],
-  releases: {}
+  releases: [],
+  installations: []
 };
 
 export const getters: GetterTree<IGitHubState, IRootState> = {};
 
 export const mutations: MutationTree<IGitHubState> = {
-  setRepositories(state, repositories: GenericObject[]) {
-    state.repositories = repositories;
+  setRepositories(state, payload: GenericObject[]) {
+    state.repositories.push(...payload);
   },
-  setReleases(state, payload: GenericObject) {
-    Vue.set(state.releases, payload.id, payload.releases);
+  setReleases(state, payload: GenericObject[]) {
+    state.releases.push(...payload);
+  },
+  setInstallations(state, payload: GenericObject[]) {
+    state.installations = payload;
   }
 };
 
 export const actions: ActionTree<IGitHubState, IRootState> = {
-  async getRepositories({ commit }) {
-    const repositories = await GitHub.getRepositories();
-    commit("setRepositories", repositories);
+  async getInstallations({ commit }) {
+    const installations = await GitHub.getInstallations();
+    commit("setInstallations", installations);
+    return installations;
   },
-  async getReleases({ commit }, repository) {
-    const id = helpers.ownerId(repository);
-    const name = helpers.ownerName(repository);
-    const releases = await GitHub.getReleases(name);
-    commit("setReleases", { id, releases });
+  async getRepositories({ commit }, installation: GenericObject) {
+    const repositories = await GitHub.getRepositories(installation);
+    commit("setRepositories", repositories);
+    return repositories;
+  },
+  async getReleases({ commit }, repository: GenericObject) {
+    const releases = await GitHub.getReleases(repository);
+    commit("setReleases", releases);
+    return releases;
   },
   async init({ dispatch, state }) {
-    await dispatch("getRepositories");
-    state.repositories.map(repository => dispatch("getReleases", repository));
+    await dispatch("getInstallations");
+    const repositories = state.installations.map(
+      async installation => await dispatch("getRepositories", installation)
+    );
+    await Promise.all(repositories);
+    const releases = state.repositories.map(async repository => await dispatch("getReleases", repository));
+    await Promise.all(releases);
   }
 };
 

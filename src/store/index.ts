@@ -7,9 +7,13 @@ import { auth } from "./auth";
 
 Vue.use(Vuex);
 
-export interface IRootState {} // eslint-disable-line
+export interface IRootState {
+  github: any;
+  repos: any;
+  auth: any;
+}
 
-const state = (): IRootState => ({});
+const state = (): IRootState => ({ github, repos, auth });
 
 export default new Vuex.Store({
   state,

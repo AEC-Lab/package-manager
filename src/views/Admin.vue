@@ -1,6 +1,6 @@
 <template>
   <v-container id="container">
-    <v-btn @click="test">GitHub Init</v-btn>
+    <v-btn @click="test" :loading="loading">Test Button</v-btn>
     <v-snackbar color="grey lighten-3" v-model="snackbar">
       <div id="snackText">{{ snackbarText }}</div>
     </v-snackbar>
@@ -8,32 +8,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 
 @Component
 export default class Admin extends Vue {
   // DATA PROPERTIES
-  loading = true;
+  loading = false;
 
   snackbar = false;
   snackbarText = "";
-
-  get repositories() {
-    return this.$store.state.github.repositories;
-  }
-  get releases() {
-    return this.$store.state.github.releases;
-  }
-
-  @Watch("repositories")
-  onRepositoriesChanged(val: string) {
-    console.log("Repositories: ", val);
-  }
-
-  @Watch("releases")
-  onReleasesChanged(val: string) {
-    console.log("Releases: ", val);
-  }
 
   // METHODS
   flashMessage(message: string) {
@@ -42,7 +25,9 @@ export default class Admin extends Vue {
   }
 
   async test() {
-    this.$store.dispatch("github/init");
+    this.loading = true;
+    await this.$store.dispatch("github/init");
+    this.loading = false;
   }
 }
 </script>
