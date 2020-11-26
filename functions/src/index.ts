@@ -11,21 +11,9 @@ import * as _ from "lodash";
 
 // github webhook endpoint
 exports.github = functions.https.onRequest((request: functions.https.Request, response: any) => {
-  // handle non post requests
-  if (request.method !== "POST") {
-    return response.status(405).send("Only POST Requests Are Accepted");
-  }
+  if (request.method !== "POST") return response.status(405).send("Only POST Requests Are Accepted");
 
   const eventHeader = request.get("X-GitHub-Event");
-  console.log("Event Header: ", eventHeader);
-
-  // const approvedHeaders = ["release", "installation", "installation_repositories"];
-  // if (eventHeader && !approvedHeaders.includes(eventHeader)) {
-  //   console.error("Unsupported Event Header: ", eventHeader);
-  //   return response.status(405).send(`Only Accepting GitHub Events: ${approvedHeaders}`);
-  // }
-
-  // write data from github webhook to database
   const event = request.body;
   const action = event.action;
 
@@ -111,12 +99,11 @@ exports.github = functions.https.onRequest((request: functions.https.Request, re
 
 // validation endpoint for deployer data
 exports.validate = functions.https.onRequest((request: functions.https.Request, response: any) => {
-  // handle invalid request method
-  if (request.method !== "POST") {
-    return response.status(405).send("Only POST Requests Are Accepted");
-  }
+  if (request.method !== "POST") return response.status(405).send("Only POST Requests Are Accepted");
+
   const deployerData = request.body;
   const version = deployerData.schema;
+
   admin
     .firestore()
     .collection("schemas")
