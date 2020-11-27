@@ -11,26 +11,20 @@ import * as _ from "lodash";
 
 // github webhook endpoint
 exports.github = functions.https.onRequest((request: functions.https.Request, response: any) => {
-  // handle invalid request method
-  if (request.method !== "POST") {
-    return response.status(405).send("Only POST Requests Are Accepted");
-  }
-  // allow only authorized github webhooks
+  if (request.method !== "POST") return response.status(405).send("Only POST Requests Are Accepted");
+
   const eventHeader = request.get("X-GitHub-Event");
-  const approvedHeaders = ["release", "installation_repositories"];
-  if (eventHeader && !approvedHeaders.includes(eventHeader)) {
-    return response.status(405).send(`Only Accepting GitHub Events: ${approvedHeaders}`);
-  }
-  // write data from github webhook to database
   const event = request.body;
+  const action = event.action;
+
   const promises: any[] = [];
 
   if (eventHeader === "installation_repositories") {
-    const action = event.action;
     if (action === "added") {
-      // add repository to database
+      // add each repository to database
       _.forEach(event.repositories_added, (repo: any) => {
         repo.users = ["user"];
+        repo.source = "github";
         promises.push(
           admin
             .firestore()
@@ -40,7 +34,7 @@ exports.github = functions.https.onRequest((request: functions.https.Request, re
         );
       });
     } else if (action === "removed") {
-      // remove repository from database
+      // remove each repository from database
       _.forEach(event.repositories_removed, (repo: any) => {
         promises.push(
           admin
@@ -52,10 +46,45 @@ exports.github = functions.https.onRequest((request: functions.https.Request, re
       });
     }
   } else if (eventHeader === "release") {
+    // add release to database for client trigger to look for updates
     promises.push(
       admin
         .firestore()
         .collection("releases")
+        .add(event)
+    );
+  } else if (eventHeader === "installation") {
+    // add each repository to database
+    if (action === "created") {
+      _.forEach(event.repositories, (repo: any) => {
+        repo.users = ["user"];
+        repo.source = "github";
+        promises.push(
+          admin
+            .firestore()
+            .collection("repositories")
+            .doc(repo.id.toString())
+            .set(repo)
+        );
+      });
+    } else if (action === "deleted") {
+      // remove each repository from database
+      _.forEach(event.repositories, (repo: any) => {
+        promises.push(
+          admin
+            .firestore()
+            .collection("repositories")
+            .doc(repo.id.toString())
+            .delete()
+        );
+      });
+    }
+  } else {
+    // otherwise store event for debugging
+    promises.push(
+      admin
+        .firestore()
+        .collection(eventHeader || "")
         .add(event)
     );
   }
@@ -70,12 +99,11 @@ exports.github = functions.https.onRequest((request: functions.https.Request, re
 
 // validation endpoint for deployer data
 exports.validate = functions.https.onRequest((request: functions.https.Request, response: any) => {
-  // handle invalid request method
-  if (request.method !== "POST") {
-    return response.status(405).send("Only POST Requests Are Accepted");
-  }
+  if (request.method !== "POST") return response.status(405).send("Only POST Requests Are Accepted");
+
   const deployerData = request.body;
   const version = deployerData.schema;
+
   admin
     .firestore()
     .collection("schemas")
