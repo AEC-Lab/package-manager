@@ -67,6 +67,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, ComputedRef, PropType } from "@vue/composition-api";
+import { GenericObject } from "types/github";
 import { component } from "vue/types/umd";
 import { Repository } from "../../../types/repos";
 
@@ -88,7 +89,8 @@ export default defineComponent({
     const isClosed = ref(false);
 
     const author = computed(() => {
-      return context.root.$store.state.github.repositories.find(r => r.id === props.repo.id)?.owner.login;
+      return context.root.$store.state.github.repositories.find((r: GenericObject) => r.id === props.repo.id)
+        ?.owner.login;
     });
     const releases = computed(() => context.root.$store.getters["github/getReleasesByRepo"](props.repo.id));
     const latestRelease = computed(() =>

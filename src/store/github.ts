@@ -24,7 +24,7 @@ export const getters: GetterTree<IGitHubState, IRootState> = {
   getLatestRelease: (state, getters) => (repoId: number): GenericObject => {
     return getters
       .getReleasesByRepo(repoId)
-      .sort((a, b) => +new Date(b.published_at) - +new Date(a.published_at))[0];
+      .sort((a: GenericObject, b: GenericObject) => +new Date(b.published_at) - +new Date(a.published_at))[0];
     // return state.releases.filter(release => release.repository === repoId).sort((a, b) => +new Date(b.published_at) - +new Date(a.published_at))[0]
   },
   // Gets preleases published after the latest full release, for a given repository
@@ -32,7 +32,7 @@ export const getters: GetterTree<IGitHubState, IRootState> = {
     return store.getters
       .getReleasesByRepo(repoId)
       .filter(
-        release =>
+        (release: GenericObject) =>
           release.prerelease === true &&
           new Date(release.published_at) > new Date(store.getters.getLatestRelease(repoId).published_at)
       );

@@ -21,6 +21,7 @@
 </template>
 
 <script lang="ts">
+import { GenericObject } from "types/github";
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { Repository } from "../../../types/repos";
 
@@ -40,7 +41,7 @@ export default class TableView extends Vue {
 
   get repoDescription() {
     return (id: number) => {
-      return this.$store.state.github.repositories.find(r => r.id === id)?.description;
+      return this.$store.state.github.repositories.find((r: GenericObject) => r.id === id)?.description;
     };
   }
 }
