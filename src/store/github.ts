@@ -1,5 +1,5 @@
 import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
-import { IRootState } from ".";
+import store, { IRootState } from ".";
 import { GenericObject } from "../../types/github";
 import GitHub from "../integrations/github";
 
@@ -15,7 +15,30 @@ export const state: IGitHubState = {
   installations: []
 };
 
-export const getters: GetterTree<IGitHubState, IRootState> = {};
+export const getters: GetterTree<IGitHubState, IRootState> = {
+  // Gets all releases for a given repository
+  getReleasesByRepo: state => (repoId: number): GenericObject[] => {
+    return state.releases.filter(release => release.repository === repoId);
+  },
+  // Gets the latest non-prerelease for a given repository
+  getLatestRelease: (state, getters) => (repoId: number): GenericObject => {
+    return getters
+      .getReleasesByRepo(repoId)
+      .sort((a, b) => +new Date(b.published_at) - +new Date(a.published_at))[0];
+    // return state.releases.filter(release => release.repository === repoId).sort((a, b) => +new Date(b.published_at) - +new Date(a.published_at))[0]
+  },
+  // Gets preleases published after the latest full release, for a given repository
+  getLatestPrereleases: (state, getters) => (repoId: number): GenericObject[] => {
+    return store.getters
+      .getReleasesByRepo(repoId)
+      .filter(
+        release =>
+          release.prerelease === true &&
+          new Date(release.published_at) > new Date(store.getters.getLatestRelease(repoId).published_at)
+      );
+    // return state.releases.filter(release => release.repository === repoId && release.prerelease === true && new Date(release.published_at) > )
+  }
+};
 
 export const mutations: MutationTree<IGitHubState> = {
   setRepositories(state, payload: GenericObject[]) {

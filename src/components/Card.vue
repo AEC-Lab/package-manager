@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto" max-height="250" max-width="200">
+  <v-card class="mx-auto" style="cursor: pointer" max-height="250" max-width="200">
     <v-img
       class="white--text align-end"
       height="100px"
@@ -9,7 +9,7 @@
     <v-card-title id="title" class="text-truncate">{{ name }}</v-card-title>
     <v-card-subtitle class="pb-0">{{ owner }}</v-card-subtitle>
     <v-card-actions>
-      <v-btn block color="orange" text>
+      <v-btn block color="primary" @click="e => e.stopPropagation()">
         Install
       </v-btn>
     </v-card-actions>
