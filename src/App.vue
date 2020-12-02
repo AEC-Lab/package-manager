@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <!-- <v-app-bar app color="primary" dark></v-app-bar> -->
-    <v-main id="router">
+    <v-main id="router" v-bind:class="{ 'nav-padding': user }">
       <router-view></router-view>
     </v-main>
     <Menu v-if="user" id="menu"></Menu>
@@ -42,8 +42,12 @@ export default Vue.extend({
 // #router {
 //   margin-left: 55px;
 // }
+.nav-padding {
+  margin-left: 56px;
+}
 #menu {
   position: absolute;
   height: 100%;
+  z-index: 100;
 }
 </style>
