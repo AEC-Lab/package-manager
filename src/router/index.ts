@@ -6,6 +6,7 @@ import { fireAuth } from "../integrations/firebase";
 import Browse from "../views/Browse.vue";
 import Settings from "../views/Settings.vue";
 import Admin from "../views/Admin.vue";
+import Developer from "../views/Developer.vue";
 import Login from "../views/auth/Login.vue";
 import Register from "../views/auth/Register.vue";
 
@@ -32,6 +33,14 @@ const routes: Array<RouteConfig> = [
     path: "/admin",
     name: "Admin",
     component: Admin,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/developer",
+    name: "Developer",
+    component: Developer,
     meta: {
       requiresAuth: true
     }
