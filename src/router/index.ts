@@ -22,7 +22,7 @@ const routes: Array<RouteConfig> = [
   },
   {
     path: "/settings",
-    name: "Setting",
+    name: "Settings",
     component: Settings,
     meta: {
       requiresAuth: true
