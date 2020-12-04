@@ -63,7 +63,8 @@ export default class Register extends Vue {
   items = [
     { title: "Browse", icon: "mdi-archive" },
     { title: "Settings", icon: "mdi-cog" },
-    { title: "Admin", icon: "mdi-shield" }
+    { title: "Admin", icon: "mdi-shield" },
+    { title: "Developer", icon: "mdi-lead-pencil" }
   ];
 
   // COMPUTED PROPERTIES
