@@ -10,69 +10,8 @@
               </h1>
             </v-toolbar-title>
           </v-toolbar>
-          <v-card-text v-if="mode === 'email'">
-            <v-form>
-              <v-text-field label="Email" v-model="user.email" />
-              <v-text-field label="Password" type="password" v-model="user.password" />
-            </v-form>
-            <v-card-actions>
-              <v-btn
-                @submit="signInWithEmail"
-                @click="signInWithEmail"
-                :loading="btnLoadingSignIn"
-                color="teal darken-1"
-                dark
-              >
-                Sign In
-              </v-btn>
-              <v-spacer />
-              <div class="text-end">
-                <div class="link" @click="() => $router.push('/register')" color="teal darken-1">
-                  Register
-                </div>
-                <div class="link" @click="() => {}">Forgot password?</div>
-              </div>
-            </v-card-actions>
-            <div class="link mt-8" @click="toggleMode">
-              Sign in with Third Party Provider
-            </div>
-          </v-card-text>
-          <v-card-text v-else-if="mode === 'provider'" class="mt-10">
-            <v-btn
-              @click="signInWithGoogle"
-              :loading="btnLoadingGoogle"
-              class="mb-2"
-              large
-              color="teal darken-1"
-              dark
-              width="100%"
-            >
-              <span class="mr-4">
-                Sign in with Google
-              </span>
-              <v-icon right dark color="white">
-                mdi-google
-              </v-icon>
-            </v-btn>
-            <v-btn
-              @click="signInWithGithub"
-              :loading="btnLoadingGithub"
-              large
-              color="teal darken-1"
-              dark
-              width="100%"
-            >
-              <span class="mr-4">
-                Sign in with GitHub
-              </span>
-              <v-icon right dark color="white">
-                mdi-github
-              </v-icon>
-            </v-btn>
-            <div class="link mt-8" @click="toggleMode">
-              Sign in with Email and Password
-            </div>
-          </v-card-text>
+          <ProviderLogin v-if="mode === 'provider'" :toggleMode="toggleMode" />
+          <EmailLogin v-else-if="mode === 'email'" :toggleMode="toggleMode" :flashMessage="flashMessage" />
         </v-card>
       </v-col>
     </v-row>
@@ -87,28 +26,22 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { LoginCredentials } from "../../../types/auth";
 import { fireAuth } from "@/integrations/firebase";
 import { ipcRenderer } from "electron";
+import ProviderLogin from "@/components/auth/ProviderLogin.vue";
+import EmailLogin from "@/components/auth/EmailLogin.vue";
 
-@Component
+@Component({
+  components: { ProviderLogin, EmailLogin }
+})
 export default class Login extends Vue {
   // DATA PROPERTIES
   loading = true;
 
-  user: LoginCredentials = {
-    email: "",
-    password: ""
-  };
-
   snackbar = false;
   snackbarText = "";
 
-  btnLoadingSignIn = false;
-  btnLoadingGoogle = false;
-  btnLoadingGithub = false;
-
-  mode: "email" | "provider" = "email";
+  mode: "email" | "provider" = "provider";
 
   // MOUNTED
   async mounted() {
@@ -156,36 +89,6 @@ export default class Login extends Vue {
 
   toggleMode() {
     this.mode = this.mode === "email" ? "provider" : "email";
-  }
-
-  async signInWithEmail() {
-    this.btnLoadingSignIn = true;
-    try {
-      await this.$store.dispatch("auth/loginWithEmailAndPassword", this.user);
-    } catch (error) {
-      this.btnLoadingSignIn = false;
-      this.snackbarText = error;
-      this.snackbar = true;
-      console.log(error);
-    }
-  }
-
-  async signInWithGoogle() {
-    this.btnLoadingGoogle = true;
-    try {
-      await this.$store.dispatch("auth/loginWithGoogle");
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async signInWithGithub() {
-    this.btnLoadingGithub = true;
-    try {
-      await this.$store.dispatch("auth/loginWithGithub");
-    } catch (error) {
-      console.log(error);
-    }
   }
 }
 </script>
