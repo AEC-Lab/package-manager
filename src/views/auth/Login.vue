@@ -1,7 +1,7 @@
 <template>
   <v-container class="fill-height" fluid>
     <v-row align="center" justify="center">
-      <v-col cols="12" sm="8" md="4">
+      <v-col cols="10" sm="8" md="5" lg="5">
         <v-card>
           <v-toolbar color="grey lighten-3" flat>
             <v-toolbar-title>
@@ -62,6 +62,7 @@ export default class Login extends Vue {
     const unsubscribe = await fireAuth.onAuthStateChanged(async user => {
       await this.$store.dispatch("auth/onAuthStateChangedAction", user);
       if (user) {
+        console.log(user);
         unsubscribe();
         this.$router.push("browse");
       } else {

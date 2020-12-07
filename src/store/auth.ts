@@ -91,6 +91,27 @@ export const actions: ActionTree<IAuthState, IRootState> = {
       throw error;
     }
   },
+  async checkEmailExists(context, email: string) {
+    try {
+      const methods: string[] = await fireAuth.fetchSignInMethodsForEmail(email);
+      if (!methods.length) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  },
+  async sendPasswordResetEmail(context, email: string) {
+    try {
+      await fireAuth.sendPasswordResetEmail(email);
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  },
   async checkUserDocExists(context, uid: string) {
     const doc = await firestore
       .collection("users")

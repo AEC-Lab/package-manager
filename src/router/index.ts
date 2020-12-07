@@ -8,6 +8,7 @@ import Settings from "../views/Settings.vue";
 import Admin from "../views/Admin.vue";
 import Login from "../views/auth/Login.vue";
 import Register from "../views/auth/Register.vue";
+import LoginManagement from "../views/auth/LoginManagement.vue";
 
 Vue.use(VueRouter);
 
@@ -45,6 +46,11 @@ const routes: Array<RouteConfig> = [
     path: "/register",
     name: "Register",
     component: Register
+  },
+  {
+    path: "/loginManagement",
+    name: "LoginManagement",
+    component: LoginManagement
   }
 ];
 
@@ -54,7 +60,7 @@ const router = new VueRouter({
 });
 
 const getCurrentUser = () => {
-  return new Promise((resolve, reject) => {
+  return new Promise<firebase.User | null>((resolve, reject) => {
     const unsubscribe = fireAuth.onAuthStateChanged(user => {
       unsubscribe();
       resolve(user);
@@ -62,10 +68,25 @@ const getCurrentUser = () => {
   });
 };
 
+const isUserVerified = async () => {
+  const user = await getCurrentUser();
+  if (!user) return false; // User doesn't exist
+  if (user.email) {
+    // If the "password" sign-in method is associated with email account, it must be verified
+    // If a user has a 3rd party provider with email (e.g. Google), it will automatically set 'emailVerified' to true
+    const methods = await fireAuth.fetchSignInMethodsForEmail(user.email);
+    if (methods.includes("password")) return user.emailVerified;
+    else return true;
+  } else {
+    // Account provider doesn't require email (e.g. Github)
+    return true;
+  }
+};
+
 // TODO might not be necessary given you can't visit paths directly
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  if (requiresAuth && !(await getCurrentUser())) {
+  if (requiresAuth && !(await isUserVerified())) {
     next("/login");
   } else {
     next();

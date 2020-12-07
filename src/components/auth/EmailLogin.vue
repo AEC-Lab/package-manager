@@ -19,7 +19,7 @@
         <div class="link" @click="() => $router.push('/register')" color="teal darken-1">
           Register
         </div>
-        <div class="link" @click="() => {}">Forgot password?</div>
+        <div class="link" @click="resetPassword">Forgot password?</div>
       </div>
     </v-card-actions>
     <div class="link mt-8" @click="toggleMode">
@@ -54,6 +54,22 @@ export default class ProviderLogin extends Vue {
       this.btnLoadingSignIn = false;
       this.flashMessage(error);
       console.log(error);
+    }
+  }
+
+  async resetPassword() {
+    if (!this.user.email) {
+      this.flashMessage("No email address provided");
+    } else if (await this.$store.dispatch("auth/checkEmailExists", this.user.email)) {
+      // Verify if email address exists (and is verified) in Firebase auth
+      // If so, fire function that sends password reset to email
+      if (await this.$store.dispatch("auth/sendPasswordResetEmail", this.user.email)) {
+        this.flashMessage("An email has been sent to your address to reset your password");
+      } else {
+        this.flashMessage("Something went wrong");
+      }
+    } else {
+      this.flashMessage("No account exists for given email");
     }
   }
 }
