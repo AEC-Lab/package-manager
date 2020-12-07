@@ -24,15 +24,22 @@
         </v-list-item>
 
         <v-divider></v-divider>
-
-        <v-list-item @click="route(item.title)" v-for="item in items" :key="item.title" link>
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+        <router-link
+          :to="{ name: item.title }"
+          v-for="item in items"
+          :key="item.title"
+          tag="div"
+          class="mb-1"
+        >
+          <v-list-item link>
+            <v-list-item-icon>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </router-link>
       </v-list>
       <template v-slot:append>
         <div v-if="!mini" class="pa-2">
@@ -56,7 +63,8 @@ export default class Register extends Vue {
   items = [
     { title: "Browse", icon: "mdi-archive" },
     { title: "Settings", icon: "mdi-cog" },
-    { title: "Admin", icon: "mdi-shield" }
+    { title: "Admin", icon: "mdi-shield" },
+    { title: "Developer", icon: "mdi-lead-pencil" }
   ];
 
   // COMPUTED PROPERTIES
@@ -77,7 +85,7 @@ export default class Register extends Vue {
 
   // METHODS
   route(name: string) {
-    this.$router.push(name);
+    this.$router.push({ name });
   }
   async logout() {
     const loggedOut = await this.$store.dispatch("auth/logout");
@@ -86,7 +94,7 @@ export default class Register extends Vue {
       //   path: this.$route.path
       // });
       // window.location.assign(r.href);
-      this.route("login");
+      this.route("Login");
     }
   }
   parseInitials(name: string | null) {
