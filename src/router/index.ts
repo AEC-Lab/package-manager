@@ -68,34 +68,10 @@ const router = new VueRouter({
   routes
 });
 
-const getCurrentUser = () => {
-  return new Promise<firebase.User | null>((resolve, reject) => {
-    const unsubscribe = fireAuth.onAuthStateChanged(user => {
-      unsubscribe();
-      resolve(user);
-    }, reject);
-  });
-};
-
-const isUserVerified = async () => {
-  const user = await getCurrentUser();
-  if (!user) return false; // User doesn't exist
-  if (user.email) {
-    // If the "password" sign-in method is associated with email account, it must be verified
-    // If a user has a 3rd party provider with email (e.g. Google), it will automatically set 'emailVerified' to true
-    const methods = await fireAuth.fetchSignInMethodsForEmail(user.email);
-    if (methods.includes("password")) return user.emailVerified;
-    else return true;
-  } else {
-    // Account provider doesn't require email (e.g. Github)
-    return true;
-  }
-};
-
 // TODO might not be necessary given you can't visit paths directly
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  if (requiresAuth && !(await isUserVerified())) {
+  if (requiresAuth && !fireAuth.currentUser) {
     next("/login");
   } else {
     next();

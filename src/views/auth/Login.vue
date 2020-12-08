@@ -43,14 +43,7 @@ export default class Login extends Vue {
 
   mode: "email" | "provider" = "provider";
 
-  // MOUNTED
-  async mounted() {
-    //   process.env.NODE_ENV === "production"
-    // ? this.checkForUpdates()
-    // : this.firebaseAuthListener();
-    this.checkForUpdates();
-    // lol
-  }
+  unsubscribe!: firebase.Unsubscribe;
 
   // METHODS
   flashMessage(message: string) {
@@ -59,17 +52,14 @@ export default class Login extends Vue {
   }
 
   async firebaseAuthListener() {
-    const unsubscribe = await fireAuth.onAuthStateChanged(async user => {
+    const _unsubscribe = fireAuth.onAuthStateChanged(async user => {
       await this.$store.dispatch("auth/onAuthStateChangedAction", user);
       if (user) {
-        console.log(user);
-        unsubscribe();
+        _unsubscribe();
         this.$router.push("browse");
-      } else {
-        this.loading = false;
-        this.snackbar = false;
       }
     });
+    return _unsubscribe;
   }
 
   checkForUpdates() {
@@ -79,17 +69,35 @@ export default class Login extends Vue {
       this.flashMessage(payload.message);
     });
     ipcRenderer.once("update-not-available", () => {
-      this.firebaseAuthListener();
+      this.loading = false;
+      this.snackbar = false;
+      // this.firebaseAuthListener();
     });
     ipcRenderer.on("auto-updater-error", (event, payload) => {
       console.error(payload.message);
       this.flashMessage(payload.message);
-      this.firebaseAuthListener();
+      this.loading = false;
+      this.snackbar = false;
+      // this.firebaseAuthListener();
     });
   }
 
   toggleMode() {
     this.mode = this.mode === "email" ? "provider" : "email";
+  }
+
+  // LIFECYCLE HOOKS
+  async mounted() {
+    //   process.env.NODE_ENV === "production"
+    // ? this.checkForUpdates()
+    // : this.firebaseAuthListener();
+    this.unsubscribe = await this.firebaseAuthListener();
+    this.checkForUpdates();
+    // lol
+  }
+
+  beforeDestroy() {
+    this.unsubscribe();
   }
 }
 </script>

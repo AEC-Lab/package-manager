@@ -22,10 +22,11 @@ export const mutations: MutationTree<IReposState> = {
 export const actions: ActionTree<IReposState, IRootState> = {
   repositoriesListener({ commit }) {
     try {
-      firestore.collection("repositories").onSnapshot(snapshot => {
+      const listener = firestore.collection("repositories").onSnapshot(snapshot => {
         const repositories = snapshot.docs.map(doc => doc.data());
         commit("setRepositories", repositories);
       });
+      commit("addListener", listener, { root: true });
     } catch (error) {
       // ! integrate with stack driver in cases like these!
       console.error(error);

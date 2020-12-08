@@ -57,7 +57,6 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { fireAuth } from "@/integrations/firebase";
 import { RegisterCredentials } from "../../../types/auth";
 
 @Component
@@ -89,6 +88,13 @@ export default class Register extends Vue {
     if (!isValid) return;
     try {
       await this.$store.dispatch("auth/registerWithEmailAndPassword", this.user);
+      const loggedOut = await this.$store.dispatch("auth/logout");
+      if (loggedOut) {
+        this.$router.push("login");
+        // TODO: flash message telling user that email verification link has been sent
+        // Doing so here won't show up because this component is destroyed immediately upon routing
+        // Need to use/make a global app flashMessage component that injects instance independently of component
+      }
     } catch (error) {
       this.snackbarText = error;
       this.snackbar = true;
@@ -99,23 +105,6 @@ export default class Register extends Vue {
   isValidEmail(email: string) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
     return re.test(email);
-  }
-
-  async firebaseAuthListener() {
-    const unsubscribe = await fireAuth.onAuthStateChanged(async user => {
-      await this.$store.dispatch("auth/onAuthStateChangedAction", user);
-      if (user) {
-        unsubscribe();
-        this.$router.push("browse");
-      } else {
-        this.snackbar = false;
-      }
-    });
-  }
-
-  // LIFECYCLE HOOKS
-  mounted() {
-    this.firebaseAuthListener();
   }
 }
 </script>
