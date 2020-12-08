@@ -64,6 +64,9 @@ export const actions: ActionTree<IAuthState, IRootState> = {
     }
   },
   async loginWithEmailAndPassword(context, credentials: LoginCredentials) {
+    if (!(await context.dispatch("checkEmailExists", credentials.email))) {
+      throw new Error("No account exists for this email address");
+    }
     try {
       // Make sure email is verified
       const emailVerified = await (

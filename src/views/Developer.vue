@@ -1,6 +1,7 @@
 <template>
   <v-container id="container">
     <ValidateSchema />
+    <v-btn @click="showSnackbar">Show snackbar</v-btn>
   </v-container>
 </template>
 
@@ -10,8 +11,14 @@ import ValidateSchema from "@/components/developer/ValidateSchema.vue";
 
 export default defineComponent({
   components: { ValidateSchema },
-  setup() {
-    return {};
+  setup(props, context) {
+    function showSnackbar() {
+      // context.root.$sn
+      // context.root.
+      context.root.$snackbar.flash({ content: "Great success!" });
+      // context.root.$snackbar.flash({ content: "Not success!", color: "error", timeout: 2000 });
+    }
+    return { showSnackbar };
   }
 });
 </script>

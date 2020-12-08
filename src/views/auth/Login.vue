@@ -11,13 +11,10 @@
             </v-toolbar-title>
           </v-toolbar>
           <ProviderLogin v-if="mode === 'provider'" :toggleMode="toggleMode" />
-          <EmailLogin v-else-if="mode === 'email'" :toggleMode="toggleMode" :flashMessage="flashMessage" />
+          <EmailLogin v-else-if="mode === 'email'" :toggleMode="toggleMode" />
         </v-card>
       </v-col>
     </v-row>
-    <v-snackbar color="grey lighten-3" v-model="snackbar">
-      <div id="snackText">{{ snackbarText }}</div>
-    </v-snackbar>
     <v-overlay color="white" :opacity="0.75" :value="loading">
       <v-progress-circular :size="50" color="teal" indeterminate></v-progress-circular>
     </v-overlay>
@@ -38,19 +35,11 @@ export default class Login extends Vue {
   // DATA PROPERTIES
   loading = true;
 
-  snackbar = false;
-  snackbarText = "";
-
   mode: "email" | "provider" = "provider";
 
   unsubscribe!: firebase.Unsubscribe;
 
   // METHODS
-  flashMessage(message: string) {
-    this.snackbar = true;
-    this.snackbarText = message;
-  }
-
   async firebaseAuthListener() {
     const _unsubscribe = fireAuth.onAuthStateChanged(async user => {
       await this.$store.dispatch("auth/onAuthStateChangedAction", user);
@@ -66,18 +55,16 @@ export default class Login extends Vue {
     ipcRenderer.send("check-for-updates");
     // wait for response
     ipcRenderer.on("auto-updater-message", (event, payload) => {
-      this.flashMessage(payload.message);
+      this.$snackbar.flash({ content: payload.message, color: "info", timeout: 2000 });
     });
     ipcRenderer.once("update-not-available", () => {
       this.loading = false;
-      this.snackbar = false;
       // this.firebaseAuthListener();
     });
     ipcRenderer.on("auto-updater-error", (event, payload) => {
       console.error(payload.message);
-      this.flashMessage(payload.message);
+      this.$snackbar.flash({ content: payload.message, color: "error" });
       this.loading = false;
-      this.snackbar = false;
       // this.firebaseAuthListener();
     });
   }
@@ -109,8 +96,5 @@ export default class Login extends Vue {
   &:hover {
     color: #13aa9b;
   }
-}
-#snackText {
-  color: teal;
 }
 </style>

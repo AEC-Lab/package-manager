@@ -30,7 +30,7 @@
               />
             </v-form>
             <v-card-actions>
-              <v-btn @submit="register" @click="register" color="teal darken-1" dark>
+              <v-btn @submit="register" @click="register" color="teal darken-1" dark :loading="processing">
                 Register
               </v-btn>
               <v-spacer />
@@ -44,14 +44,6 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-snackbar v-model="snackbar">
-      {{ snackbarText }}
-      <template v-slot:action="{ attrs }">
-        <v-btn color="red" text v-bind="attrs" @click="snackbar = false">
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -70,8 +62,8 @@ export default class Register extends Vue {
   };
 
   isFormValid = false;
-  snackbar = false;
-  snackbarText = "";
+
+  processing = false;
 
   emailRules = [
     (v: string) => !!v || "Field is required",
@@ -87,17 +79,19 @@ export default class Register extends Vue {
     }).validate();
     if (!isValid) return;
     try {
+      this.processing = true;
       await this.$store.dispatch("auth/registerWithEmailAndPassword", this.user);
       const loggedOut = await this.$store.dispatch("auth/logout");
       if (loggedOut) {
         this.$router.push("login");
-        // TODO: flash message telling user that email verification link has been sent
-        // Doing so here won't show up because this component is destroyed immediately upon routing
-        // Need to use/make a global app flashMessage component that injects instance independently of component
+        this.$snackbar.flash({
+          content: "A verification link has been sent to your email.",
+          color: "success"
+        });
       }
     } catch (error) {
-      this.snackbarText = error;
-      this.snackbar = true;
+      this.$snackbar.flash({ content: error, color: "error" });
+      this.processing = false;
       console.log(error);
     }
   }
