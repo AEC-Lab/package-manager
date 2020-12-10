@@ -37,7 +37,7 @@ const createJWT = () => {
   const token = jwt.sign({}, APPLICATIONKEY, {
     algorithm: "RS256",
     issuer: APPLICATIONID,
-    expiresIn: 10 * 60 // ten minutes, maximum expiration time per GitHub docs
+    expiresIn: 10 * 60 - 30 // ten minutes, maximum expiration time per GitHub docs
   });
   return token;
 };
