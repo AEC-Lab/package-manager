@@ -20,6 +20,11 @@ import fetch from "node-fetch";
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null;
 
+// function to return environment variables on the system
+ipcMain.on("get-process-env-variable", (event, variable) => {
+  event.sender.send("environment-variable-found", process.env[variable]);
+});
+
 // messaging system for autoUpdater to render process
 ipcMain.on("check-for-updates", event => {
   autoUpdater.on("checking-for-update", () => {

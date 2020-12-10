@@ -19,14 +19,19 @@
         <v-menu bottom offset-y>
           <template v-slot:activator="{ on, attrs }">
             <div class="split-btn mb-4">
-              <v-btn color="light" class="main-btn" @click="() => {}">Install</v-btn>
+              <v-btn :loading="isLoading" color="light" class="main-btn" @click="() => {}">Install</v-btn>
               <v-btn v-on="on" v-bind="attrs" color="light" class="actions-btn">
                 <v-icon>mdi-menu-down</v-icon>
               </v-btn>
             </div>
           </template>
           <v-list>
-            <v-list-item class="release-item" v-for="release in releases" :key="release.id">
+            <v-list-item
+              class="release-item"
+              v-for="release in releases"
+              :key="release.id"
+              @click="download(release)"
+            >
               <v-col cols="2" class="text-body-2">{{ release.tag_name.replace("v", "") }}</v-col>
               <v-col class="text-body-2">{{ release.name }}</v-col>
               <v-col cols="3" class="text-body-2">{{
@@ -87,6 +92,7 @@ export default defineComponent({
   },
   setup(props, context) {
     const isClosed = ref(false);
+    const isLoading = ref(false);
 
     const author = computed(() => {
       return context.root.$store.state.github.repositories.find((r: GenericObject) => r.id === props.repo.id)
@@ -108,9 +114,27 @@ export default defineComponent({
       setTimeout(() => props.closeDetails(), 500);
     }
 
+    async function download(release: GenericObject) {
+      isLoading.value = true;
+      const { assets } = release;
+      const promises = assets.map((asset: GenericObject) => {
+        const payload = {
+          assetId: asset.id,
+          releaseId: release.id,
+          assetName: asset.name,
+          repository: props.repo
+        };
+        return context.root.$store.dispatch("github/getAsset", payload);
+      });
+      await Promise.all(promises);
+      isLoading.value = false;
+    }
+
     return {
       isClosed,
+      isLoading,
       callClose,
+      download,
       author,
       releases,
       latestRelease,

@@ -2,6 +2,10 @@ import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
 import store, { IRootState } from ".";
 import { GenericObject } from "../../types/github";
 import GitHub from "../integrations/github";
+import helpers from "../utils/helpers";
+import fs from "fs-extra";
+import { reject } from "lodash";
+import { resolve } from "dns";
 
 export interface IGitHubState {
   repositories: GenericObject[];
@@ -67,6 +71,18 @@ export const actions: ActionTree<IGitHubState, IRootState> = {
     const releases = await GitHub.getReleases(repository);
     commit("setReleases", releases);
     return releases;
+  },
+  async getAsset(context, payload: GenericObject) {
+    const { repository, assetId, releaseId, assetName } = payload;
+    const asset = await GitHub.getAsset(repository, assetId);
+    console.log("Asset: ", asset);
+    const encodedPath = `$TEMP\\${helpers.ownerName(repository).replace("/", "-")}-${releaseId}`;
+    const actualPath = await helpers.createActualPath(encodedPath);
+    const filePath = `${actualPath}\\${assetName}`;
+    fs.outputFile(filePath, asset, outputError => {
+      if (outputError) throw outputError;
+      return filePath;
+    });
   },
   async init({ dispatch, state }) {
     await dispatch("getInstallations");

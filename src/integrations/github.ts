@@ -9,6 +9,9 @@ import { find } from "lodash";
 import helpers from "../utils/helpers";
 
 import { GenericObject } from "types/github";
+import { Repository } from "types/repos";
+
+import fetch from "node-fetch";
 
 const $backend = axios.create({
   baseURL: "https://api.github.com",
@@ -70,7 +73,7 @@ GitHub.getRepositories = async (installation: GenericObject) => {
   return repositories;
 };
 
-GitHub.getReleases = async (repository: GenericObject) => {
+GitHub.getReleases = async (repository: Repository) => {
   const { installation } = repository;
   const token = find($store.state.github.installations, ["id", installation]).token;
   const Authorization = `token ${token}`;
@@ -82,51 +85,46 @@ GitHub.getReleases = async (repository: GenericObject) => {
   return releases;
 };
 
-// GitHub.getAsset = (repoName, assetId) => {
-//   // using standard rquest library to avoid limitations with axios
+GitHub.getAsset = async (repository: Repository, assetId: string) => {
+  // using standard rquest library to avoid encoding limitations with axios
+  const r = find($store.state.github.repositories, ["id", repository.id]);
+  const { installation } = r;
+  const token = find($store.state.github.installations, ["id", installation]).token;
+  const ownerName = helpers.ownerName(repository);
+  const url = `https://api.github.com/repos/${ownerName}/releases/assets/${assetId}`;
+  const options = {
+    encoding: null,
+    headers: {
+      Authorization: `token ${token}`,
+      Accept: "application/octet-stream",
+      "User-Agent": "Package Manager"
+    }
+  };
+  const response = await fetch(url, options);
+  const buffer = await response.buffer();
+  return buffer;
+};
+// GitHub.getAsset = (repository: Repository, assetId: string) => {
 //   return new Promise((resolve, reject) => {
-//     GitHub.requestToken().then(token => {
-//       const options = {
-//         url: `https://api.github.com/repos/${repoName}/releases/assets/${assetId}`,
-//         encoding: null,
-//         headers: {
-//           Authorization: `token ${token}`,
-//           Accept: "application/octet-stream",
-//           "User-Agent": "Package Manager"
-//         }
-//       };
-//       requestPromise(options)
-//         .then(asset => {
-//           resolve(asset);
-//         })
-//         .catch(error => {
-//           reject(error);
-//         });
-//     });
-//   });
-// };
-
-// GitHub.getSource = (repoName, tagName) => {
-//   // using standard rquest library to avoid limitations with axios
-//   return new Promise((resolve, reject) => {
-//     GitHub.requestToken().then(token => {
-//       const options = {
-//         url: `https://api.github.com/repos/${repoName}/zipball/${tagName}`,
-//         encoding: null,
-//         headers: {
-//           Authorization: `token ${token}`,
-//           Accept: "application/vnd.github.machine-man-preview+json",
-//           "User-Agent": "Package Manager"
-//         }
-//       };
-//       requestPromise(options)
-//         .then(source => {
-//           resolve(source);
-//         })
-//         .catch(error => {
-//           reject(error);
-//         });
-//     });
+//     // using standard rquest library to avoid encoding limitations with axios
+//     const r = find($store.state.github.repositories, ["id", repository.id]);
+//     const { installation } = r;
+//     const token = find($store.state.github.installations, ["id", installation]).token;
+//     const Authorization = `token ${token}`;
+//     const id = helpers.ownerName(repository);
+//     const url = `https://api.github.com/repos/${id}/releases/assets/${assetId}`;
+//     const options = {
+//       url: url,
+//       encoding: null,
+//       headers: {
+//         Authorization,
+//         Accept: "application/octet-stream",
+//         "User-Agent": "Package Manager"
+//       }
+//     };
+//     requestPromise(options)
+//       .then(asset => resolve(asset))
+//       .catch(error => reject(error));
 //   });
 // };
 
