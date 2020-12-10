@@ -61,6 +61,7 @@ import { RegisterCredentials } from "../../../types/auth";
 
 @Component
 export default class Register extends Vue {
+  // DATA PROPERTIES
   user: RegisterCredentials = {
     email: "",
     name: "",
@@ -79,6 +80,7 @@ export default class Register extends Vue {
   passwordRules = [(v: string) => !!v || "Field is required"];
   passwordConfirmationRules = [(v: string) => v === this.user.password || "Passwords do not match"];
 
+  // METHODS
   async register() {
     const isValid = (this.$refs.form as Vue & {
       validate: () => boolean;
@@ -86,12 +88,20 @@ export default class Register extends Vue {
     if (!isValid) return;
     try {
       await this.$store.dispatch("auth/registerWithEmailAndPassword", this.user);
+      const loggedOut = await this.$store.dispatch("auth/logout");
+      if (loggedOut) {
+        this.$router.push("login");
+        // TODO: flash message telling user that email verification link has been sent
+        // Doing so here won't show up because this component is destroyed immediately upon routing
+        // Need to use/make a global app flashMessage component that injects instance independently of component
+      }
     } catch (error) {
       this.snackbarText = error;
       this.snackbar = true;
       console.log(error);
     }
   }
+
   isValidEmail(email: string) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
     return re.test(email);

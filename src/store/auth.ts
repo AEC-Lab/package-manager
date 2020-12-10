@@ -2,7 +2,7 @@ import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
 import { ipcRenderer } from "electron";
 import { IRootState } from ".";
 import { User, LoginCredentials, RegisterCredentials } from "../../types/auth";
-import firebase, { fireAuth, firestore } from "../integrations/firebase";
+import firebase, { fireAuth, firestore, fireFunc } from "../integrations/firebase";
 
 export interface IAuthState {
   user: User | null;
@@ -40,7 +40,6 @@ export const actions: ActionTree<IAuthState, IRootState> = {
             roles: docData?.roles,
             uid: user.uid
           };
-          console.log(_user);
           context.commit("setUser", _user);
         });
     } else {
@@ -66,6 +65,16 @@ export const actions: ActionTree<IAuthState, IRootState> = {
   },
   async loginWithEmailAndPassword(context, credentials: LoginCredentials) {
     try {
+      // Make sure email is verified
+      const emailVerified = await (
+        await fireFunc.httpsCallable("isUserEmailVerified")({ email: credentials.email })
+      ).data;
+      if (!emailVerified) {
+        throw new Error(
+          "Email address has not yet been verified. You must first verify your email through the link sent to you."
+        );
+      }
+
       const user = await fireAuth.signInWithEmailAndPassword(credentials.email, credentials.password);
       return user;
     } catch (error) {
@@ -76,6 +85,9 @@ export const actions: ActionTree<IAuthState, IRootState> = {
   async registerWithEmailAndPassword(context, credentials: RegisterCredentials) {
     try {
       const user = await fireAuth.createUserWithEmailAndPassword(credentials.email, credentials.password);
+      // After signing in, send email verification link, and immediately sign user out and direct to login w/ message
+      user.user?.sendEmailVerification();
+
       if (user.user && Boolean(credentials.name)) {
         // Wait for document to be created by cloud function before updating 'name' field
         while (!(await context.dispatch("checkUserDocExists", user.user.uid))) {
@@ -91,12 +103,32 @@ export const actions: ActionTree<IAuthState, IRootState> = {
       throw error;
     }
   },
+  async checkEmailExists(context, email: string) {
+    try {
+      const methods: string[] = await fireAuth.fetchSignInMethodsForEmail(email);
+      if (!methods.length) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  },
+  async sendPasswordResetEmail(context, email: string) {
+    try {
+      await fireAuth.sendPasswordResetEmail(email);
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  },
   async checkUserDocExists(context, uid: string) {
     const doc = await firestore
       .collection("users")
       .doc(uid)
       .get();
-    console.log("return doc exists", doc.exists);
     if (doc.exists) {
       console.log(doc.data());
     }
@@ -104,6 +136,7 @@ export const actions: ActionTree<IAuthState, IRootState> = {
   },
   async logout() {
     try {
+      this.commit("unsubscribeAllListeners", null, { root: true });
       await fireAuth.signOut();
       return true;
     } catch (error) {
