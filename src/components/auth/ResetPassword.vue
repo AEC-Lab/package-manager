@@ -31,9 +31,6 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-snackbar color="grey lighten-3" v-model="snackbar">
-      <div id="snackText">{{ snackbarText }}</div>
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -65,18 +62,13 @@ export default class ResetPassword extends Vue {
   snackbarText = "";
 
   // METHODS
-  flashMessage(message: string) {
-    this.snackbar = true;
-    this.snackbarText = message;
-  }
-
   async handleResetPassword() {
     // First check if form input is valid
     if (!this.user.password || !this.user.passwordConfirmation) {
-      this.flashMessage("Password field(s) missing");
+      this.$snackbar.flash({ content: "Password field(s) missing", color: "error" });
       return;
     } else if (this.user.passwordConfirmation !== this.user.password) {
-      this.flashMessage("Passwords do not match");
+      this.$snackbar.flash({ content: "Passwords do not match", color: "error" });
       return;
     }
 
@@ -92,18 +84,18 @@ export default class ResetPassword extends Vue {
       if (success) {
         // Redirect to home page
         await setTimeout(() => {
-          this.flashMessage("Password reset successful!");
+          this.$snackbar.flash({ content: "Password reset successful!", color: "success" });
           this.$router.push({
             path: "/browse"
           });
         }, 1000);
       } else {
         this.btnLoadingSubmit = false;
-        this.flashMessage("Invalid credentials");
+        this.$snackbar.flash({ content: "Invalid credentials", color: "error" });
       }
     } catch (error) {
       this.btnLoadingSubmit = false;
-      this.flashMessage(error.message);
+      this.$snackbar.flash({ content: error.message, color: "error" });
     }
   }
 
@@ -113,7 +105,7 @@ export default class ResetPassword extends Vue {
       this.user.email = await fireAuth.verifyPasswordResetCode(this.actionCode);
     } catch (error) {
       const msg = error.message + "<br>" + "Please click 'Forgot Password' to request a new link.";
-      this.flashMessage(msg);
+      this.$snackbar.flash({ content: msg, color: "error" });
       this.$router.push({
         path: "/login"
       });

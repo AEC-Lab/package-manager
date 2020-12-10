@@ -4,6 +4,7 @@ import Vuex, { MutationTree } from "vuex";
 import { repos } from "./repos";
 import { github } from "./github";
 import { auth } from "./auth";
+import { snackbar } from "./snackbar";
 
 Vue.use(Vuex);
 
@@ -11,10 +12,11 @@ export interface IRootState {
   github: any;
   repos: any;
   auth: any;
+  snackbar: any;
   listeners: firebase.Unsubscribe[];
 }
 
-const state = (): IRootState => ({ github, repos, auth, listeners: [] });
+const state = (): IRootState => ({ github, repos, auth, snackbar, listeners: [] });
 
 export const mutations: MutationTree<IRootState> = {
   addListener(state, listener: firebase.Unsubscribe) {
@@ -34,6 +36,7 @@ export default new Vuex.Store({
   modules: {
     repos,
     github,
-    auth
+    auth,
+    snackbar
   }
 });

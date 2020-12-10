@@ -36,7 +36,6 @@ import { LoginCredentials } from "../../../types/auth";
 export default class ProviderLogin extends Vue {
   // PROPS
   @Prop() readonly toggleMode!: () => void;
-  @Prop() readonly flashMessage!: (msg: string) => void;
 
   // DATA PROPERTIES
   user: LoginCredentials = {
@@ -52,24 +51,27 @@ export default class ProviderLogin extends Vue {
       await this.$store.dispatch("auth/loginWithEmailAndPassword", this.user);
     } catch (error) {
       this.btnLoadingSignIn = false;
-      this.flashMessage(error);
+      this.$snackbar.flash({ content: error, color: "error" });
       console.log(error);
     }
   }
 
   async resetPassword() {
     if (!this.user.email) {
-      this.flashMessage("No email address provided");
+      this.$snackbar.flash({ content: "No email address provided", color: "error" });
     } else if (await this.$store.dispatch("auth/checkEmailExists", this.user.email)) {
       // Verify if email address exists (and is verified) in Firebase auth
       // If so, fire function that sends password reset to email
       if (await this.$store.dispatch("auth/sendPasswordResetEmail", this.user.email)) {
-        this.flashMessage("An email has been sent to your address to reset your password");
+        this.$snackbar.flash({
+          content: "An email has been sent to your address to reset your password",
+          color: "success"
+        });
       } else {
-        this.flashMessage("Something went wrong");
+        this.$snackbar.flash({ content: "Something went wrong", color: "error" });
       }
     } else {
-      this.flashMessage("No account exists for given email");
+      this.$snackbar.flash({ content: "No account exists for given email", color: "error" });
     }
   }
 }

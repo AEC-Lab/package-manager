@@ -5,18 +5,21 @@
       <router-view></router-view>
     </v-main>
     <Menu v-if="user" id="menu"></Menu>
+    <Snackbar />
   </v-app>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import Menu from "@/components/Menu.vue";
+import Snackbar from "@/components/Snackbar.vue";
 
 // import { Component } from "vue-property-decorator";
 
 export default Vue.extend({
   components: {
-    Menu
+    Menu,
+    Snackbar
   },
   name: "App",
   data: () => ({
