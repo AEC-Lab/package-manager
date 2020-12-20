@@ -3,6 +3,7 @@ const GitHub: { [key: string]: Function } = {};
 import { Base64 } from "js-base64";
 import axios from "axios";
 import jwt from "jsonwebtoken";
+import { ipcRenderer } from "electron";
 
 import $store from "@/store";
 import { find } from "lodash";
@@ -10,8 +11,6 @@ import helpers from "../utils/helpers";
 
 import { GenericObject } from "types/github";
 import { Repository } from "types/repos";
-
-import fetch from "node-fetch";
 
 const $backend = axios.create({
   baseURL: "https://api.github.com",
@@ -85,47 +84,27 @@ GitHub.getReleases = async (repository: Repository) => {
   return releases;
 };
 
-GitHub.getAsset = async (repository: Repository, assetId: string) => {
-  // using standard rquest library to avoid encoding limitations with axios
+GitHub.getAsset = async (repository: Repository, assetId: string, directoryPath: string) => {
+  // Get API url and token for asset, then pass to electron-dl to download
   const r = find($store.state.github.repositories, ["id", repository.id]);
   const { installation } = r;
   const token = find($store.state.github.installations, ["id", installation]).token;
   const ownerName = helpers.ownerName(repository);
   const url = `https://api.github.com/repos/${ownerName}/releases/assets/${assetId}`;
-  const options = {
-    encoding: null,
-    headers: {
-      Authorization: `token ${token}`,
-      Accept: "application/octet-stream",
-      "User-Agent": "Package Manager"
-    }
-  };
-  const response = await fetch(url, options);
-  const buffer = await response.buffer();
-  return buffer;
+  console.log(`Downloading asset ${assetId}...`);
+  ipcRenderer.send("download-private-asset", {
+    url: url,
+    token: token,
+    assetId,
+    properties: { directory: directoryPath }
+  });
+  ipcRenderer.on(`download-success-${assetId}`, (event, savePath) => {
+    console.log(`File downloaded to ${savePath}`);
+    return savePath;
+  });
+  ipcRenderer.on(`download-failure-${assetId}`, (event, error) => {
+    console.log(error);
+  });
 };
-// GitHub.getAsset = (repository: Repository, assetId: string) => {
-//   return new Promise((resolve, reject) => {
-//     // using standard rquest library to avoid encoding limitations with axios
-//     const r = find($store.state.github.repositories, ["id", repository.id]);
-//     const { installation } = r;
-//     const token = find($store.state.github.installations, ["id", installation]).token;
-//     const Authorization = `token ${token}`;
-//     const id = helpers.ownerName(repository);
-//     const url = `https://api.github.com/repos/${id}/releases/assets/${assetId}`;
-//     const options = {
-//       url: url,
-//       encoding: null,
-//       headers: {
-//         Authorization,
-//         Accept: "application/octet-stream",
-//         "User-Agent": "Package Manager"
-//       }
-//     };
-//     requestPromise(options)
-//       .then(asset => resolve(asset))
-//       .catch(error => reject(error));
-//   });
-// };
 
 export default GitHub;

@@ -1,6 +1,7 @@
 "use strict";
 
 import { app, protocol, BrowserWindow, shell } from "electron";
+import { download } from "electron-dl";
 import { autoUpdater } from "electron-updater";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
@@ -137,6 +138,33 @@ ipcMain.on("authenticate", (event, provider, client) => {
         }).then((cp: any) => cp.unref());
       });
     destroyer(server);
+  }
+});
+
+// Handle downloads for private repo assets
+ipcMain.on("download-private-asset", async (event, info) => {
+  try {
+    const response = await fetch(info.url, {
+      headers: {
+        Accept: "application/octet-stream",
+        Authorization: `Bearer ${info.token}`
+      },
+      redirect: "manual" // prevents automatic redirect with returns 400 response
+    });
+    const redirectUrl = response.headers.get("location"); // URL it would otherwise redirect to (AWS S3 bucket)
+    if (response.status === 302 && redirectUrl) {
+      // Download asset with fully-authenticated download url (NO auth headers to add)
+      const dl = await download(win!, redirectUrl, info.properties);
+      win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
+    } else {
+      win!.webContents.send(
+        `download-failure-${info.assetId}`,
+        `Response status ${response.status} handler not implemented`
+      );
+    }
+  } catch (err) {
+    console.log(err);
+    win!.webContents.send("download-failure", err);
   }
 });
 

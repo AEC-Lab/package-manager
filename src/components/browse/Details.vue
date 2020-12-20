@@ -71,9 +71,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, ComputedRef, PropType } from "@vue/composition-api";
+import { defineComponent, ref, computed, PropType } from "@vue/composition-api";
 import { GenericObject } from "types/github";
-import { component } from "vue/types/umd";
 import { Repository } from "../../../types/repos";
 
 type CloseHandler = () => void;
@@ -117,16 +116,15 @@ export default defineComponent({
     async function download(release: GenericObject) {
       isLoading.value = true;
       const { assets } = release;
-      const promises = assets.map((asset: GenericObject) => {
+      assets.map(async (asset: GenericObject) => {
         const payload = {
           assetId: asset.id,
           releaseId: release.id,
           assetName: asset.name,
           repository: props.repo
         };
-        return context.root.$store.dispatch("github/getAsset", payload);
+        return await context.root.$store.dispatch("github/getAsset", payload);
       });
-      await Promise.all(promises);
       isLoading.value = false;
     }
 
