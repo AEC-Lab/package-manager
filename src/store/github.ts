@@ -49,6 +49,12 @@ export const mutations: MutationTree<IGitHubState> = {
   },
   setInstallations(state, payload: GenericObject[]) {
     state.installations = payload;
+  },
+  clearRepositories(state) {
+    state.repositories = [];
+  },
+  clearReleases(state) {
+    state.releases = [];
   }
 };
 
@@ -68,7 +74,9 @@ export const actions: ActionTree<IGitHubState, IRootState> = {
     commit("setReleases", releases);
     return releases;
   },
-  async init({ dispatch, state }) {
+  async init({ commit, dispatch, state }) {
+    commit("clearRepositories");
+    commit("clearReleases");
     await dispatch("getInstallations");
     const repositories = state.installations.map(
       async installation => await dispatch("getRepositories", installation)
