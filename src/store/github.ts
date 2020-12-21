@@ -2,6 +2,7 @@ import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
 import store, { IRootState } from ".";
 import { GenericObject } from "../../types/github";
 import GitHub from "../integrations/github";
+import helpers from "../utils/helpers";
 
 export interface IGitHubState {
   repositories: GenericObject[];
@@ -25,18 +26,16 @@ export const getters: GetterTree<IGitHubState, IRootState> = {
     return getters
       .getReleasesByRepo(repoId)
       .sort((a: GenericObject, b: GenericObject) => +new Date(b.published_at) - +new Date(a.published_at))[0];
-    // return state.releases.filter(release => release.repository === repoId).sort((a, b) => +new Date(b.published_at) - +new Date(a.published_at))[0]
   },
   // Gets preleases published after the latest full release, for a given repository
   getLatestPrereleases: (state, getters) => (repoId: number): GenericObject[] => {
-    return store.getters
+    return getters
       .getReleasesByRepo(repoId)
       .filter(
         (release: GenericObject) =>
           release.prerelease === true &&
           new Date(release.published_at) > new Date(store.getters.getLatestRelease(repoId).published_at)
       );
-    // return state.releases.filter(release => release.repository === repoId && release.prerelease === true && new Date(release.published_at) > )
   }
 };
 
@@ -67,6 +66,13 @@ export const actions: ActionTree<IGitHubState, IRootState> = {
     const releases = await GitHub.getReleases(repository);
     commit("setReleases", releases);
     return releases;
+  },
+  async getAsset(context, payload: GenericObject) {
+    const { repository, assetId, releaseId } = payload;
+    const encodedPath = `$TEMP\\${helpers.ownerName(repository).replace("/", "-")}-${releaseId}`;
+    const actualPath = await helpers.createActualPath(encodedPath);
+    const filePath = await GitHub.getAsset(repository, assetId, actualPath);
+    return filePath;
   },
   async init({ dispatch, state }) {
     await dispatch("getInstallations");
