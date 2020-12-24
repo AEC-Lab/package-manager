@@ -19,8 +19,14 @@
         <v-menu bottom offset-y>
           <template v-slot:activator="{ on, attrs }">
             <div class="split-btn mb-4">
-              <v-btn :loading="isLoading" color="light" class="main-btn" @click="() => {}">Install</v-btn>
-              <v-btn v-on="on" v-bind="attrs" color="light" class="actions-btn">
+              <v-btn
+                :loading="isLoading"
+                :color="buttonConfig.color"
+                class="main-btn"
+                @click="e => installActionHandlerWrapper(e, repo, buttonConfig.handler)"
+                >{{ buttonConfig.text }}</v-btn
+              >
+              <v-btn v-on="on" v-bind="attrs" :color="buttonConfig.color" class="actions-btn">
                 <v-icon>mdi-menu-down</v-icon>
               </v-btn>
             </div>
@@ -30,7 +36,7 @@
               class="release-item"
               v-for="release in releases"
               :key="release.id"
-              @click="download(release)"
+              @click="downloadRelease(release)"
             >
               <v-col cols="2" class="text-body-2">{{ release.tag_name.replace("v", "") }}</v-col>
               <v-col class="text-body-2">{{ release.name }}</v-col>
@@ -74,6 +80,7 @@
 import { defineComponent, ref, computed, PropType } from "@vue/composition-api";
 import { GenericObject } from "types/github";
 import { Repository } from "../../../types/repos";
+import { getButtonConfig, installPackage } from "../../utils/install";
 
 type CloseHandler = () => void;
 
@@ -107,24 +114,35 @@ export default defineComponent({
     const latestReleaseDate = computed(
       () => latestRelease.value && new Date(latestRelease.value.published_at).toLocaleDateString()
     );
+    const buttonConfig = computed(() => {
+      return getButtonConfig(props.repo.id);
+    });
 
     function callClose() {
       isClosed.value = true;
       setTimeout(() => props.closeDetails(), 500);
     }
 
-    async function download(release: GenericObject) {
+    async function installActionHandlerWrapper(event: Event, repo: Repository, handler: Function) {
       isLoading.value = true;
-      const { assets } = release;
-      assets.map(async (asset: GenericObject) => {
-        const payload = {
-          assetId: asset.id,
-          releaseId: release.id,
-          assetName: asset.name,
-          repository: props.repo
-        };
-        return await context.root.$store.dispatch("github/getAsset", payload);
-      });
+      await handler(event, repo);
+      isLoading.value = false;
+    }
+
+    async function downloadRelease(release: GenericObject) {
+      isLoading.value = true;
+      try {
+        await installPackage(props.repo, release);
+        context.root.$snackbar.flash({
+          content: `Successfully installed ${props.repo.name} - ${release.tag_name.replace("v", "")}`,
+          color: "success"
+        });
+      } catch (error) {
+        context.root.$snackbar.flash({
+          content: `${error} - ${props.repo.name}`,
+          color: "danger"
+        });
+      }
       isLoading.value = false;
     }
 
@@ -132,12 +150,14 @@ export default defineComponent({
       isClosed,
       isLoading,
       callClose,
-      download,
+      installActionHandlerWrapper,
+      downloadRelease,
       author,
       releases,
       latestRelease,
       latestReleaseVersion,
-      latestReleaseDate
+      latestReleaseDate,
+      buttonConfig
     };
   }
 });

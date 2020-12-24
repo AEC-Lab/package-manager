@@ -45,6 +45,7 @@ export default class Login extends Vue {
       await this.$store.dispatch("auth/onAuthStateChangedAction", user);
       if (user) {
         _unsubscribe();
+        await this.$store.dispatch("config/loadLocalConfig");
         this.$router.push("browse");
       }
     });

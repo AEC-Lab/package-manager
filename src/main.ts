@@ -13,7 +13,7 @@ Vue.use(snackbarPlugin, { store });
 
 Vue.config.productionTip = false;
 
-new Vue({
+export default new Vue({
   router,
   store,
   vuetify,
