@@ -4,12 +4,14 @@
       <v-col cols="12">
         <v-text-field label="Name" v-model="name"></v-text-field>
         <v-textarea label="Description" v-model="description" rows="3"></v-textarea>
-        <v-text-field label="Author" disabled filled placeholder="Voyansi"></v-text-field>
-        <v-text-field label="Source" disabled filled placeholder="GitHub"></v-text-field>
-        <div class="caption">Releases available</div>
-        <v-radio-group v-model="releaseSetting" mandatory>
-          <v-radio v-for="setting in releaseSettings" :key="setting.value" :label="setting.label"></v-radio>
-        </v-radio-group>
+        <v-select
+          label="Author"
+          v-model="selectedAuthor"
+          :items="authors"
+          item-text="name"
+          item-value="id"
+        ></v-select>
+        <v-text-field label="Source URL" v-model="url" hint="Link to package download"> </v-text-field>
         <v-combobox
           v-model="tags"
           :items="existingTags"
@@ -49,6 +51,7 @@
           clear-icon="mdi-close"
           clearable
           label="Add an image URL"
+          hint="The first image will be used as the thumbnail in the browse listing"
           @click:append-outer="addImage"
           @click:clear="clearImageInput"
         ></v-text-field>
@@ -60,9 +63,8 @@
             </div>
           </div>
         </v-row>
-        <v-switch v-model="active" label="Active"></v-switch>
         <v-btn class="mr-4" @click="() => $router.push('/admin')">Cancel</v-btn>
-        <v-btn @click="save" color="primary">Save</v-btn>
+        <v-btn @click="save" color="primary">Create</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -72,17 +74,19 @@
 import { Component, Vue } from "vue-property-decorator";
 
 @Component
-export default class PackageEdit extends Vue {
-  name = "package-name-one";
+export default class PackageCreate extends Vue {
+  name = "";
   description = "";
 
-  releaseSetting = "";
-  releaseSettings = [
-    { label: "Latest and pre-release only", value: "LATEST_AND_PRERELEASE" },
-    { label: "All", value: "ALL" }
+  selectedAuthor: any = null;
+  authors = [
+    { name: "Voyansi", id: "abcd1234" },
+    { name: "Mark Pothier", id: "qwerty98765" }
   ];
 
-  tags = ["Dynamo", "Revit", "Space Planning", "Generative Design"];
+  url = "";
+
+  tags = [];
   existingTags = [
     "Dynamo",
     "Revit",
@@ -94,12 +98,8 @@ export default class PackageEdit extends Vue {
   ];
   tagSearch: string | null = null;
 
-  active = true;
-
   imageInput = "";
-  images: string[] = [
-    "https://base.imgix.net/files/base/ebm/industryweek/image/2019/04/industryweek_34767_gen_design_czgur.png?auto=format&fit=max&w=1200"
-  ];
+  images: string[] = [];
 
   // METHODS
   removeTag(item: string) {

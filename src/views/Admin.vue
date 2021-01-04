@@ -32,7 +32,14 @@
               </tr>
             </template>
           </v-data-table>
-          <v-btn outlined @click="() => {}">
+          <v-btn
+            outlined
+            @click="
+              () => {
+                $router.push('/packages/create');
+              }
+            "
+          >
             <v-icon left>mdi-plus-thick</v-icon>
             Create Package
           </v-btn>
@@ -65,7 +72,14 @@
                 </td>
                 <td>{{ item.packageCount }}</td>
                 <td>
-                  <v-icon @click="() => {}">mdi-pencil</v-icon>
+                  <v-icon
+                    @click="
+                      () => {
+                        $router.push('/authors/abcd1234/edit');
+                      }
+                    "
+                    >mdi-pencil</v-icon
+                  >
                 </td>
               </tr>
             </template>
