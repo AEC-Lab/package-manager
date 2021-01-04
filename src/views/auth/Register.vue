@@ -30,7 +30,7 @@
               />
             </v-form>
             <v-card-actions>
-              <v-btn @submit="register" @click="register" color="teal darken-1" dark>
+              <v-btn @submit="register" @click="register" color="teal darken-1" dark :loading="processing">
                 Register
               </v-btn>
               <v-spacer />
@@ -44,14 +44,6 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-snackbar v-model="snackbar">
-      {{ snackbarText }}
-      <template v-slot:action="{ attrs }">
-        <v-btn color="red" text v-bind="attrs" @click="snackbar = false">
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -61,6 +53,7 @@ import { RegisterCredentials } from "../../../types/auth";
 
 @Component
 export default class Register extends Vue {
+  // DATA PROPERTIES
   user: RegisterCredentials = {
     email: "",
     name: "",
@@ -69,8 +62,8 @@ export default class Register extends Vue {
   };
 
   isFormValid = false;
-  snackbar = false;
-  snackbarText = "";
+
+  processing = false;
 
   emailRules = [
     (v: string) => !!v || "Field is required",
@@ -79,19 +72,30 @@ export default class Register extends Vue {
   passwordRules = [(v: string) => !!v || "Field is required"];
   passwordConfirmationRules = [(v: string) => v === this.user.password || "Passwords do not match"];
 
+  // METHODS
   async register() {
     const isValid = (this.$refs.form as Vue & {
       validate: () => boolean;
     }).validate();
     if (!isValid) return;
     try {
+      this.processing = true;
       await this.$store.dispatch("auth/registerWithEmailAndPassword", this.user);
+      const loggedOut = await this.$store.dispatch("auth/logout");
+      if (loggedOut) {
+        this.$router.push("login");
+        this.$snackbar.flash({
+          content: "A verification link has been sent to your email.",
+          color: "success"
+        });
+      }
     } catch (error) {
-      this.snackbarText = error;
-      this.snackbar = true;
+      this.$snackbar.flash({ content: error, color: "error" });
+      this.processing = false;
       console.log(error);
     }
   }
+
   isValidEmail(email: string) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
     return re.test(email);

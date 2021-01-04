@@ -1,6 +1,7 @@
 "use strict";
 
-import { app, protocol, BrowserWindow } from "electron";
+import electron, { app, protocol, BrowserWindow, shell } from "electron";
+import { download } from "electron-dl";
 import { autoUpdater } from "electron-updater";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
@@ -15,10 +16,22 @@ import destroyer from "server-destroy";
 import { google } from "googleapis";
 import { ipcMain } from "electron";
 import fetch from "node-fetch";
+import fs from "fs";
+import { PackageConfigFile } from "types/config";
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null;
+
+// function to return environment variables on the system
+ipcMain.on("get-process-env-variable", (event, variable) => {
+  event.sender.send("environment-variable-found", process.env[variable]);
+});
+
+// return config file path
+ipcMain.on("get-config-path", event => {
+  event.sender.send("config-path-found", getConfigFilePath());
+});
 
 // messaging system for autoUpdater to render process
 ipcMain.on("check-for-updates", event => {
@@ -135,6 +148,33 @@ ipcMain.on("authenticate", (event, provider, client) => {
   }
 });
 
+// Handle downloads for private repo assets
+ipcMain.on("download-private-asset", async (event, info) => {
+  try {
+    const response = await fetch(info.url, {
+      headers: {
+        Accept: "application/octet-stream",
+        Authorization: `Bearer ${info.token}`
+      },
+      redirect: "manual" // prevents automatic redirect with returns 400 response
+    });
+    const redirectUrl = response.headers.get("location"); // URL it would otherwise redirect to (AWS S3 bucket)
+    if (response.status === 302 && redirectUrl) {
+      // Download asset with fully-authenticated download url (NO auth headers to add)
+      const dl = await download(win!, redirectUrl, info.properties);
+      win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
+    } else {
+      win!.webContents.send(
+        `download-failure-${info.assetId}`,
+        `Response status ${response.status} handler not implemented`
+      );
+    }
+  } catch (err) {
+    console.log(err);
+    win!.webContents.send("download-failure", err);
+  }
+});
+
 function _getGithubAuthorizeUrl(params: any) {
   const url = new URL("https://github.com/login/oauth/authorize");
   for (const p in params) {
@@ -189,6 +229,34 @@ function createWindow() {
   win.on("closed", () => {
     win = null;
   });
+
+  win.webContents.on("new-window", (e, url) => {
+    e.preventDefault();
+    shell.openExternal(url);
+  });
+}
+
+function getConfigFilePath() {
+  const configDir = (electron.app || electron.remote.app).getPath("userData");
+  return `${configDir}\\packages-config.json`;
+}
+
+function checkConfigFile() {
+  // Check packages.config file
+  const configPath = getConfigFilePath();
+  const appVersion = (electron.app || electron.remote.app).getVersion().replace("v", "");
+  if (fs.existsSync(configPath)) {
+    const configObj: PackageConfigFile = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    // Update version if necessary
+    if (appVersion !== configObj.version) {
+      configObj.version = appVersion;
+      fs.writeFileSync(configPath, JSON.stringify(configObj));
+    }
+  } else {
+    // Create new file
+    const newConfigObj: PackageConfigFile = { version: appVersion, packages: [] };
+    fs.writeFileSync(configPath, JSON.stringify(newConfigObj));
+  }
 }
 
 // Quit when all windows are closed.
@@ -204,6 +272,7 @@ app.on("activate", () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (win === null) {
+    checkConfigFile();
     createWindow();
   }
 });
@@ -220,6 +289,7 @@ app.on("ready", async () => {
       console.error("Vue Devtools failed to install:", e.toString());
     }
   }
+  checkConfigFile();
   createWindow();
 });
 

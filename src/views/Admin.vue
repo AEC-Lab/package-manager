@@ -1,29 +1,27 @@
 <template>
-  <v-container id="container">Admin</v-container>
+  <v-container id="container">
+    <v-btn @click="test" :loading="loading">Test Button</v-btn>
+  </v-container>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from "@vue/composition-api";
+import { Component, Vue } from "vue-property-decorator";
 
-export default defineComponent({
-  setup(props, context) {
-    const test = ref("test");
-    const $store = context.root.$store;
+@Component
+export default class Admin extends Vue {
+  // DATA PROPERTIES
+  loading = false;
 
-    const repositories = computed(() => {
-      return $store.state.repositories;
-    });
-
-    return {
-      test,
-      repositories
-    };
+  async test() {
+    this.loading = true;
+    await this.$store.dispatch("github/init");
+    this.loading = false;
   }
-});
+}
 </script>
-<style lang="scss">
+
+<style lang="scss" scoped>
 #container {
-  background-color: rgb(224, 224, 224);
-  height: 100vh;
+  margin-left: 55px;
 }
 </style>

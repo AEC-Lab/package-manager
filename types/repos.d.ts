@@ -5,4 +5,5 @@ export interface Repository {
   node_id: string;
   private: boolean;
   users: string[];
+  installation?: string;
 }

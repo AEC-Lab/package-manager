@@ -6,8 +6,10 @@ import { fireAuth } from "../integrations/firebase";
 import Browse from "../views/Browse.vue";
 import Settings from "../views/Settings.vue";
 import Admin from "../views/Admin.vue";
+import Developer from "../views/Developer.vue";
 import Login from "../views/auth/Login.vue";
 import Register from "../views/auth/Register.vue";
+import LoginManagement from "../views/auth/LoginManagement.vue";
 
 Vue.use(VueRouter);
 
@@ -22,7 +24,7 @@ const routes: Array<RouteConfig> = [
   },
   {
     path: "/settings",
-    name: "Setting",
+    name: "Settings",
     component: Settings,
     meta: {
       requiresAuth: true
@@ -37,6 +39,14 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
+    path: "/developer",
+    name: "Developer",
+    component: Developer,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: "/login",
     name: "Login",
     component: Login
@@ -45,6 +55,11 @@ const routes: Array<RouteConfig> = [
     path: "/register",
     name: "Register",
     component: Register
+  },
+  {
+    path: "/loginManagement",
+    name: "LoginManagement",
+    component: LoginManagement
   }
 ];
 
@@ -53,19 +68,10 @@ const router = new VueRouter({
   routes
 });
 
-const getCurrentUser = () => {
-  return new Promise((resolve, reject) => {
-    const unsubscribe = fireAuth.onAuthStateChanged(user => {
-      unsubscribe();
-      resolve(user);
-    }, reject);
-  });
-};
-
 // TODO might not be necessary given you can't visit paths directly
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  if (requiresAuth && !(await getCurrentUser())) {
+  if (requiresAuth && !fireAuth.currentUser) {
     next("/login");
   } else {
     next();
