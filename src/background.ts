@@ -1,6 +1,6 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, shell } from "electron";
+import electron, { app, protocol, BrowserWindow, shell } from "electron";
 import { download } from "electron-dl";
 import { autoUpdater } from "electron-updater";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
@@ -16,6 +16,8 @@ import destroyer from "server-destroy";
 import { google } from "googleapis";
 import { ipcMain } from "electron";
 import fetch from "node-fetch";
+import fs from "fs";
+import { PackageConfigFile } from "types/config";
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -24,6 +26,11 @@ let win: BrowserWindow | null;
 // function to return environment variables on the system
 ipcMain.on("get-process-env-variable", (event, variable) => {
   event.sender.send("environment-variable-found", process.env[variable]);
+});
+
+// return config file path
+ipcMain.on("get-config-path", event => {
+  event.sender.send("config-path-found", getConfigFilePath());
 });
 
 // messaging system for autoUpdater to render process
@@ -229,6 +236,29 @@ function createWindow() {
   });
 }
 
+function getConfigFilePath() {
+  const configDir = (electron.app || electron.remote.app).getPath("userData");
+  return `${configDir}\\packages-config.json`;
+}
+
+function checkConfigFile() {
+  // Check packages.config file
+  const configPath = getConfigFilePath();
+  const appVersion = (electron.app || electron.remote.app).getVersion().replace("v", "");
+  if (fs.existsSync(configPath)) {
+    const configObj: PackageConfigFile = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    // Update version if necessary
+    if (appVersion !== configObj.version) {
+      configObj.version = appVersion;
+      fs.writeFileSync(configPath, JSON.stringify(configObj));
+    }
+  } else {
+    // Create new file
+    const newConfigObj: PackageConfigFile = { version: appVersion, packages: [] };
+    fs.writeFileSync(configPath, JSON.stringify(newConfigObj));
+  }
+}
+
 // Quit when all windows are closed.
 app.on("window-all-closed", () => {
   // On macOS it is common for applications and their menu bar
@@ -242,6 +272,7 @@ app.on("activate", () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (win === null) {
+    checkConfigFile();
     createWindow();
   }
 });
@@ -258,6 +289,7 @@ app.on("ready", async () => {
       console.error("Vue Devtools failed to install:", e.toString());
     }
   }
+  checkConfigFile();
   createWindow();
 });
 

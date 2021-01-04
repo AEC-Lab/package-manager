@@ -2,7 +2,7 @@
   <div>
     <div v-for="repo in repos" :key="repo.id">
       <div class="card" @click="showDetails(repo)">
-        <Card :name="repo.name"></Card>
+        <Card :repo="repo"></Card>
       </div>
     </div>
   </div>

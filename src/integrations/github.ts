@@ -92,18 +92,21 @@ GitHub.getAsset = async (repository: Repository, assetId: string, directoryPath:
   const ownerName = helpers.ownerName(repository);
   const url = `https://api.github.com/repos/${ownerName}/releases/assets/${assetId}`;
   console.log(`Downloading asset ${assetId}...`);
-  ipcRenderer.send("download-private-asset", {
-    url: url,
-    token: token,
-    assetId,
-    properties: { directory: directoryPath }
-  });
-  ipcRenderer.on(`download-success-${assetId}`, (event, savePath) => {
-    console.log(`File downloaded to ${savePath}`);
-    return savePath;
-  });
-  ipcRenderer.on(`download-failure-${assetId}`, (event, error) => {
-    console.log(error);
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("download-private-asset", {
+      url: url,
+      token: token,
+      assetId,
+      properties: { directory: directoryPath }
+    });
+    ipcRenderer.on(`download-success-${assetId}`, (event, savePath) => {
+      console.log(`File downloaded to ${savePath}`);
+      resolve(savePath);
+    });
+    ipcRenderer.on(`download-failure-${assetId}`, (event, error) => {
+      console.log(error);
+      reject(error);
+    });
   });
 };
 
