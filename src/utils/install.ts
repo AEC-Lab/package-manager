@@ -1,8 +1,9 @@
 import store from "../store";
 import { PackageConfigLocal } from "../../types/config";
-import { ButtonConfigs, ButtonActions } from "../../types/enums";
+import { ButtonConfigEnum, ButtonActions } from "../../types/enums";
 import { GenericObject } from "types/github";
 import { Repository } from "types/repos";
+import Vue from "../main";
 
 export const getButtonConfig = (packageId: number) => {
   const existingInstall: PackageConfigLocal | undefined = store.state.config.localConfig.packages.find(
@@ -47,4 +48,53 @@ export const installPackage = async (repository: Repository, release?: GenericOb
 export const uninstallPackage = async (repository: Repository) => {
   // TODO: ADD UNINSTALL FUNCTIONALITY HERE (reference .package file to take proper action (e.g. delete files/folders, run uninstall.exe, etc.))
   await store.dispatch("config/removePackage", repository.id);
+};
+
+export const ButtonConfigs: ButtonConfigEnum = {
+  INSTALL: {
+    text: "Install",
+    color: "primary",
+    handler: async (event: Event, repo: Repository) => {
+      event.stopPropagation();
+      try {
+        await installPackage(repo);
+        Vue.$snackbar.flash({ content: `Successfully installed ${repo.name}`, color: "success" });
+      } catch (error) {
+        Vue.$snackbar.flash({ content: `Error downloading ${repo.name} - ${error}`, color: "danger" });
+      }
+    }
+  },
+  UNINSTALL: {
+    text: "Uninstall",
+    color: "success",
+    handler: async (event: Event, repo: Repository) => {
+      event.stopPropagation();
+      try {
+        await uninstallPackage(repo);
+        Vue.$snackbar.flash({ content: `Successfully uninstalled ${repo.name}`, color: "success" });
+      } catch (error) {
+        Vue.$snackbar.flash({ content: `Error uninstalling ${repo.name} - ${error}`, color: "danger" });
+      }
+    }
+  },
+  UPDATE: {
+    text: "Update",
+    color: "warning",
+    handler: async (event: Event, repo: Repository) => {
+      event.stopPropagation();
+      try {
+        await installPackage(repo);
+        Vue.$snackbar.flash({ content: `Successfully updated ${repo.name}`, color: "success" });
+      } catch (error) {
+        Vue.$snackbar.flash({ content: `Error updating ${repo.name} - ${error}`, color: "danger" });
+      }
+    }
+  },
+  DISABLED: {
+    text: "Disabled",
+    color: "grey",
+    handler: (event: Event) => {
+      event.stopPropagation();
+    }
+  }
 };
