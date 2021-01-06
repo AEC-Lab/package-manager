@@ -7,6 +7,7 @@ import axios from "axios";
 
 import { db } from "../config/fbConfig";
 import { GithubRepository, Package } from "../../../types/package";
+import { Author } from "../../../types/author";
 import { PackageReleaseSetting, PackageSource, PackageStatus, PackageVisibility } from "../../../types/enums";
 import { GenericObject } from "../types";
 
@@ -55,8 +56,10 @@ export const processGithubAppAction = async (request: Request, response: any) =>
     // add release to database for client trigger to look for updates
     promises.push(_addOrUpdateReleaseDoc(event));
   } else if (eventHeader === "installation") {
-    // add each repository to database
     if (action === "created") {
+      // create new 'author' doc in Firestore first, corresponding to the organization installed on
+      await _createAuthor(event);
+      // add each repository to database
       _.forEach(event.repositories, (repo: any) => {
         promises.push(_createPackage(repo, event));
       });
@@ -65,6 +68,8 @@ export const processGithubAppAction = async (request: Request, response: any) =>
       _.forEach(event.repositories, (repo: any) => {
         promises.push(_removePackage(repo));
       });
+      // remove 'author' doc from Firestore
+      promises.push(_removeAuthor(event));
     }
   } else {
     // otherwise store event for debugging
@@ -80,13 +85,54 @@ export const processGithubAppAction = async (request: Request, response: any) =>
 };
 
 // PRIVATE FUNCTIONS
+async function _createAuthor(event: any) {
+  const newAuthorDoc = db.collection("authors").doc();
+  const authorObject: Author = {
+    id: newAuthorDoc.id,
+    name: event.installation.account.login,
+    description: "",
+    thumbnailUrl: "",
+    sourceConfig: {
+      github: {
+        id: event.installation.account.id,
+        installed: true,
+        name: event.installation.account.login,
+        admins: []
+      }
+    }
+  };
+  await newAuthorDoc.set(authorObject);
+  return newAuthorDoc.id;
+}
+
+async function _removeAuthor(event: any) {
+  const authorDocQuery = await db
+    .collection("authors")
+    .where("sourceConfig.github.id", "==", event.installation.account.id)
+    .get();
+  if (authorDocQuery.empty) return;
+  const authorDoc = authorDocQuery.docs[0];
+
+  // return await authorDoc.ref.update({ "sourceConfig.github.installed": false })
+  // In the future, when a Github app is uninstalled, we may want to update the author doc instead of deleting it completely;
+  // e.g. if an author has multiple sources (Github, Azure, URL, etc.), we would want to leave it in place for those other sources
+
+  return await authorDoc.ref.delete();
+}
+
 async function _createPackage(repo: any, event: any) {
   const newPackageDocRef = db.collection("packages").doc();
   const existingReleases = await _getRepoReleases(repo, event);
   const releaseDocIds = await _createReleaseDocs(existingReleases);
+  const authorDocQuery = await db
+    .collection("authors")
+    .where("sourceConfig.github.id", "==", event.installation.account.id)
+    .get();
+  const authorId = authorDocQuery.empty ? "" : authorDocQuery.docs[0].id;
 
   const githubRepoData: GithubRepository = {
     ownerId: event.installation.account.id,
+    installationId: event.installation.id,
     releases: releaseDocIds,
     releaseSetting: PackageReleaseSetting.LatestAndPrerelease,
     ...repo
@@ -102,19 +148,22 @@ async function _createPackage(repo: any, event: any) {
     visibility: repo.private ? PackageVisibility.Private : PackageVisibility.Public,
     source: PackageSource.Github,
     sourceData: githubRepoData,
-    authorId: "" // TODO: find authorId from existing authors collection by matching github repo ownerId
+    authorId: authorId
   };
 
-  repo.users = ["user"];
-  repo.source = "github";
-  const newRepoDoc = db
-    .collection("repositories")
-    .doc(repo.id.toString())
-    .set(repo);
+  // TO DELETE >>> //
+  // repo.users = ["user"];
+  // repo.source = "github";
+  // const newRepoDoc = db
+  //   .collection("repositories")
+  //   .doc(repo.id.toString())
+  //   .set(repo);
+  // <<< TO DELETE //
 
   const newPackageDocPromise = newPackageDocRef.set(newPackage);
 
-  return Promise.all([newPackageDocPromise, newRepoDoc]);
+  // return Promise.all([newPackageDocPromise, newRepoDoc]);
+  return newPackageDocPromise;
 }
 
 async function _removePackage(repo: any) {

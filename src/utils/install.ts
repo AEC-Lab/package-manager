@@ -2,14 +2,14 @@ import store from "../store";
 import { PackageConfigLocal } from "../../types/config";
 import { ButtonConfigEnum, ButtonActions } from "../../types/enums";
 import { GenericObject } from "types/github";
-import { Repository } from "types/repos";
 import Vue from "../main";
+import { Package } from "types/package";
 
-export const getButtonConfig = (packageId: number) => {
+export const getButtonConfig = (pkg: Package) => {
   const existingInstall: PackageConfigLocal | undefined = store.state.config.localConfig.packages.find(
-    (obj: PackageConfigLocal) => obj.packageId === packageId
+    (obj: PackageConfigLocal) => obj.packageId === pkg.id
   );
-  const latestRelease = store.getters["github/getLatestRelease"](packageId);
+  const latestRelease = store.getters["github/getLatestRelease"](pkg);
   if (!latestRelease) return ButtonConfigs[ButtonActions.DISABLED]; // In reality there should be no packages without releases
   if (existingInstall) {
     if (existingInstall.releaseId === latestRelease.id) {
@@ -18,13 +18,13 @@ export const getButtonConfig = (packageId: number) => {
   } else return ButtonConfigs[ButtonActions.INSTALL];
 };
 
-export const installPackage = async (repository: Repository, release?: GenericObject) => {
+export const installPackage = async (pkg: Package, release?: GenericObject) => {
   let releasePackage: GenericObject;
   if (!release) {
-    releasePackage = await store.getters["github/getLatestRelease"](repository.id);
+    releasePackage = await store.getters["github/getLatestRelease"](pkg);
   } else releasePackage = release;
   if (!releasePackage) {
-    throw new Error("No release found for this repository");
+    throw new Error("No release found for this package");
   }
   const { assets } = releasePackage;
   await Promise.all(
@@ -33,60 +33,60 @@ export const installPackage = async (repository: Repository, release?: GenericOb
         assetId: asset.id,
         releaseId: releasePackage.id,
         assetName: asset.name,
-        repository: repository
+        repository: pkg.sourceData
       };
       return await store.dispatch("github/getAsset", payload);
     })
   );
   // TODO: ADD INSTALL FUNCTIONALITY HERE (reference .package file for instructions) //
   await store.dispatch("config/addOrUpdatePackage", {
-    packageId: repository.id,
+    packageId: pkg.id,
     releaseId: releasePackage.id
   });
 };
 
-export const uninstallPackage = async (repository: Repository) => {
+export const uninstallPackage = async (pkg: Package) => {
   // TODO: ADD UNINSTALL FUNCTIONALITY HERE (reference .package file to take proper action (e.g. delete files/folders, run uninstall.exe, etc.))
-  await store.dispatch("config/removePackage", repository.id);
+  await store.dispatch("config/removePackage", pkg.id);
 };
 
 export const ButtonConfigs: ButtonConfigEnum = {
   INSTALL: {
     text: "Install",
     color: "primary",
-    handler: async (event: Event, repo: Repository) => {
+    handler: async (event: Event, pkg: Package) => {
       event.stopPropagation();
       try {
-        await installPackage(repo);
-        Vue.$snackbar.flash({ content: `Successfully installed ${repo.name}`, color: "success" });
+        await installPackage(pkg);
+        Vue.$snackbar.flash({ content: `Successfully installed ${pkg.name}`, color: "success" });
       } catch (error) {
-        Vue.$snackbar.flash({ content: `Error downloading ${repo.name} - ${error}`, color: "danger" });
+        Vue.$snackbar.flash({ content: `Error downloading ${pkg.name} - ${error}`, color: "danger" });
       }
     }
   },
   UNINSTALL: {
     text: "Uninstall",
     color: "success",
-    handler: async (event: Event, repo: Repository) => {
+    handler: async (event: Event, pkg: Package) => {
       event.stopPropagation();
       try {
-        await uninstallPackage(repo);
-        Vue.$snackbar.flash({ content: `Successfully uninstalled ${repo.name}`, color: "success" });
+        await uninstallPackage(pkg);
+        Vue.$snackbar.flash({ content: `Successfully uninstalled ${pkg.name}`, color: "success" });
       } catch (error) {
-        Vue.$snackbar.flash({ content: `Error uninstalling ${repo.name} - ${error}`, color: "danger" });
+        Vue.$snackbar.flash({ content: `Error uninstalling ${pkg.name} - ${error}`, color: "danger" });
       }
     }
   },
   UPDATE: {
     text: "Update",
     color: "warning",
-    handler: async (event: Event, repo: Repository) => {
+    handler: async (event: Event, pkg: Package) => {
       event.stopPropagation();
       try {
-        await installPackage(repo);
-        Vue.$snackbar.flash({ content: `Successfully updated ${repo.name}`, color: "success" });
+        await installPackage(pkg);
+        Vue.$snackbar.flash({ content: `Successfully updated ${pkg.name}`, color: "success" });
       } catch (error) {
-        Vue.$snackbar.flash({ content: `Error updating ${repo.name} - ${error}`, color: "danger" });
+        Vue.$snackbar.flash({ content: `Error updating ${pkg.name} - ${error}`, color: "danger" });
       }
     }
   },

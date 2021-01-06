@@ -1,6 +1,8 @@
 export interface Author {
   id: string;
   name: string;
+  description: string;
+  thumbnailUrl: string;
   sourceConfig: AuthorSourceConfig;
 }
 
@@ -12,6 +14,6 @@ interface AuthorSourceConfig {
 interface GithubOrgConfig {
   id: number;
   name: string;
+  installed: boolean;
   admins: number[];
-  private: boolean;
 }

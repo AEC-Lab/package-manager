@@ -20,6 +20,7 @@ export interface GithubRepository {
   private: boolean;
   node_id: string;
   ownerId: number;
+  installationId: number;
   releases: string[];
   releaseSetting: PackageReleaseSetting;
 }

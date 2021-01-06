@@ -1,6 +1,6 @@
 <template>
   <v-container id="container">
-    <v-expansion-panels multiple v-model="panels">
+    <v-expansion-panels v-model="panels">
       <v-expansion-panel>
         <v-expansion-panel-header>
           <span class="title font-weight-bold">Packages</span>
@@ -16,14 +16,14 @@
             <template v-slot:item="{ item }">
               <tr>
                 <td>{{ item.name }}</td>
-                <td>{{ item.author }}</td>
-                <td>{{ item.source }}</td>
-                <td>{{ item.status }}</td>
+                <td>{{ $store.getters["authors/getAuthorNameById"](item.authorId) }}</td>
+                <td>{{ Object.keys(PackageSource).find(key => PackageSource[key] === item.source) }}</td>
+                <td>{{ Object.keys(PackageStatus).find(key => PackageStatus[key] === item.status) }}</td>
                 <td>
                   <v-icon
                     @click="
                       () => {
-                        $router.push('/packages/12345/edit');
+                        $router.push(`/packages/${item.id}/edit`);
                       }
                     "
                     >mdi-pencil</v-icon
@@ -67,15 +67,15 @@
                 <td>{{ item.name }}</td>
                 <td>
                   <v-chip-group>
-                    <v-chip v-for="source in item.sources" :key="source">{{ source }}</v-chip>
+                    <v-chip v-for="source in authorSources(item)" :key="source">{{ source }}</v-chip>
                   </v-chip-group>
                 </td>
-                <td>{{ item.packageCount }}</td>
+                <td>{{ authorPackageCount(item) }}</td>
                 <td>
                   <v-icon
                     @click="
                       () => {
-                        $router.push('/authors/abcd1234/edit');
+                        $router.push(`/authors/${item.id}/edit`);
                       }
                     "
                     >mdi-pencil</v-icon
@@ -121,11 +121,17 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import { PackageStatus, PackageSource } from "../../types/enums";
+import { Author } from "../../types/author";
+import { Package } from "../../types/package";
 
 @Component
 export default class Admin extends Vue {
   // DATA PROPERTIES
-  panels = [0];
+  PackageStatus = PackageStatus;
+  PackageSource = PackageSource;
+
+  panels = 0;
 
   headersPackages = [
     { text: "Name", value: "name" },
@@ -149,17 +155,10 @@ export default class Admin extends Vue {
     { text: "", value: "edit" }
   ];
 
-  packages = [
-    { name: "pkg-name-one", id: 1, author: "Voyansi", source: "GitHub", status: "Active" },
-    { name: "pkg-name-two", id: 2, author: "Voyansi", source: "GitHub", status: "Inactive" },
-    { name: "pkg-name-three", id: 3, author: "Mark Pothier", source: "GitHub", status: "Inactive" },
-    { name: "pkg-name-four", id: 4, author: "Mark Pothier", source: "URL", status: "Active" }
-  ];
-
-  authors = [
-    { name: "Voyansi", id: 1, sources: ["GitHub"], packageCount: 14 },
-    { name: "John Smith (me)", id: 2, sources: ["GitHub", "URL"], packageCount: 3 }
-  ];
+  // authors = [
+  //   { name: "Voyansi", id: 1, sources: ["GitHub"], packageCount: 14 },
+  //   { name: "John Smith (me)", id: 2, sources: ["GitHub", "URL"], packageCount: 3 }
+  // ];
 
   enterprises = [
     { name: "Salesforce", id: 1, memberCount: 257, packageCount: 6 },
@@ -167,6 +166,31 @@ export default class Admin extends Vue {
     { name: "Google", id: 3, memberCount: 1182, packageCount: 23 },
     { name: "Amazon", id: 4, memberCount: 430, packageCount: 8 }
   ];
+
+  // COMPUTED PROPERTIES
+  get packages(): Package[] {
+    return this.$store.state.packages.packages;
+  }
+
+  get authors() {
+    return this.$store.state.authors.authors;
+  }
+
+  // METHOD
+  authorSources(author: Author) {
+    const sources: string[] = [];
+    if (author.sourceConfig.github) {
+      sources.push(
+        "Github"
+        // Object.keys(PackageSource).find((key: string) => (PackageSource as any)[key] === PackageSource.Github)
+      );
+    }
+    return sources;
+  }
+
+  authorPackageCount(author: Author) {
+    return this.$store.state.packages.packages.filter((pkg: Package) => pkg.authorId === author.id).length;
+  }
 }
 </script>
 

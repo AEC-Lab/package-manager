@@ -2,16 +2,26 @@
   <v-container id="container">
     <v-row>
       <v-col cols="12">
-        <v-text-field label="Name" v-model="name"></v-text-field>
-        <v-textarea label="Description" v-model="description" rows="3"></v-textarea>
-        <v-text-field label="Author" disabled filled placeholder="Voyansi"></v-text-field>
-        <v-text-field label="Source" disabled filled placeholder="GitHub"></v-text-field>
+        <v-text-field label="Name" v-model="packageTemp.name"></v-text-field>
+        <v-textarea label="Description" v-model="packageTemp.description" rows="3"></v-textarea>
+        <v-text-field
+          label="Author"
+          disabled
+          filled
+          :placeholder="$store.getters['authors/getAuthorNameById'](packageTemp.authorId)"
+        ></v-text-field>
+        <v-text-field label="Source" disabled filled :placeholder="displaySource"></v-text-field>
         <div class="caption">Releases available</div>
-        <v-radio-group v-model="releaseSetting" mandatory>
-          <v-radio v-for="setting in releaseSettings" :key="setting.value" :label="setting.label"></v-radio>
+        <v-radio-group v-model="packageTemp.sourceData.releaseSetting" mandatory>
+          <v-radio
+            v-for="setting in releaseSettings"
+            :key="setting.value"
+            :label="setting.label"
+            :value="setting.value"
+          ></v-radio>
         </v-radio-group>
         <v-combobox
-          v-model="tags"
+          v-model="packageTemp.tags"
           :items="existingTags"
           :search-input.sync="tagSearch"
           hide-selected
@@ -54,14 +64,19 @@
           @click:clear="clearImageInput"
         ></v-text-field>
         <v-row class="" justify="start">
-          <div v-for="(image, index) in images" :key="image" class="mr-4">
+          <div v-for="(image, index) in packageTemp.images" :key="image" class="mr-4">
             <v-icon @click="removeImage(index)">mdi-close</v-icon>
             <div class="img-wrapper">
               <img :src="image" alt="" />
             </div>
           </div>
         </v-row>
-        <v-switch v-model="active" label="Active"></v-switch>
+        <v-switch
+          v-model="packageTemp.status"
+          :label="displayStatus"
+          :true-value="PackageStatus.Active"
+          :false-value="PackageStatus.Inactive"
+        ></v-switch>
         <v-btn class="mr-4" @click="() => $router.push('/admin')">Cancel</v-btn>
         <v-btn @click="save" color="primary">Save</v-btn>
       </v-col>
@@ -71,19 +86,19 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import _ from "lodash";
+import { GithubRepository, Package } from "../../../types/package";
+import { PackageStatus, PackageVisibility, PackageReleaseSetting, PackageSource } from "../../../types/enums";
 
 @Component
 export default class PackageEdit extends Vue {
-  name = "package-name-one";
-  description = "";
+  PackageStatus = PackageStatus;
+  PackageSource = PackageSource;
 
-  releaseSetting = "";
   releaseSettings = [
-    { label: "Latest and pre-release only", value: "LATEST_AND_PRERELEASE" },
-    { label: "All", value: "ALL" }
+    { label: "Latest and pre-release only", value: PackageReleaseSetting.LatestAndPrerelease },
+    { label: "All", value: PackageReleaseSetting.All }
   ];
-
-  tags = ["Dynamo", "Revit", "Space Planning", "Generative Design"];
   existingTags = [
     "Dynamo",
     "Revit",
@@ -94,21 +109,50 @@ export default class PackageEdit extends Vue {
     "Drawing Management"
   ];
   tagSearch: string | null = null;
-
-  active = true;
-
   imageInput = "";
-  images: string[] = [
-    "https://base.imgix.net/files/base/ebm/industryweek/image/2019/04/industryweek_34767_gen_design_czgur.png?auto=format&fit=max&w=1200"
-  ];
+
+  packageTemp: Package = this.defaultPackageData();
+
+  // COMPUTED PROPERTIES
+  get displaySource() {
+    const srcData = this.packageTemp.sourceData as GithubRepository;
+    const url = `https://github.com/${srcData.full_name}`;
+    return (
+      Object.keys(PackageSource).find(
+        (key: string) => (PackageSource as any)[key] === this.packageTemp.source
+      ) +
+      "        " +
+      url
+    );
+  }
+  get displayStatus() {
+    return Object.keys(PackageStatus).find(
+      (key: string) => (PackageStatus as any)[key] === this.packageTemp.status
+    );
+  }
 
   // METHODS
+  defaultPackageData(): Package {
+    return {
+      id: "",
+      name: "",
+      description: "",
+      tags: [],
+      authorId: "",
+      images: [],
+      status: PackageStatus.Inactive,
+      visibility: PackageVisibility.Private,
+      source: PackageSource.Github,
+      sourceData: {}
+    };
+  }
+
   removeTag(item: string) {
-    this.tags = this.tags.filter(tag => tag !== item);
+    this.packageTemp.tags = this.packageTemp.tags.filter(tag => tag !== item);
   }
 
   addImage() {
-    this.images.push(this.imageInput);
+    this.packageTemp.images.push(this.imageInput);
     this.imageInput = "";
   }
 
@@ -117,13 +161,24 @@ export default class PackageEdit extends Vue {
   }
 
   removeImage(index: number) {
-    this.images.splice(index, 1);
-    // this.images = this.images.filter(image => image !== url);
+    this.packageTemp.images.splice(index, 1);
   }
 
-  save() {
-    // TODO: update data in Firestore...
-    this.$router.push("/admin");
+  async save() {
+    try {
+      await this.$store.dispatch("packages/updatePackageData", this.packageTemp);
+      this.$router.push("/admin");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // LIFECYCLE HOOKS
+  mounted() {
+    const packageRef: Package = this.$store.state.packages.packages.find(
+      (pkg: Package) => pkg.id === this.$route.params.packageId
+    );
+    this.packageTemp = _.cloneDeep(packageRef);
   }
 }
 </script>
