@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div v-for="repo in repos" :key="repo.id">
-      <div class="card" @click="showDetails(repo)">
-        <Card :repo="repo"></Card>
+    <div v-for="pkg in packages" :key="pkg.id">
+      <div class="card" @click="showDetails(pkg)">
+        <Card :pkg="pkg"></Card>
       </div>
     </div>
   </div>
@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
-import { Repository } from "../../../types/repos";
+import { Package } from "../../../types/package";
 import Card from "@/components/Card.vue";
 
 @Component({
@@ -20,8 +20,8 @@ import Card from "@/components/Card.vue";
   }
 })
 export default class CardView extends Vue {
-  @Prop() readonly repos!: Repository[];
-  @Prop() readonly showDetails!: (repo: Repository) => void;
+  @Prop() readonly packages!: Package[];
+  @Prop() readonly showDetails!: (pkg: Package) => void;
 }
 </script>
 

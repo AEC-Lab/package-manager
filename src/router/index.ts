@@ -10,6 +10,9 @@ import Developer from "../views/Developer.vue";
 import Login from "../views/auth/Login.vue";
 import Register from "../views/auth/Register.vue";
 import LoginManagement from "../views/auth/LoginManagement.vue";
+import PackageEdit from "../views/admin/PackageEdit.vue";
+import PackageCreate from "../views/admin/PackageCreate.vue";
+import AuthorEdit from "../views/admin/AuthorEdit.vue";
 
 Vue.use(VueRouter);
 
@@ -60,6 +63,21 @@ const routes: Array<RouteConfig> = [
     path: "/loginManagement",
     name: "LoginManagement",
     component: LoginManagement
+  },
+  {
+    path: "/packages/:packageId/edit",
+    name: "PackageEdit",
+    component: PackageEdit
+  },
+  {
+    path: "/packages/create",
+    name: "PackageCreate",
+    component: PackageCreate
+  },
+  {
+    path: "/authors/:authorId/edit",
+    name: "AuthorEdit",
+    component: AuthorEdit
   }
 ];
 
