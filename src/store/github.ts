@@ -50,7 +50,6 @@ export const mutations: MutationTree<IGitHubState> = {
 export const actions: ActionTree<IGitHubState, IRootState> = {
   async getAsset(context, payload: GenericObject) {
     const { repository, assetId, assetName, releaseId } = payload;
-    console.log("repo: ", repository);
     const encodedPath = `$TEMP\\${helpers.ownerName(repository.sourceData).replace("/", "-")}-${releaseId}`;
     const actualPath = await helpers.createActualPath(encodedPath);
     const fp = actualPath + `\\${assetName}`;

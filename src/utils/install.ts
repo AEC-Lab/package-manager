@@ -56,8 +56,6 @@ export const installPackage = async (pkg: Package, release?: GenericObject) => {
   const { assets } = releasePackage;
   await downloadHandler(assets, releasePackage, pkg);
 
-  console.log("Package: ", pkg);
-
   const encodedPath = `$TEMP\\${helpers.ownerName(pkg.sourceData).replace("/", "-")}-${releasePackage.id}`;
   const actualPath = await helpers.createActualPath(encodedPath);
   try {
@@ -99,7 +97,7 @@ export const installPackage = async (pkg: Package, release?: GenericObject) => {
 export const uninstallPackage = async (pkg: Package, release?: GenericObject) => {
   let releasePackage: GenericObject;
   if (!release) {
-    releasePackage = await store.getters["github/getLatestRelease"](pkg.id);
+    releasePackage = await store.getters["github/getLatestRelease"](pkg);
   } else releasePackage = release;
   if (!releasePackage) {
     throw new Error("No release found for this pkg");

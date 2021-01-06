@@ -7,7 +7,6 @@ import { ipcRenderer } from "electron";
 
 import helpers from "../utils/helpers";
 
-import { GithubRepository } from "types/package";
 import { GenericObject } from "types/github";
 
 const $backend = axios.create({
