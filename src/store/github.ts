@@ -3,7 +3,7 @@ import store, { IRootState } from ".";
 import { GenericObject } from "../../types/github";
 import GitHub from "../integrations/github";
 import helpers from "../utils/helpers";
-
+import fs from "fs-extra";
 export interface IGitHubState {
   repositories: GenericObject[];
   releases: GenericObject[];
@@ -74,9 +74,11 @@ export const actions: ActionTree<IGitHubState, IRootState> = {
     return releases;
   },
   async getAsset(context, payload: GenericObject) {
-    const { repository, assetId, releaseId } = payload;
+    const { repository, assetId, assetName, releaseId } = payload;
     const encodedPath = `$TEMP\\${helpers.ownerName(repository).replace("/", "-")}-${releaseId}`;
     const actualPath = await helpers.createActualPath(encodedPath);
+    const fp = actualPath + `\\${assetName}`;
+    if (fs.existsSync(fp)) fs.unlinkSync(fp); // remove file if present
     const filePath = await GitHub.getAsset(repository, assetId, actualPath);
     return filePath;
   },
