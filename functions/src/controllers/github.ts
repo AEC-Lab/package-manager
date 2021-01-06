@@ -91,6 +91,7 @@ async function _createAuthor(event: any) {
     id: newAuthorDoc.id,
     name: event.installation.account.login,
     description: "",
+    website: "",
     thumbnailUrl: "",
     sourceConfig: {
       github: {
@@ -144,6 +145,7 @@ async function _createPackage(repo: any, event: any) {
     description: "",
     tags: [],
     images: [],
+    website: "",
     status: PackageStatus.Inactive,
     visibility: repo.private ? PackageVisibility.Private : PackageVisibility.Public,
     source: PackageSource.Github,

@@ -9,6 +9,8 @@
         <div class="text-body-1">
           {{ pkg.description }}
         </div>
+        <br /><br />
+        <v-chip v-for="tag in pkg.tags" :key="tag" class="mr-2">{{ tag }}</v-chip>
       </v-col>
       <v-col id="detail-specs">
         <!-- <v-btn class="mb-4">Install</v-btn> -->
@@ -59,31 +61,32 @@
         </div>
         <div class="d-flex justify-space-between subtitle-1">
           <span>Website:</span>
-          <a href="http://www.google.com" target="_blank">http://www.google.com</a>
+          <a :href="pkg.website" target="_blank">{{ pkg.website }}</a>
         </div>
       </v-col>
     </v-row>
-    <v-row class="" justify="start">
-      <div v-for="image in pkg.images" :key="image" class="mr-4">
+    <v-row class="ml-0 mr-0">
+      <v-card
+        v-for="(image, index) in pkg.images"
+        :key="index"
+        class="mr-4 mb-4"
+        @click="imageIndex = index"
+        outlined
+      >
         <div class="img-wrapper">
           <img :src="image" alt="" />
         </div>
-      </div>
+      </v-card>
     </v-row>
-    <!-- <v-carousel>
-      <v-carousel-item :key="i" v-for="i in 5">
-        <v-layout row>
-          <v-flex xs4 :key="j" v-for="j in 3">
-            <img :src="'https://placehold.it/150x150/?text=' + i + '-' + j" alt="" />
-          </v-flex>
-        </v-layout>
-      </v-carousel-item>
-    </v-carousel> -->
+
+    <CoolLightBox :items="gallery" :index="imageIndex" @close="imageIndex = null"> </CoolLightBox>
   </v-container>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, computed, PropType } from "@vue/composition-api";
+import CoolLightBox from "vue-cool-lightbox";
+import "vue-cool-lightbox/dist/vue-cool-lightbox.min.css";
 import { GenericObject } from "types/github";
 import { GithubRepository, Package } from "../../../types/package";
 import { PackageConfigLocal } from "../../../types/config";
@@ -94,7 +97,7 @@ import { PackageReleaseSetting, PackageSource } from "../../../types/enums";
 type CloseHandler = () => void;
 
 export default defineComponent({
-  components: {},
+  components: { CoolLightBox },
   props: {
     pkg: {
       type: Object as () => Package,
@@ -108,6 +111,15 @@ export default defineComponent({
   setup(props, context) {
     const isClosed = ref(false);
     const isLoading = ref(false);
+
+    const gallery = computed(() => {
+      return props.pkg.images.map(img => {
+        return {
+          src: img
+        };
+      });
+    });
+    const imageIndex = ref(null);
 
     const author = computed(() => {
       return context.root.$store.state.authors.authors.find(
@@ -178,6 +190,8 @@ export default defineComponent({
     }
 
     return {
+      gallery,
+      imageIndex,
       isClosed,
       isLoading,
       isReleaseInstalled,
@@ -261,9 +275,7 @@ img {
 
 .img-wrapper {
   height: 120px;
-  &:not(:last-child) {
-    margin-right: 8px;
-  }
+  cursor: pointer;
 }
 
 @keyframes slide-open {

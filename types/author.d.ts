@@ -2,6 +2,7 @@ export interface Author {
   id: string;
   name: string;
   description: string;
+  website: string;
   thumbnailUrl: string;
   sourceConfig: AuthorSourceConfig;
 }

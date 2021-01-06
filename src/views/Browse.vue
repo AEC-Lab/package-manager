@@ -17,6 +17,7 @@ import ControlBar from "@/components/browse/ControlBar.vue";
 import CardView from "@/components/browse/CardView.vue";
 import TableView from "@/components/browse/TableView.vue";
 import { Package } from "types/package";
+import { PackageStatus } from "../../types/enums";
 
 export default defineComponent({
   components: {
@@ -39,14 +40,19 @@ export default defineComponent({
     const $store = context.root.$store;
 
     const packages: ComputedRef<Package[]> = computed(() => {
-      return $store.state.packages.packages;
+      return $store.state.packages.packages.filter((pkg: Package) => pkg.status === PackageStatus.Active);
     });
 
     const filteredPackages: ComputedRef<Package[]> = computed(() => {
       if (searchText.value == "") return packages.value;
       else {
         return packages.value.filter(pkg => {
-          return pkg.name.toLowerCase().includes(searchText.value.toLowerCase());
+          return [
+            pkg.name,
+            pkg.description,
+            $store.getters["authors/getAuthorNameById"](pkg.authorId),
+            ...pkg.tags
+          ].some(field => field.toLowerCase().includes(searchText.value.toLowerCase().trim()));
         });
       }
     });

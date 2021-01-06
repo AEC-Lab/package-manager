@@ -7,6 +7,7 @@ export interface Package {
   tags: string[];
   authorId: string;
   images: string[];
+  website: string;
   status: PackageStatus;
   visibility: PackageVisibility;
   source: PackageSource;

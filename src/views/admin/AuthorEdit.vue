@@ -4,17 +4,40 @@
       <v-col cols="12">
         <v-text-field label="Name" v-model="authorTemp.name"></v-text-field>
         <v-textarea label="Description" v-model="authorTemp.description" rows="3"></v-textarea>
+        <v-text-field label="Website" v-model="authorTemp.website" rows="3"></v-text-field>
 
-        <v-text-field label="Sources" disabled filled :placeholder="displaySources"></v-text-field>
+        <div class="caption">Sources</div>
+        <v-list-item-group class="mb-2">
+          <v-list-item v-for="source in sources" :key="source.title">
+            <v-list-item-icon>
+              <v-icon>{{ source.icon }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{ source.title }}</v-list-item-title>
+              <v-list-item-subtitle>{{ source.subtitle }}</v-list-item-subtitle>
+            </v-list-item-content>
+            <template>
+              <v-divider> </v-divider>
+            </template>
+          </v-list-item>
+        </v-list-item-group>
+        <v-btn small outlined @click="() => {}" class="mb-1">
+          <v-icon left>mdi-plus-thick</v-icon>
+          Add Source
+        </v-btn>
+        <div class="caption mb-8 font-italic font-weight-light">
+          * GitHub organizations that have installed the Package Manager GitHub App will appear here
+          automatically.
+        </div>
 
         <v-text-field
           v-model="authorTemp.thumbnailUrl"
           clear-icon="mdi-close"
           clearable
-          label="Add a profile image URL"
+          label="Profile image URL"
           @click:clear="clearImageInput"
         ></v-text-field>
-        <v-row class="" justify="start">
+        <v-row class="mb-8 ml-0" justify="start">
           <div class="img-wrapper">
             <img :src="authorTemp.thumbnailUrl || fallbackImage" alt="" @error="e => imageLoadOnError(e)" />
           </div>
@@ -39,17 +62,17 @@ export default class AuthorEdit extends Vue {
   authorTemp: Author = this.defaultAuthorData();
 
   // COMPUTED PROPERTIES
-  get displaySources(): any {
-    const sources: any = {};
+  get sources(): any[] {
+    const result: any[] = [];
     if ("github" in this.authorTemp.sourceConfig) {
-      sources["Github"] = this.authorTemp.sourceConfig.github!.name;
+      result.push({
+        title: "Github",
+        subtitle: this.authorTemp.sourceConfig.github!.name,
+        icon: "mdi-github"
+      });
     }
     // add other sources as needed
-    let formattedSources = "";
-    for (const source in sources) {
-      formattedSources = formattedSources.concat(`${source} - ${sources[source]}`);
-    }
-    return formattedSources;
+    return result;
   }
 
   // METHODS
@@ -58,6 +81,7 @@ export default class AuthorEdit extends Vue {
       id: "",
       name: "",
       description: "",
+      website: "",
       thumbnailUrl: "",
       sourceConfig: {}
     };

@@ -53,6 +53,7 @@
             </v-chip>
           </template>
         </v-combobox>
+        <v-text-field v-model="packageTemp.images" label="Website URL"></v-text-field>
         <v-text-field
           v-model="imageInput"
           :append-outer-icon="imageInput && 'mdi-plus-thick'"
@@ -140,6 +141,7 @@ export default class PackageEdit extends Vue {
       tags: [],
       authorId: "",
       images: [],
+      website: "",
       status: PackageStatus.Inactive,
       visibility: PackageVisibility.Private,
       source: PackageSource.Github,

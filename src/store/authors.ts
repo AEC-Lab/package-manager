@@ -55,7 +55,8 @@ export const actions: ActionTree<IAuthorsState, IRootState> = {
         .update({
           name: payload.name,
           description: payload.description,
-          thumbnailUrl: payload.thumbnailUrl
+          thumbnailUrl: payload.thumbnailUrl,
+          website: payload.website
         });
       Vue.$snackbar.flash({ content: "Author updated", color: "success" });
       return true;

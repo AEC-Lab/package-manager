@@ -69,6 +69,7 @@ export const actions: ActionTree<IPackagesState, IRootState> = {
           description: payload.description,
           tags: payload.tags,
           images: payload.images,
+          website: payload.website,
           status: payload.status,
           visibility: payload.visibility,
           "sourceData.releaseSetting": srcData.releaseSetting
