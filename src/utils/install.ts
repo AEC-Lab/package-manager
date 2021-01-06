@@ -33,7 +33,7 @@ export const getButtonConfig = (pkg: Package) => {
 const downloadHandler = async (
   assets: GenericObject[],
   releasePackage: GenericObject,
-  repository: Repository
+  repository: Package
 ) => {
   for (const asset of assets) {
     const payload = {
@@ -46,7 +46,7 @@ const downloadHandler = async (
   }
 };
 
-export const installPackage = async (repository: Repository, release?: GenericObject) => {
+export const installPackage = async (pkg: Package, release?: GenericObject) => {
   let releasePackage: GenericObject;
   if (!release) {
     releasePackage = await store.getters["github/getLatestRelease"](pkg);
@@ -55,9 +55,9 @@ export const installPackage = async (repository: Repository, release?: GenericOb
     throw new Error("No release found for this package");
   }
   const { assets } = releasePackage;
-  await downloadHandler(assets, releasePackage, repository);
+  await downloadHandler(assets, releasePackage, pkg);
 
-  const encodedPath = `$TEMP\\${helpers.ownerName(repository).replace("/", "-")}-${releasePackage.id}`;
+  const encodedPath = `$TEMP\\${helpers.ownerName(pkg).replace("/", "-")}-${releasePackage.id}`;
   const actualPath = await helpers.createActualPath(encodedPath);
   try {
     const instructions = fs.readJSONSync(`${actualPath}\\${packageFile}`);
@@ -73,7 +73,7 @@ export const installPackage = async (repository: Repository, release?: GenericOb
 
       // 3.  process uninstall
       const existingInstall: PackageConfigLocal | undefined = store.state.config.localConfig.packages.find(
-        (obj: PackageConfigLocal) => obj.packageId === repository.id
+        (obj: PackageConfigLocal) => obj.packageId === pkg.id
       );
 
       if (existingInstall) {
@@ -88,24 +88,24 @@ export const installPackage = async (repository: Repository, release?: GenericOb
   } catch (err) {
     throw new Error(err);
   }
-  
+
   await store.dispatch("config/addOrUpdatePackage", {
     packageId: pkg.id,
     releaseId: releasePackage.id
   });
 };
 
-export const uninstallPackage = async (repository: Repository, release?: GenericObject) => {
+export const uninstallPackage = async (pkg: Package, release?: GenericObject) => {
   let releasePackage: GenericObject;
   if (!release) {
-    releasePackage = await store.getters["github/getLatestRelease"](repository.id);
+    releasePackage = await store.getters["github/getLatestRelease"](pkg.id);
   } else releasePackage = release;
   if (!releasePackage) {
-    throw new Error("No release found for this repository");
+    throw new Error("No release found for this pkg");
   }
   const { assets } = releasePackage;
-  await downloadHandler(assets, releasePackage, repository);
-  const encodedPath = `$TEMP\\${helpers.ownerName(repository).replace("/", "-")}-${releasePackage.id}`;
+  await downloadHandler(assets, releasePackage, pkg);
+  const encodedPath = `$TEMP\\${helpers.ownerName(pkg).replace("/", "-")}-${releasePackage.id}`;
   const actualPath = await helpers.createActualPath(encodedPath);
 
   try {
@@ -128,8 +128,8 @@ export const uninstallPackage = async (repository: Repository, release?: Generic
     throw new Error(err);
   }
 
-  await store.dispatch("config/removePackage", repository.id);
-}
+  await store.dispatch("config/removePackage", pkg.id);
+};
 
 export const ButtonConfigs: ButtonConfigEnum = {
   INSTALL: {
