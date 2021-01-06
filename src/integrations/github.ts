@@ -8,6 +8,7 @@ import { ipcRenderer } from "electron";
 import helpers from "../utils/helpers";
 
 import { GithubRepository } from "types/package";
+import { GenericObject } from "types/github";
 
 const $backend = axios.create({
   baseURL: "https://api.github.com",
@@ -48,10 +49,10 @@ GitHub.getInstallationToken = async (installationId: string) => {
   return token;
 };
 
-GitHub.getAsset = async (repository: GithubRepository, assetId: string, directoryPath: string) => {
+GitHub.getAsset = async (repository: GenericObject, assetId: string, directoryPath: string) => {
   // Get API url and token for asset, then pass to electron-dl to download
-  const token = await GitHub.getInstallationToken(repository.installationId);
-  const ownerName = helpers.ownerName(repository);
+  const token = await GitHub.getInstallationToken(repository.sourceData.installationId);
+  const ownerName = helpers.ownerName(repository.sourceData);
   const url = `https://api.github.com/repos/${ownerName}/releases/assets/${assetId}`;
   console.log(`Downloading asset ${assetId}...`);
   return new Promise((resolve, reject) => {

@@ -50,7 +50,8 @@ export const mutations: MutationTree<IGitHubState> = {
 export const actions: ActionTree<IGitHubState, IRootState> = {
   async getAsset(context, payload: GenericObject) {
     const { repository, assetId, assetName, releaseId } = payload;
-    const encodedPath = `$TEMP\\${helpers.ownerName(repository).replace("/", "-")}-${releaseId}`;
+    console.log("repo: ", repository);
+    const encodedPath = `$TEMP\\${helpers.ownerName(repository.sourceData).replace("/", "-")}-${releaseId}`;
     const actualPath = await helpers.createActualPath(encodedPath);
     const fp = actualPath + `\\${assetName}`;
     if (fs.existsSync(fp)) fs.unlinkSync(fp); // remove file if present

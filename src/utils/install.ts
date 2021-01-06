@@ -2,7 +2,6 @@ import store from "../store";
 import { PackageConfigLocal } from "../../types/config";
 import { ButtonConfigEnum, ButtonActions } from "../../types/enums";
 import { GenericObject } from "types/github";
-import { Repository } from "types/repos";
 import { ProcessConfig } from "types/install";
 
 import _ from "lodash";
@@ -57,7 +56,9 @@ export const installPackage = async (pkg: Package, release?: GenericObject) => {
   const { assets } = releasePackage;
   await downloadHandler(assets, releasePackage, pkg);
 
-  const encodedPath = `$TEMP\\${helpers.ownerName(pkg).replace("/", "-")}-${releasePackage.id}`;
+  console.log("Package: ", pkg);
+
+  const encodedPath = `$TEMP\\${helpers.ownerName(pkg.sourceData).replace("/", "-")}-${releasePackage.id}`;
   const actualPath = await helpers.createActualPath(encodedPath);
   try {
     const instructions = fs.readJSONSync(`${actualPath}\\${packageFile}`);
@@ -105,7 +106,7 @@ export const uninstallPackage = async (pkg: Package, release?: GenericObject) =>
   }
   const { assets } = releasePackage;
   await downloadHandler(assets, releasePackage, pkg);
-  const encodedPath = `$TEMP\\${helpers.ownerName(pkg).replace("/", "-")}-${releasePackage.id}`;
+  const encodedPath = `$TEMP\\${helpers.ownerName(pkg.sourceData).replace("/", "-")}-${releasePackage.id}`;
   const actualPath = await helpers.createActualPath(encodedPath);
 
   try {
