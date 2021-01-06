@@ -85,6 +85,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, PropType } from "@vue/composition-api";
+// @ts-ignore
 import CoolLightBox from "vue-cool-lightbox";
 import "vue-cool-lightbox/dist/vue-cool-lightbox.min.css";
 import { GenericObject } from "types/github";
