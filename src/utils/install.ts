@@ -102,8 +102,7 @@ export const uninstallPackage = async (repository: Repository, release?: Generic
     throw new Error("No release found for this repository");
   }
   const { assets } = releasePackage;
-  const packageAsset = _.find(assets, asset => asset.name == packageFile);
-  await downloadHandler([packageAsset], releasePackage, repository);
+  await downloadHandler(assets, releasePackage, repository);
   const encodedPath = `$TEMP\\${helpers.ownerName(repository).replace("/", "-")}-${releasePackage.id}`;
   const actualPath = await helpers.createActualPath(encodedPath);
 
