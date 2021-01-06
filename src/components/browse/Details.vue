@@ -3,16 +3,14 @@
     <div class="mb-16">
       <v-icon class="back-btn" x-large @click="callClose">mdi-arrow-left</v-icon>
     </div>
-    <h1 class="text-h4">{{ repo.name }}</h1>
+    <h1 class="text-h4">{{ pkg.name }}</h1>
     <v-row class="mb-4">
       <v-col>
         <div class="text-body-1">
-          Do consectetur minim Lorem et in laboris duis culpa. Pariatur adipisicing aliquip id dolore aliqua
-          exercitation eiusmod reprehenderit minim sunt eiusmod nostrud. Esse occaecat elit non nulla aliqua
-          ipsum. Cillum magna fugiat in incididunt anim excepteur dolor duis cupidatat aliqua. Ad aute sunt
-          veniam amet id est veniam. Officia qui ipsum exercitation do commodo in laboris veniam veniam non
-          commodo tempor laborum irure.
+          {{ pkg.description }}
         </div>
+        <br /><br />
+        <v-chip v-for="tag in pkg.tags" :key="tag" class="mr-2">{{ tag }}</v-chip>
       </v-col>
       <v-col id="detail-specs">
         <!-- <v-btn class="mb-4">Install</v-btn> -->
@@ -23,7 +21,7 @@
                 :loading="isLoading"
                 :color="buttonConfig.color"
                 class="main-btn"
-                @click="e => installActionHandlerWrapper(e, repo, buttonConfig.handler)"
+                @click="e => installActionHandlerWrapper(e, pkg, buttonConfig.handler)"
                 >{{ buttonConfig.text }}</v-btn
               >
               <v-btn v-on="on" v-bind="attrs" :color="buttonConfig.color" class="actions-btn">
@@ -43,6 +41,9 @@
               <v-col cols="3" class="text-body-2">{{
                 new Date(release.published_at).toLocaleDateString()
               }}</v-col>
+              <v-col cols="1">
+                <v-icon v-if="isReleaseInstalled(release)">mdi-check</v-icon>
+              </v-col>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -56,39 +57,51 @@
         </div>
         <div class="d-flex justify-space-between mb-2 subtitle-1">
           <span>Author:</span>
-          <span>{{ author }}</span>
+          <span>{{ author.name }}</span>
         </div>
         <div class="d-flex justify-space-between subtitle-1">
           <span>Website:</span>
-          <a href="http://www.google.com" target="_blank">http://www.google.com</a>
+          <a :href="pkg.website" target="_blank">{{ pkg.website }}</a>
         </div>
       </v-col>
     </v-row>
-    <!-- <v-carousel>
-      <v-carousel-item :key="i" v-for="i in 5">
-        <v-layout row>
-          <v-flex xs4 :key="j" v-for="j in 3">
-            <img :src="'https://placehold.it/150x150/?text=' + i + '-' + j" alt="" />
-          </v-flex>
-        </v-layout>
-      </v-carousel-item>
-    </v-carousel> -->
+    <v-row class="ml-0 mr-0">
+      <v-card
+        v-for="(image, index) in pkg.images"
+        :key="index"
+        class="mr-4 mb-4"
+        @click="imageIndex = index"
+        outlined
+      >
+        <div class="img-wrapper">
+          <img :src="image" alt="" />
+        </div>
+      </v-card>
+    </v-row>
+
+    <CoolLightBox :items="gallery" :index="imageIndex" @close="imageIndex = null"> </CoolLightBox>
   </v-container>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, computed, PropType } from "@vue/composition-api";
+// @ts-ignore
+import CoolLightBox from "vue-cool-lightbox";
+import "vue-cool-lightbox/dist/vue-cool-lightbox.min.css";
 import { GenericObject } from "types/github";
-import { Repository } from "../../../types/repos";
+import { GithubRepository, Package } from "../../../types/package";
+import { PackageConfigLocal } from "../../../types/config";
+import { Author } from "../../../types/author";
 import { getButtonConfig, installPackage } from "../../utils/install";
+import { PackageReleaseSetting, PackageSource } from "../../../types/enums";
 
 type CloseHandler = () => void;
 
 export default defineComponent({
-  components: {},
+  components: { CoolLightBox },
   props: {
-    repo: {
-      type: Object as () => Repository,
+    pkg: {
+      type: Object as () => Package,
       required: true
     },
     closeDetails: {
@@ -100,14 +113,37 @@ export default defineComponent({
     const isClosed = ref(false);
     const isLoading = ref(false);
 
-    const author = computed(() => {
-      return context.root.$store.state.github.repositories.find((r: GenericObject) => r.id === props.repo.id)
-        ?.owner.login;
+    const gallery = computed(() => {
+      return props.pkg.images.map(img => {
+        return {
+          src: img
+        };
+      });
     });
-    const releases = computed(() => context.root.$store.getters["github/getReleasesByRepo"](props.repo.id));
-    const latestRelease = computed(() =>
-      context.root.$store.getters["github/getLatestRelease"](props.repo.id)
-    );
+    const imageIndex = ref(null);
+
+    const author = computed(() => {
+      return context.root.$store.state.authors.authors.find(
+        (author: Author) => author.id === props.pkg.authorId
+      );
+    });
+    const releases = computed(() => {
+      if (props.pkg.source === PackageSource.Github) {
+        const srcData = props.pkg.sourceData as GithubRepository;
+        if (srcData.releaseSetting === PackageReleaseSetting.LatestAndPrerelease) {
+          return context.root.$store.getters["github/getLatestAndPrereleases"](props.pkg);
+        } else if (srcData.releaseSetting === PackageReleaseSetting.All) {
+          return context.root.$store.getters["github/getReleasesByPackage"](props.pkg);
+        } else {
+          return context.root.$store.getters["github/getReleasesByPackage"](props.pkg);
+        }
+      } else if (props.pkg.source === PackageSource.Azure) return [];
+      // TBD
+      else if (props.pkg.source === PackageSource.Url) return [];
+      // TBD
+      else return [];
+    });
+    const latestRelease = computed(() => context.root.$store.getters["github/getLatestRelease"](props.pkg));
     const latestReleaseVersion = computed(
       () => latestRelease.value && latestRelease.value.tag_name.replace("v", "")
     );
@@ -115,31 +151,39 @@ export default defineComponent({
       () => latestRelease.value && new Date(latestRelease.value.published_at).toLocaleDateString()
     );
     const buttonConfig = computed(() => {
-      return getButtonConfig(props.repo.id);
+      return getButtonConfig(props.pkg);
     });
+
+    function isReleaseInstalled(release: GenericObject): boolean {
+      const localPackageConfig: PackageConfigLocal = context.root.$store.state.config.localConfig.packages.find(
+        (pkg: PackageConfigLocal) => pkg.packageId === props.pkg.id
+      );
+      if (!localPackageConfig) return false;
+      return release.id === localPackageConfig.releaseId;
+    }
 
     function callClose() {
       isClosed.value = true;
       setTimeout(() => props.closeDetails(), 500);
     }
 
-    async function installActionHandlerWrapper(event: Event, repo: Repository, handler: Function) {
+    async function installActionHandlerWrapper(event: Event, pkg: Package, handler: Function) {
       isLoading.value = true;
-      await handler(event, repo);
+      await handler(event, pkg);
       isLoading.value = false;
     }
 
     async function downloadRelease(release: GenericObject) {
       isLoading.value = true;
       try {
-        await installPackage(props.repo, release);
+        await installPackage(props.pkg, release);
         context.root.$snackbar.flash({
-          content: `Successfully installed ${props.repo.name} - ${release.tag_name.replace("v", "")}`,
+          content: `Successfully installed ${props.pkg.name} - ${release.tag_name.replace("v", "")}`,
           color: "success"
         });
       } catch (error) {
         context.root.$snackbar.flash({
-          content: `${error} - ${props.repo.name}`,
+          content: `${error} - ${props.pkg.name}`,
           color: "danger"
         });
       }
@@ -147,8 +191,11 @@ export default defineComponent({
     }
 
     return {
+      gallery,
+      imageIndex,
       isClosed,
       isLoading,
+      isReleaseInstalled,
       callClose,
       installActionHandlerWrapper,
       downloadRelease,
@@ -219,6 +266,17 @@ export default defineComponent({
   &:not(:last-child) {
     border-bottom: 1px solid rgb(192, 192, 192);
   }
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+.img-wrapper {
+  height: 120px;
+  cursor: pointer;
 }
 
 @keyframes slide-open {

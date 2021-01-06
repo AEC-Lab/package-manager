@@ -1,6 +1,6 @@
 interface PackageConfigCore {
-  packageId: number;
-  releaseId: number;
+  packageId: string;
+  releaseId: string;
 }
 
 export interface PackageConfigCloud extends PackageConfigCore {
