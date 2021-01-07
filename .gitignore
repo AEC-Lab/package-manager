@@ -30,3 +30,4 @@ dist_electron/*
 !dist_electron/dev-app-update.yml
 
 seed/service-account-development.json
+seed/service-account-production.json
