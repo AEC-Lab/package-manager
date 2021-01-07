@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.8",
+    "@types/jsonwebtoken": "^8.5.0",
     "@types/node-fetch": "^2.5.7",
     "firebase-functions-test": "^0.2.0",
     "tslint": "^5.12.0",
