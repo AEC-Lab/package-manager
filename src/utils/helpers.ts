@@ -1,7 +1,9 @@
 // import _ from "lodash";
-import { ipcRenderer } from "electron";
+import axios from "axios";
 
+import { ipcRenderer } from "electron";
 import { GenericObject } from "types/github";
+import { GithubRepository } from "types/package";
 
 const helpers: { [key: string]: Function } = {};
 
@@ -11,7 +13,7 @@ helpers.ownerId = (repository: GenericObject) => {
   return `${owner}/${id}`;
 };
 
-helpers.ownerName = (repository: GenericObject) => {
+helpers.ownerName = (repository: GithubRepository) => {
   return repository.full_name;
 };
 
@@ -37,6 +39,23 @@ helpers.createActualPath = (path: string) => {
       resolve(path);
     }
   });
+};
+
+helpers.validateSchema = async (schema: GenericObject) => {
+  try {
+    const url = process.env.VUE_APP_API + "/validate";
+    const response = await axios.post(url, schema);
+    const { data } = response;
+    return !!data;
+  } catch (error) {
+    if (error.response.status === 500) {
+      throw new Error("Server error... please try again later");
+    } else if (error.response.status === 400) {
+      throw new Error("Invalid schema: " + error.response.data);
+    } else {
+      throw new Error("Unknown error: " + error.response.data);
+    }
+  }
 };
 
 export default helpers;

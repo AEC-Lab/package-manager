@@ -4,6 +4,7 @@ import { GenericObject } from "../../types/github";
 import { Package, GithubRepository } from "../../types/package";
 import GitHub from "../integrations/github";
 import helpers from "../utils/helpers";
+import fs from "fs-extra";
 import { firestore } from "../integrations/firebase";
 
 export interface IGitHubState {
@@ -47,11 +48,18 @@ export const mutations: MutationTree<IGitHubState> = {
 };
 
 export const actions: ActionTree<IGitHubState, IRootState> = {
-  async getAsset(context, payload: GenericObject) {
-    const { repository, assetId, releaseId } = payload;
-    const encodedPath = `$TEMP\\${helpers.ownerName(repository).replace("/", "-")}-${releaseId}`;
+  async getAsset(context, payload: any) {
+    const {
+      pkg,
+      assetId,
+      assetName,
+      releaseId
+    }: { pkg: Package; assetId: number; assetName: string; releaseId: number } = payload;
+    const encodedPath = `$TEMP\\${helpers.ownerName(pkg.sourceData).replace("/", "-")}-${releaseId}`;
     const actualPath = await helpers.createActualPath(encodedPath);
-    const filePath = await GitHub.getAsset(repository, assetId, actualPath);
+    const fp = actualPath + `\\${assetName}`;
+    if (fs.existsSync(fp)) fs.unlinkSync(fp); // remove file if present
+    const filePath = await GitHub.getAsset(pkg.sourceData, assetId, actualPath);
     return filePath;
   },
   async fetchReleases({ commit }, releaseIds: string[]) {
