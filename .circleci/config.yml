@@ -2,7 +2,7 @@ version: 2
 jobs:
   deploy-functions:
     docker:
-      - image: circleci/node:10.10.0
+      - image: circleci/node:10.13.0
 
     steps:
       # checkout codebase
@@ -23,7 +23,6 @@ jobs:
             firebase use production
             firebase deploy --token=$FIREBASE_TOKEN --non-interactive
 
-
   build:
     docker:
       # use a wine image to successfully build a windows application
@@ -32,19 +31,18 @@ jobs:
 
     # set working directory
     working_directory: ~/repo
-    
+
     # specify steps for build job
     steps:
-
       # checkout codebase
       - checkout
 
       # download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
       # install yarn packages for electron
       - run:
@@ -56,7 +54,7 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-        
+
       # run tests!
 
       # build electron application
@@ -70,11 +68,11 @@ jobs:
           name: "Get Code Version"
           command: |
             node -p -e "require('./package.json').version" > ./dist_electron/version.txt
-      
+
       # persist installer to workspace so release job can access
       - persist_to_workspace:
           root: ./dist_electron
-          paths: 
+          paths:
             - package-manager-setup.exe
             - package-manager-setup.exe.blockmap
             - latest.yml
@@ -85,7 +83,7 @@ jobs:
       # use docker go image to leverage ghr library
       - image: circleci/golang:1.10
 
-    steps:      
+    steps:
       # mount workspace from build job
       - attach_workspace:
           at: ./dist_electron

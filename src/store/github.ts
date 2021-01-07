@@ -1,95 +1,83 @@
 import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
-import store, { IRootState } from ".";
+import { IRootState } from ".";
 import { GenericObject } from "../../types/github";
+import { Package, GithubRepository } from "../../types/package";
 import GitHub from "../integrations/github";
 import helpers from "../utils/helpers";
+import fs from "fs-extra";
+import { firestore } from "../integrations/firebase";
 
 export interface IGitHubState {
-  repositories: GenericObject[];
   releases: GenericObject[];
-  installations: GenericObject[];
 }
 
 export const state: IGitHubState = {
-  repositories: [],
-  releases: [],
-  installations: []
+  releases: []
 };
 
 export const getters: GetterTree<IGitHubState, IRootState> = {
-  // Gets all releases for a given repository
-  getReleasesByRepo: state => (repoId: number): GenericObject[] => {
-    return state.releases.filter(release => release.repository === repoId);
+  // Gets all releases for a given package
+  getReleasesByPackage: state => (pkg: Package): GenericObject[] => {
+    const srcData = pkg.sourceData as GithubRepository;
+    return state.releases
+      .filter(release => srcData.releases.includes(release._id))
+      .sort((a: GenericObject, b: GenericObject) => +new Date(b.published_at) - +new Date(a.published_at));
   },
-  // Gets the latest non-prerelease for a given repository
-  getLatestRelease: (state, getters) => (repoId: number): GenericObject => {
+  // Gets the latest non-prerelease for a given package
+  getLatestRelease: (state, getters) => (pkg: Package): GenericObject => {
     return getters
-      .getReleasesByRepo(repoId)
+      .getReleasesByPackage(pkg)
+      .filter((release: GenericObject) => release.prerelease === false)
       .sort((a: GenericObject, b: GenericObject) => +new Date(b.published_at) - +new Date(a.published_at))[0];
   },
-  // Gets preleases published after the latest full release, for a given repository
-  getLatestPrereleases: (state, getters) => (repoId: number): GenericObject[] => {
+  // Gets latest release plus subsequent prereleases
+  getLatestAndPrereleases: (state, getters) => (pkg: Package): GenericObject[] => {
     return getters
-      .getReleasesByRepo(repoId)
+      .getReleasesByPackage(pkg)
       .filter(
         (release: GenericObject) =>
-          release.prerelease === true &&
-          new Date(release.published_at) > new Date(store.getters.getLatestRelease(repoId).published_at)
+          new Date(release.published_at) >= new Date(getters.getLatestRelease(pkg).published_at)
       );
   }
 };
 
 export const mutations: MutationTree<IGitHubState> = {
-  setRepositories(state, payload: GenericObject[]) {
-    state.repositories.push(...payload);
-  },
   setReleases(state, payload: GenericObject[]) {
-    state.releases.push(...payload);
-  },
-  setInstallations(state, payload: GenericObject[]) {
-    state.installations = payload;
-  },
-  clearRepositories(state) {
-    state.repositories = [];
-  },
-  clearReleases(state) {
-    state.releases = [];
+    state.releases = payload;
   }
 };
 
 export const actions: ActionTree<IGitHubState, IRootState> = {
-  async getInstallations({ commit }) {
-    const installations = await GitHub.getInstallations();
-    commit("setInstallations", installations);
-    return installations;
-  },
-  async getRepositories({ commit }, installation: GenericObject) {
-    const repositories = await GitHub.getRepositories(installation);
-    commit("setRepositories", repositories);
-    return repositories;
-  },
-  async getReleases({ commit }, repository: GenericObject) {
-    const releases = await GitHub.getReleases(repository);
-    commit("setReleases", releases);
-    return releases;
-  },
-  async getAsset(context, payload: GenericObject) {
-    const { repository, assetId, releaseId } = payload;
-    const encodedPath = `$TEMP\\${helpers.ownerName(repository).replace("/", "-")}-${releaseId}`;
+  async getAsset(context, payload: any) {
+    const {
+      pkg,
+      assetId,
+      assetName,
+      releaseId
+    }: { pkg: Package; assetId: number; assetName: string; releaseId: number } = payload;
+    const encodedPath = `$TEMP\\${helpers.ownerName(pkg.sourceData).replace("/", "-")}-${releaseId}`;
     const actualPath = await helpers.createActualPath(encodedPath);
-    const filePath = await GitHub.getAsset(repository, assetId, actualPath);
+    const fp = actualPath + `\\${assetName}`;
+    if (fs.existsSync(fp)) fs.unlinkSync(fp); // remove file if present
+    const filePath = await GitHub.getAsset(pkg.sourceData, assetId, actualPath);
     return filePath;
   },
-  async init({ commit, dispatch, state }) {
-    commit("clearRepositories");
-    commit("clearReleases");
-    await dispatch("getInstallations");
-    const repositories = state.installations.map(
-      async installation => await dispatch("getRepositories", installation)
+  async fetchReleases({ commit }, releaseIds: string[]) {
+    const releaseDocs = await Promise.all(
+      releaseIds.map(id =>
+        firestore
+          .collection("releases")
+          .doc(id)
+          .get()
+      )
     );
-    await Promise.all(repositories);
-    const releases = state.repositories.map(async repository => await dispatch("getReleases", repository));
-    await Promise.all(releases);
+    const releases = releaseDocs.map(r => {
+      return {
+        _id: r.id,
+        ...r.data()
+      };
+    });
+    commit("setReleases", releases);
   }
 };
 

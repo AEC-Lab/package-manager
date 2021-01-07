@@ -11,7 +11,7 @@ export const validatePackageSchema = (request: Request, response: any) => {
   if (request.method !== "POST") return response.status(405).send("Only POST Requests Are Accepted");
 
   const deployerData = request.body;
-  const version = deployerData.schema;
+  const { version } = deployerData;
 
   db.collection("schemas")
     .doc(version.toString())

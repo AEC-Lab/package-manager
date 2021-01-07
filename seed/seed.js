@@ -3,12 +3,12 @@ require("dotenv").config();
 const admin = require("firebase-admin");
 
 // eslint-disable-next-line
-const serviceAccount = require("./service-account-dev.json");
+const serviceAccount = require("./service-account-production.json");
 
 // Initialize the app with a service account, granting admin privileges
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.VUE_APP_DATABASEURL
+  databaseURL: "https://package-manager-417d1.firebaseio.com" // production!
 });
 
 // eslint-disable-next-line

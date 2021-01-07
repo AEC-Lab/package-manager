@@ -5,12 +5,9 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 import { ipcRenderer } from "electron";
 
-import $store from "@/store";
-import { find } from "lodash";
 import helpers from "../utils/helpers";
 
-import { GenericObject } from "types/github";
-import { Repository } from "types/repos";
+import { GithubRepository } from "types/package";
 
 const $backend = axios.create({
   baseURL: "https://api.github.com",
@@ -51,44 +48,9 @@ GitHub.getInstallationToken = async (installationId: string) => {
   return token;
 };
 
-GitHub.getInstallations = async () => {
-  const Authorization = `Bearer ${createJWT()}`;
-  const headers = { Authorization };
-  const response = await $backend.get("app/installations", { headers });
-  const installations = response.data;
-  const promises = installations.map(
-    async (i: GenericObject) => (i.token = await GitHub.getInstallationToken(i.id))
-  );
-  await Promise.all(promises);
-  return installations;
-};
-
-GitHub.getRepositories = async (installation: GenericObject) => {
-  const Authorization = `token ${installation.token}`;
-  const headers = { Authorization };
-  const response = await $backend.get("installation/repositories", { headers });
-  const repositories = response.data.repositories;
-  repositories.forEach((r: GenericObject) => (r.installation = installation.id));
-  return repositories;
-};
-
-GitHub.getReleases = async (repository: Repository) => {
-  const { installation } = repository;
-  const token = find($store.state.github.installations, ["id", installation]).token;
-  const Authorization = `token ${token}`;
-  const headers = { Authorization };
-  const id = helpers.ownerName(repository);
-  const response = await $backend.get(`repos/${id}/releases`, { headers });
-  const releases = response.data;
-  releases.forEach((r: GenericObject) => (r.repository = repository.id));
-  return releases;
-};
-
-GitHub.getAsset = async (repository: Repository, assetId: string, directoryPath: string) => {
+GitHub.getAsset = async (repository: GithubRepository, assetId: string, directoryPath: string) => {
   // Get API url and token for asset, then pass to electron-dl to download
-  const r = find($store.state.github.repositories, ["id", repository.id]);
-  const { installation } = r;
-  const token = find($store.state.github.installations, ["id", installation]).token;
+  const token = await GitHub.getInstallationToken(repository.installationId);
   const ownerName = helpers.ownerName(repository);
   const url = `https://api.github.com/repos/${ownerName}/releases/assets/${assetId}`;
   console.log(`Downloading asset ${assetId}...`);
@@ -97,7 +59,7 @@ GitHub.getAsset = async (repository: Repository, assetId: string, directoryPath:
       url: url,
       token: token,
       assetId,
-      properties: { directory: directoryPath }
+      properties: { directory: directoryPath, saveAs: false }
     });
     ipcRenderer.on(`download-success-${assetId}`, (event, savePath) => {
       console.log(`File downloaded to ${savePath}`);
