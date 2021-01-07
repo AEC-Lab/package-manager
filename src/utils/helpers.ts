@@ -3,6 +3,7 @@ import axios from "axios";
 
 import { ipcRenderer } from "electron";
 import { GenericObject } from "types/github";
+import { GithubRepository } from "types/package";
 
 const helpers: { [key: string]: Function } = {};
 
@@ -12,7 +13,7 @@ helpers.ownerId = (repository: GenericObject) => {
   return `${owner}/${id}`;
 };
 
-helpers.ownerName = (repository: GenericObject) => {
+helpers.ownerName = (repository: GithubRepository) => {
   return repository.full_name;
 };
 

@@ -29,18 +29,15 @@ export const getButtonConfig = (pkg: Package) => {
   } else return ButtonConfigs[ButtonActions.INSTALL];
 };
 
-const downloadHandler = async (
-  assets: GenericObject[],
-  releasePackage: GenericObject,
-  repository: Package
-) => {
+const downloadHandler = async (assets: GenericObject[], releasePackage: GenericObject, pkg: Package) => {
   for (const asset of assets) {
     const payload = {
       assetId: asset.id,
       releaseId: releasePackage.id,
       assetName: asset.name,
-      repository: repository
+      pkg
     };
+    // TODO: add switch depending on package source (github | azure | url, etc.)
     await store.dispatch("github/getAsset", payload);
   }
 };

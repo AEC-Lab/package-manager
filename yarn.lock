@@ -1532,6 +1532,11 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
+"@types/extract-zip@^1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@types/extract-zip/-/extract-zip-1.6.2.tgz#5c7eb441c41136167a42b88b64051e6260c29e86"
+  integrity sha1-XH60QcQRNhZ6QriLZAUeYmDCnoY=
+
 "@types/fs-extra@^9.0.1":
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/@types/fs-extra/-/fs-extra-9.0.1.tgz#91c8fc4c51f6d5dbe44c2ca9ab09310bd00c7918"
@@ -1661,6 +1666,13 @@
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
   integrity sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
+
+"@types/ps-list@^6.2.1":
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/@types/ps-list/-/ps-list-6.2.1.tgz#4547c2f4dcf32e6a2358f64f0f208066acfbfa89"
+  integrity sha512-YGrVUmLaAu89QffaehCcCp5kphlbCf72+vDxnRyP1soC9y7xaatnoB0Fgo/tEGHk8teglcLwY6b4iHcyd/UWFA==
+  dependencies:
+    ps-list "*"
 
 "@types/q@^1.5.1":
   version "1.5.4"
@@ -9736,7 +9748,7 @@ prr@~1.0.1:
   resolved "https://registry.yarnpkg.com/prr/-/prr-1.0.1.tgz#d3fc114ba06995a45ec6893f484ceb1d78f5f476"
   integrity sha1-0/wRS6BplaRexok/SEzrHXj19HY=
 
-ps-list@^7.2.0:
+ps-list@*, ps-list@^7.2.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/ps-list/-/ps-list-7.2.0.tgz#3d110e1de8249a4b178c9b1cf2a215d1e4e42fc0"
   integrity sha512-v4Bl6I3f2kJfr5o80ShABNHAokIgY+wFDTQfE+X3zWYgSGQOCBeYptLZUpoOALBqO5EawmDN/tjTldJesd0ujQ==

@@ -48,13 +48,18 @@ export const mutations: MutationTree<IGitHubState> = {
 };
 
 export const actions: ActionTree<IGitHubState, IRootState> = {
-  async getAsset(context, payload: GenericObject) {
-    const { repository, assetId, assetName, releaseId } = payload;
-    const encodedPath = `$TEMP\\${helpers.ownerName(repository.sourceData).replace("/", "-")}-${releaseId}`;
+  async getAsset(context, payload: any) {
+    const {
+      pkg,
+      assetId,
+      assetName,
+      releaseId
+    }: { pkg: Package; assetId: number; assetName: string; releaseId: number } = payload;
+    const encodedPath = `$TEMP\\${helpers.ownerName(pkg.sourceData).replace("/", "-")}-${releaseId}`;
     const actualPath = await helpers.createActualPath(encodedPath);
     const fp = actualPath + `\\${assetName}`;
     if (fs.existsSync(fp)) fs.unlinkSync(fp); // remove file if present
-    const filePath = await GitHub.getAsset(repository, assetId, actualPath);
+    const filePath = await GitHub.getAsset(pkg.sourceData, assetId, actualPath);
     return filePath;
   },
   async fetchReleases({ commit }, releaseIds: string[]) {
