@@ -44,6 +44,7 @@ export const validate = functions.https.onRequest(configureApp(validateRoute));
 //////////////////////////////////////
 
 export { createUser, deleteUser } from "./fb-event-triggers/auth";
+export { processGithubEvent } from "./fb-event-triggers/github";
 
 ////////////////////////////////////////////
 ///////// HTTPS CALLABLE FUNCTIONS /////////
