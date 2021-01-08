@@ -90,6 +90,15 @@ export const processGithubEvent = functions.firestore
 // PRIVATE FUNCTIONS
 async function _createAuthor(event: any) {
   const newAuthorDoc = db.collection("authors").doc();
+
+  const accountType = event.installation.account.type;
+  let adminIds: number[] = [];
+  if (accountType === "User") {
+    adminIds = [event.installation.account.id]; // User's account id only
+  } else if (accountType === "Organization") {
+    adminIds = await _getOrganizationAdmins(event.installation.account.login, event.installation.id);
+  }
+
   const authorObject: Author = {
     id: newAuthorDoc.id,
     name: event.installation.account.login,
@@ -100,8 +109,9 @@ async function _createAuthor(event: any) {
       github: {
         id: event.installation.account.id,
         installed: true,
+        installationId: event.installation.id,
         name: event.installation.account.login,
-        admins: []
+        admins: adminIds
       }
     }
   };
@@ -155,19 +165,7 @@ async function _createPackage(repo: any, event: any) {
     authorId: authorId
   };
 
-  // TO DELETE >>> //
-  // repo.users = ["user"];
-  // repo.source = "github";
-  // const newRepoDoc = db
-  //   .collection("repositories")
-  //   .doc(repo.id.toString())
-  //   .set(repo);
-  // <<< TO DELETE //
-
-  const newPackageDocPromise = newPackageDocRef.set(newPackage);
-
-  // return Promise.all([newPackageDocPromise, newRepoDoc]);
-  return newPackageDocPromise;
+  return newPackageDocRef.set(newPackage);
 }
 
 async function _removePackage(repo: any) {
@@ -284,4 +282,13 @@ async function _createReleaseDocs(releases: any[]) {
   }
   await Promise.all(promises);
   return docIds;
+}
+
+async function _getOrganizationAdmins(org: string, installationId: number) {
+  const token = await _getInstallationToken(installationId);
+  const headers = { Authorization: `token ${token}` };
+  const params = { role: "admin" };
+  const url = `https://api.github.com/orgs/${org}/members`;
+  const response = await $backend.get(url, { headers, params });
+  return response.data.map((user: any) => user.id);
 }

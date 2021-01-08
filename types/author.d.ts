@@ -16,5 +16,6 @@ interface GithubOrgConfig {
   id: number;
   name: string;
   installed: boolean;
+  installationId: number;
   admins: number[];
 }
