@@ -1,8 +1,8 @@
 import express from "express";
-import { processGithubAppAction } from "../controllers/github";
+import { addWebhookPayloadToQueue } from "../controllers/github";
 
 const router = express.Router();
 
-router.route("/").post(processGithubAppAction);
+router.route("/").post(addWebhookPayloadToQueue);
 
 export default router;
