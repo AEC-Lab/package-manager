@@ -16,7 +16,11 @@ export const state: IGitHubState = {
 };
 
 export const getters: GetterTree<IGitHubState, IRootState> = {
-  // Gets all releases for a given package
+  /**
+   * Gets all releases for a given package
+   * @param pkg - package to get releases
+   * @returns releases of the package
+   */
   getReleasesByPackage: state => (pkg: Package): GenericObject[] => {
     const srcData = pkg.sourceData as GithubRepository;
     return state.releases
@@ -48,6 +52,12 @@ export const mutations: MutationTree<IGitHubState> = {
 };
 
 export const actions: ActionTree<IGitHubState, IRootState> = {
+  /**
+   * Get asset filepath from the package
+   * @async
+   * @param payload
+   * @returns asset path
+   */
   async getAsset(context, payload: any) {
     const {
       pkg,
@@ -62,6 +72,10 @@ export const actions: ActionTree<IGitHubState, IRootState> = {
     const filePath = await GitHub.getAsset(pkg.sourceData, assetId, actualPath);
     return filePath;
   },
+  /**
+   * Get release metadata from firebase. Commits releases to state
+   * @param releaseIds
+   */
   async fetchReleases({ commit }, releaseIds: string[]) {
     const releaseDocs = await Promise.all(
       releaseIds.map(id =>

@@ -27,6 +27,9 @@ export const mutations: MutationTree<IPackagesState> = {
 };
 
 export const actions: ActionTree<IPackagesState, IRootState> = {
+  /**
+   *  Listen for package changes
+   */
   packagesListener({ commit, dispatch }) {
     if (state.isPackageListenerSet) return;
     try {
@@ -57,6 +60,11 @@ export const actions: ActionTree<IPackagesState, IRootState> = {
       console.error(error);
     }
   },
+  /**
+   * Update package metadata in firebase
+   * @param payload - package to update
+   * @returns if package is updated successfully
+   */
   async updatePackageData(context, payload: Package) {
     try {
       const srcData = payload.sourceData as GithubRepository;

@@ -32,6 +32,9 @@ export const mutations: MutationTree<IAuthorsState> = {
 };
 
 export const actions: ActionTree<IAuthorsState, IRootState> = {
+  /**
+   * attach listeners for Author changes
+   */
   authorsListener({ commit }) {
     if (state.isAuthorListenerSet) return;
     try {
@@ -46,6 +49,11 @@ export const actions: ActionTree<IAuthorsState, IRootState> = {
       console.error(error);
     }
   },
+  /**
+   * Update Author metadata in firebase
+   * @param payload - Author metadata
+   * @returns if update waas successful
+   */
   async updateAuthorData(context, payload: Author) {
     try {
       // update editable fields only

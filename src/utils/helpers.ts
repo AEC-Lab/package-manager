@@ -13,10 +13,21 @@ helpers.ownerId = (repository: GenericObject) => {
   return `${owner}/${id}`;
 };
 
+/**
+ * Get the repo owner name
+ *
+ * @param repository
+ *
+ * @returns - full_name of repo owner
+ */
 helpers.ownerName = (repository: GithubRepository) => {
   return repository.full_name;
 };
 
+/**
+ *
+ * @param path
+ */
 helpers.createActualPath = (path: string) => {
   // this function will parse a single environment variable from a string
   // marked with a '$' before the varialbe, and return the string
