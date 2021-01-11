@@ -33,12 +33,13 @@ export const actions: ActionTree<IAuthState, IRootState> = {
         .collection("users")
         .doc(user.uid)
         .onSnapshot(snapshot => {
-          const docData = snapshot.data();
+          const docData = snapshot.data() as User;
           const _user: User = {
             email: user.email,
             name: docData?.name,
             roles: docData?.roles,
-            uid: user.uid
+            uid: user.uid,
+            config: docData?.config
           };
           context.commit("setUser", _user);
         });

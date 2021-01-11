@@ -1,30 +1,11 @@
 import * as functions from "firebase-functions";
 import * as _ from "lodash";
-import jwt from "jsonwebtoken";
-import { Base64 } from "js-base64";
-import axios from "axios";
 
 import { db } from "../config/fbConfig";
 import { GithubRepository, Package } from "../../../types/package";
 import { Author } from "../../../types/author";
 import { PackageReleaseSetting, PackageSource, PackageStatus, PackageVisibility } from "../../../types/enums";
-import { GenericObject } from "../types";
-
-// axios instance to be used for external Github API calls
-const $backend = axios.create({
-  baseURL: "https://api.github.com",
-  timeout: 30000,
-  headers: {
-    Accept: "application/vnd.github.machine-man-preview+json"
-  }
-});
-
-// stubs for request and response interceptors if needed
-$backend.interceptors.request.use(config => config);
-$backend.interceptors.response.use(
-  response => response,
-  error => error
-);
+import { getRepoReleases, getOrganizationAdmins } from "../utils/github";
 
 export const processGithubEvent = functions.firestore
   .document("gh_webhook_queue/{docId}")
@@ -96,7 +77,7 @@ async function _createAuthor(event: any) {
   if (accountType === "User") {
     adminIds = [event.installation.account.id]; // User's account id only
   } else if (accountType === "Organization") {
-    adminIds = await _getOrganizationAdmins(event.installation.account.login, event.installation.id);
+    adminIds = await getOrganizationAdmins(event.installation.account.login, event.installation.id);
   }
 
   const authorObject: Author = {
@@ -108,9 +89,10 @@ async function _createAuthor(event: any) {
     sourceConfig: {
       github: {
         id: event.installation.account.id,
+        name: event.installation.account.login,
+        type: event.installation.account.type,
         installed: true,
         installationId: event.installation.id,
-        name: event.installation.account.login,
         admins: adminIds
       }
     }
@@ -135,7 +117,7 @@ async function _removeAuthor(event: any) {
 
 async function _createPackage(repo: any, event: any) {
   const newPackageDocRef = db.collection("packages").doc();
-  const existingReleases = await _getRepoReleases(repo, event);
+  const existingReleases = await getRepoReleases(repo, event);
   const releaseDocIds = await _createReleaseDocs(existingReleases);
   const authorDocQuery = await db
     .collection("authors")
@@ -243,35 +225,6 @@ async function _addOrUpdateReleaseDoc(event: any) {
   return Promise.all(promises);
 }
 
-async function _getRepoReleases(repo: any, event: any) {
-  const token = await _getInstallationToken(event.installation.id);
-  const Authorization = `token ${token}`;
-  const headers = { Authorization };
-  const response = await $backend.get(`repos/${repo.full_name}/releases`, { headers });
-  const releases = response.data;
-  releases.forEach((r: GenericObject) => (r.repository = repo.id));
-  return releases;
-}
-
-function _createJWT() {
-  const token = jwt.sign({}, Base64.decode(functions.config().github.application_key), {
-    algorithm: "RS256",
-    issuer: functions.config().github.application_id,
-    expiresIn: 10 * 60 - 30 // ten minutes, maximum expiration time per GitHub docs
-  });
-  return token;
-}
-
-async function _getInstallationToken(installationId: number) {
-  const Authorization = `Bearer ${_createJWT()}`;
-  const headers = { Authorization };
-  const response = await $backend.post(`app/installations/${installationId}/access_tokens`, null, {
-    headers
-  });
-  const token = response.data.token;
-  return token;
-}
-
 async function _createReleaseDocs(releases: any[]) {
   const docIds: string[] = [];
   const promises: any[] = [];
@@ -282,13 +235,4 @@ async function _createReleaseDocs(releases: any[]) {
   }
   await Promise.all(promises);
   return docIds;
-}
-
-async function _getOrganizationAdmins(org: string, installationId: number) {
-  const token = await _getInstallationToken(installationId);
-  const headers = { Authorization: `token ${token}` };
-  const params = { role: "admin" };
-  const url = `https://api.github.com/orgs/${org}/members`;
-  const response = await $backend.get(url, { headers, params });
-  return response.data.map((user: any) => user.id);
 }

@@ -1,8 +1,11 @@
+import { PackageConfigCloud } from "./config";
+
 export interface User {
   email: string | null;
   name: string | null;
   roles: string[];
   uid: string;
+  config: PackageConfigCloud[];
 }
 
 export interface LoginCredentials {
