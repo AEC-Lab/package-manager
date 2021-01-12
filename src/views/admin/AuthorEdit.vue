@@ -98,8 +98,8 @@ export default class AuthorEdit extends Vue {
 
   async save() {
     try {
-      await this.$store.dispatch("authors/updateAuthorData", this.authorTemp);
-      this.$router.push("/admin");
+      const success = await this.$store.dispatch("authors/updateAuthorData", this.authorTemp);
+      if (success) this.$router.push("/admin");
     } catch (error) {
       console.log(error);
     }

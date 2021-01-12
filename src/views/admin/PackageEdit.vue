@@ -168,8 +168,8 @@ export default class PackageEdit extends Vue {
 
   async save() {
     try {
-      await this.$store.dispatch("packages/updatePackageData", this.packageTemp);
-      this.$router.push("/admin");
+      const success = await this.$store.dispatch("packages/updatePackageData", this.packageTemp);
+      if (success) this.$router.push("/admin");
     } catch (error) {
       console.log(error);
     }

@@ -16,6 +16,7 @@ export const createUser = functions.auth.user().onCreate(async (user: admin.auth
   // If provider is GitHub, and user has no public name, use username for name
   if (user.providerData[0].providerId === "github.com" && !user.displayName) {
     payload.name = await getGithubUsername(user.providerData[0].uid);
+    payload.githubId = parseInt(user.providerData[0].uid);
   }
   return await db
     .collection("users")

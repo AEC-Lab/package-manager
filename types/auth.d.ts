@@ -6,6 +6,7 @@ export interface User {
   roles: string[];
   uid: string;
   config: PackageConfigCloud[];
+  githubId?: number;
 }
 
 export interface LoginCredentials {
