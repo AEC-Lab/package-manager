@@ -61,7 +61,8 @@ export const actions: ActionTree<IAuthorsState, IRootState> = {
       Vue.$snackbar.flash({ content: "Author updated", color: "success" });
       return true;
     } catch (error) {
-      Vue.$snackbar.flash({ content: `Error - ${error}`, color: "danger" });
+      Vue.$snackbar.flash({ content: `Error - ${error}`, color: "error" });
+      console.error(error);
       return false;
     }
   }

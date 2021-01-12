@@ -51,3 +51,9 @@ export { processGithubEvent } from "./fb-event-triggers/github";
 ////////////////////////////////////////////
 
 export { isUserEmailVerified } from "./callables/auth";
+
+///////////////////////////////////////
+///////// SCHEDULED FUNCTIONS /////////
+///////////////////////////////////////
+
+export { syncGithubOrgAdmins } from "./scheduled/github";

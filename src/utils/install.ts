@@ -137,7 +137,7 @@ export const ButtonConfigs: ButtonConfigEnum = {
         await installPackage(pkg);
         Vue.$snackbar.flash({ content: `Successfully installed ${pkg.name}`, color: "success" });
       } catch (error) {
-        Vue.$snackbar.flash({ content: `Error downloading ${pkg.name} - ${error}`, color: "danger" });
+        Vue.$snackbar.flash({ content: `Error downloading ${pkg.name} - ${error}`, color: "error" });
       }
     }
   },
@@ -150,7 +150,7 @@ export const ButtonConfigs: ButtonConfigEnum = {
         await uninstallPackage(pkg);
         Vue.$snackbar.flash({ content: `Successfully uninstalled ${pkg.name}`, color: "success" });
       } catch (error) {
-        Vue.$snackbar.flash({ content: `Error uninstalling ${pkg.name} - ${error}`, color: "danger" });
+        Vue.$snackbar.flash({ content: `Error uninstalling ${pkg.name} - ${error}`, color: "error" });
       }
     }
   },
@@ -163,7 +163,7 @@ export const ButtonConfigs: ButtonConfigEnum = {
         await installPackage(pkg);
         Vue.$snackbar.flash({ content: `Successfully updated ${pkg.name}`, color: "success" });
       } catch (error) {
-        Vue.$snackbar.flash({ content: `Error updating ${pkg.name} - ${error}`, color: "danger" });
+        Vue.$snackbar.flash({ content: `Error updating ${pkg.name} - ${error}`, color: "error" });
       }
     }
   },

@@ -77,7 +77,8 @@ export const actions: ActionTree<IPackagesState, IRootState> = {
       Vue.$snackbar.flash({ content: "Package updated", color: "success" });
       return true;
     } catch (error) {
-      Vue.$snackbar.flash({ content: `Error - ${error}`, color: "danger" });
+      Vue.$snackbar.flash({ content: `Error - ${error}`, color: "error" });
+      console.error(error);
       return false;
     }
   }

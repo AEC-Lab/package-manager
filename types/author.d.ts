@@ -15,6 +15,8 @@ interface AuthorSourceConfig {
 interface GithubOrgConfig {
   id: number;
   name: string;
+  type: "User" | "Organization";
   installed: boolean;
+  installationId: number;
   admins: number[];
 }

@@ -184,7 +184,7 @@ export default defineComponent({
       } catch (error) {
         context.root.$snackbar.flash({
           content: `${error} - ${props.pkg.name}`,
-          color: "danger"
+          color: "error"
         });
       }
       isLoading.value = false;
