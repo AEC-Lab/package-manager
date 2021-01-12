@@ -56,6 +56,9 @@ export default class ProviderLogin extends Vue {
     }
   }
 
+  /**
+   * dispatches password reset
+   */
   async resetPassword() {
     if (!this.user.email) {
       this.$snackbar.flash({ content: "No email address provided", color: "error" });

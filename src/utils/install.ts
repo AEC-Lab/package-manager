@@ -16,6 +16,13 @@ const packageFile = "manage.package";
 import Vue from "../main";
 import { Package } from "types/package";
 
+/**
+ * Gets button configurations for the package
+ *
+ * @param pkg - package
+ *
+ * @returns the corresponding button configuration
+ */
 export const getButtonConfig = (pkg: Package) => {
   const existingInstall: PackageConfigLocal | undefined = store.state.config.localConfig.packages.find(
     (obj: PackageConfigLocal) => obj.packageId === pkg.id
@@ -29,6 +36,14 @@ export const getButtonConfig = (pkg: Package) => {
   } else return ButtonConfigs[ButtonActions.INSTALL];
 };
 
+/**
+ * Dispatches asset downloads
+ *
+ * @param assets
+ * @param releasePackage
+ * @param pkg
+ *
+ */
 const downloadHandler = async (assets: GenericObject[], releasePackage: GenericObject, pkg: Package) => {
   for (const asset of assets) {
     const payload = {
@@ -42,6 +57,16 @@ const downloadHandler = async (assets: GenericObject[], releasePackage: GenericO
   }
 };
 
+/**
+ * Installs package
+ *
+ * @param pkg - package to install
+ * @param [release] - release to install
+ *
+ * @throws err - no release package found
+ * @throws err - install failed
+ *
+ */
 export const installPackage = async (pkg: Package, release?: GenericObject) => {
   let releasePackage: GenericObject;
   if (!release) {
@@ -91,6 +116,15 @@ export const installPackage = async (pkg: Package, release?: GenericObject) => {
   });
 };
 
+/**
+ * Uninstalls package
+ *
+ * @param pkg - package to be uninstalled
+ * @param [release] - release to uninstall
+ *
+ * @throws err - no release found
+ * @throws err - uninstall failure
+ */
 export const uninstallPackage = async (pkg: Package, release?: GenericObject) => {
   let releasePackage: GenericObject;
   if (!release) {
@@ -127,6 +161,9 @@ export const uninstallPackage = async (pkg: Package, release?: GenericObject) =>
   await store.dispatch("config/removePackage", pkg.id);
 };
 
+/**
+ * Install Button Configurations
+ */
 export const ButtonConfigs: ButtonConfigEnum = {
   INSTALL: {
     text: "Install",
@@ -176,6 +213,11 @@ export const ButtonConfigs: ButtonConfigEnum = {
   }
 };
 
+/**
+ * Checks for open processes
+ *
+ * @param processes
+ */
 const checkForProcessesOpen = async (processes: ProcessConfig[]) => {
   if (!processes || !processes.length) return;
   psList().then(openProcesses => {
@@ -187,11 +229,23 @@ const checkForProcessesOpen = async (processes: ProcessConfig[]) => {
   });
 };
 
+/**
+ * get the file extension of an asset string
+ *
+ * @param asset - string path of asset
+ *
+ * @returns extension of asset
+ */
 const getExtension = (asset: string) => {
   const substringArray = asset.split(".");
   return substringArray[substringArray.length - 1];
 };
 
+/**
+ *
+ * @param operations
+ * @param parentPath
+ */
 const installOperation = async (operations: GenericObject[], parentPath: string) => {
   for (const i in operations) {
     const operation = operations[i];
