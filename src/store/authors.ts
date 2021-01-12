@@ -19,6 +19,12 @@ export const getters: GetterTree<IAuthorsState, IRootState> = {
   getAuthorNameById: state => (authorId: string): string => {
     const author = state.authors.find(author => author.id === authorId);
     return author ? author.name : "Unknown";
+  },
+  getAuthorAdmins: state => (authorId: string): number[] => {
+    const author = state.authors.find(author => author.id === authorId);
+    if (author && author.sourceConfig.github) {
+      return author.sourceConfig.github.admins;
+    } else return [];
   }
 };
 
