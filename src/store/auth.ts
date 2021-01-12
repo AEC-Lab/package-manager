@@ -82,7 +82,7 @@ export const actions: ActionTree<IAuthState, IRootState> = {
    * @throws account doesn't exist
    * @throws email not verified
    * @throws log-in failed
-   * @returs firebase user
+   * @returns firebase user
    */
   async loginWithEmailAndPassword(context, credentials: LoginCredentials) {
     if (!(await context.dispatch("checkEmailExists", credentials.email))) {
