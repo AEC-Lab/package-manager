@@ -53,7 +53,7 @@
             </v-chip>
           </template>
         </v-combobox>
-        <v-text-field v-model="packageTemp.images" label="Website URL"></v-text-field>
+        <v-text-field v-model="packageTemp.website" label="Website URL"></v-text-field>
         <v-text-field
           v-model="imageInput"
           :append-outer-icon="imageInput && 'mdi-plus-thick'"
