@@ -65,7 +65,7 @@ export default defineComponent({
       validating.value = true;
       try {
         const payload = JSON.parse(await testFile.value!.text());
-        const uri = "https://us-central1-package-manager-development.cloudfunctions.net/validate";
+        const uri = `${process.env.VUE_APP_API}/validate`;
         const response = await axios.post(uri, payload);
         responseMessage.value = response.data;
         responseTypeSuccess.value = true;

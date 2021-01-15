@@ -50,22 +50,47 @@ GitHub.getInstallationToken = async (installationId: string) => {
 
 GitHub.getAsset = async (repository: GithubRepository, assetId: string, directoryPath: string) => {
   // Get API url and token for asset, then pass to electron-dl to download
+  const access = repository.private ? "private" : "public";
   const token = await GitHub.getInstallationToken(repository.installationId);
   const ownerName = helpers.ownerName(repository);
   const url = `https://api.github.com/repos/${ownerName}/releases/assets/${assetId}`;
   console.log(`Downloading asset ${assetId}...`);
   return new Promise((resolve, reject) => {
-    ipcRenderer.send("download-private-asset", {
+    ipcRenderer.send(`download-github-asset`, {
       url: url,
       token: token,
       assetId,
+      acceptType: "application/octet-stream",
       properties: { directory: directoryPath, saveAs: false }
     });
-    ipcRenderer.on(`download-success-${assetId}`, (event, savePath) => {
+    ipcRenderer.once(`download-success-${assetId}`, (event, savePath) => {
       console.log(`File downloaded to ${savePath}`);
       resolve(savePath);
     });
-    ipcRenderer.on(`download-failure-${assetId}`, (event, error) => {
+    ipcRenderer.once(`download-failure-${assetId}`, (event, error) => {
+      console.log(error);
+      reject(error);
+    });
+  });
+};
+
+GitHub.getSource = async (repository: GithubRepository, sourceUrl: string, directoryPath: string) => {
+  const access = repository.private ? "private" : "public";
+  const token = await GitHub.getInstallationToken(repository.installationId);
+  const assetId = "source";
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send(`download-github-asset`, {
+      url: sourceUrl,
+      token: token,
+      assetId: assetId,
+      acceptType: "application/vnd.github.machine-man-preview+json",
+      properties: { directory: directoryPath, saveAs: false }
+    });
+    ipcRenderer.once(`download-success-${assetId}`, (event, savePath) => {
+      console.log(`Source .zip downloaded to ${savePath}`);
+      resolve(savePath);
+    });
+    ipcRenderer.once(`download-failure-${assetId}`, (event, error) => {
       console.log(error);
       reject(error);
     });
