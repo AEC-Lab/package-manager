@@ -155,11 +155,6 @@ export default class Admin extends Vue {
     { text: "", value: "edit" }
   ];
 
-  // authors = [
-  //   { name: "Voyansi", id: 1, sources: ["GitHub"], packageCount: 14 },
-  //   { name: "John Smith (me)", id: 2, sources: ["GitHub", "URL"], packageCount: 3 }
-  // ];
-
   enterprises = [
     { name: "Salesforce", id: 1, memberCount: 257, packageCount: 6 },
     { name: "Voyansi", id: 2, memberCount: 144, packageCount: 11 },
@@ -169,11 +164,17 @@ export default class Admin extends Vue {
 
   // COMPUTED PROPERTIES
   get packages(): Package[] {
-    return this.$store.state.packages.packages;
+    return this.$store.state.packages.packages.filter((pkg: Package) => {
+      const packageAdmins = this.$store.getters["packages/getPackageAdmins"](pkg);
+      return packageAdmins.includes(this.$store.state.auth.user.githubId);
+    });
   }
 
   get authors() {
-    return this.$store.state.authors.authors;
+    return this.$store.state.authors.authors.filter((author: Author) => {
+      const authorAdmins = this.$store.getters["authors/getAuthorAdmins"](author.id);
+      return authorAdmins.includes(this.$store.state.auth.user.githubId);
+    });
   }
 
   // METHOD

@@ -15,7 +15,11 @@ export const state: IPackagesState = {
   isPackageListenerSet: false
 };
 
-export const getters: GetterTree<IPackagesState, IRootState> = {};
+export const getters: GetterTree<IPackagesState, IRootState> = {
+  getPackageAdmins: (state, getters, rootState, rootGetters) => (pkg: Package): number[] => {
+    return rootGetters["authors/getAuthorAdmins"](pkg.authorId);
+  }
+};
 
 export const mutations: MutationTree<IPackagesState> = {
   setPackages(state, payload: Package[]) {
