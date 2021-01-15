@@ -49,8 +49,6 @@ GitHub.getInstallationToken = async (installationId: string) => {
 };
 
 GitHub.getAsset = async (repository: GithubRepository, assetId: string, directoryPath: string) => {
-  // Get API url and token for asset, then pass to electron-dl to download
-  const access = repository.private ? "private" : "public";
   const token = await GitHub.getInstallationToken(repository.installationId);
   const ownerName = helpers.ownerName(repository);
   const url = `https://api.github.com/repos/${ownerName}/releases/assets/${assetId}`;
@@ -75,7 +73,6 @@ GitHub.getAsset = async (repository: GithubRepository, assetId: string, director
 };
 
 GitHub.getSource = async (repository: GithubRepository, sourceUrl: string, directoryPath: string) => {
-  const access = repository.private ? "private" : "public";
   const token = await GitHub.getInstallationToken(repository.installationId);
   const assetId = "source";
   return new Promise((resolve, reject) => {
