@@ -45,7 +45,8 @@ export const actions: ActionTree<IAuthState, IRootState> = {
             name: docData?.name,
             roles: docData?.roles,
             uid: user.uid,
-            config: docData?.config
+            config: docData?.config,
+            githubId: docData?.githubId
           };
           context.commit("setUser", _user);
         });
