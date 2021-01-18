@@ -9,6 +9,7 @@ import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
 import { shell } from "electron";
+import { spawnSync } from "child_process";
 
 import psList from "ps-list";
 import helpers from "../utils/helpers";
@@ -291,7 +292,7 @@ const installOperation = async (
         fs.copySync(tempFilePath, destFilePath);
       }
     } else if (operation.action === "run") {
-      await shell.openExternal(tempFilePath);
+      spawnSync("cmd.exe", ["/c", tempFilePath]);
     }
   }
   return;
@@ -312,9 +313,8 @@ const uninstallOperation = async (operations: GenericObject[], parentPath: strin
     } else if (operation.action === "run") {
       // run a file in local temp directory
       const filePath = await helpers.createActualPath(`${parentPath}\\${fileName}`);
-      console.log(`trying to run ${filePath}`);
-      await shell.openExternal(filePath);
-      console.log("operation finished");
+      // await shell.openExternal(filePath);  // <-- can't get this to work on test package
+      spawnSync("cmd.exe", ["/c", filePath]);
     }
   }
   return;
