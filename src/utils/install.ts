@@ -162,6 +162,7 @@ export const uninstallPackage = async (pkg: Package, release?: GenericObject) =>
       await uninstallOperation(instructions.uninstall, actualPath);
 
       // 4. delete temp folder
+      console.log("deleting temp folder");
       fs.removeSync(actualPath);
     }
   } catch (err) {
@@ -279,15 +280,15 @@ const installOperation = async (
     } else if (operation.action === "copy") {
       const decodedPath = await helpers.createActualPath(operation.destination);
       const destFilePath = `${decodedPath}\\${path.basename(sourcePath)}`;
-      fs.copySync(tempFilePath, destFilePath);
-
       const extension = getExtension(sourcePath);
       if (extension === "zip" || extension === "tar" || extension === "gz") {
         try {
-          helpers.extractZip(tempFilePath, destFilePath, false);
+          helpers.extractZip(tempFilePath, decodedPath, false);
         } catch (error) {
           throw new Error(error);
         }
+      } else {
+        fs.copySync(tempFilePath, destFilePath);
       }
     } else if (operation.action === "run") {
       await shell.openExternal(tempFilePath);
@@ -310,8 +311,10 @@ const uninstallOperation = async (operations: GenericObject[], parentPath: strin
       }
     } else if (operation.action === "run") {
       // run a file in local temp directory
-      const filePath = `${parentPath}\\${fileName}`;
+      const filePath = await helpers.createActualPath(`${parentPath}\\${fileName}`);
+      console.log(`trying to run ${filePath}`);
       await shell.openExternal(filePath);
+      console.log("operation finished");
     }
   }
   return;
