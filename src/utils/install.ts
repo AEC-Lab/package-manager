@@ -8,7 +8,6 @@ import GitHub from "../integrations/github";
 import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
-import { shell } from "electron";
 import { spawnSync } from "child_process";
 
 import psList from "ps-list";
