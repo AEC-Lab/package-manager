@@ -2,6 +2,8 @@
 import axios from "axios";
 
 import { ipcRenderer } from "electron";
+import fs from "fs-extra";
+import path from "path";
 import { GenericObject } from "types/github";
 import { GithubRepository } from "types/package";
 
@@ -67,6 +69,34 @@ helpers.validateSchema = async (schema: GenericObject) => {
       throw new Error("Unknown error: " + error.response.data);
     }
   }
+};
+
+helpers.extractZip = async (sourcePath: string, destPath: string, isGithubSource: boolean) => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("extract-zip", { sourcePath, destPath, isGithubSource });
+    ipcRenderer.once("extract-success", (event, sourceDirectoryName) => {
+      resolve(sourceDirectoryName);
+    });
+    ipcRenderer.once("extract-failure", (event, error) => {
+      console.log(error);
+      reject(error);
+    });
+  });
+};
+
+helpers.cachedAssetsExist = async (cacheDirectory: string, packageFile: string): Promise<boolean> => {
+  if (fs.existsSync(cacheDirectory)) {
+    const pkgFilePath = path.join(cacheDirectory, packageFile);
+    if (fs.existsSync(pkgFilePath)) {
+      const instructions = fs.readJSONSync(pkgFilePath);
+      const assetPaths: string[] = await Promise.all(
+        instructions.uninstall.map((operation: any) => helpers.createActualPath(operation.source))
+      );
+      const uninstallSourcesExist = assetPaths.every((path: string) => fs.existsSync(path));
+      if (uninstallSourcesExist) return true;
+    }
+  }
+  return false;
 };
 
 export default helpers;

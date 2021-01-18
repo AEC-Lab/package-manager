@@ -17,6 +17,7 @@ import { google } from "googleapis";
 import { ipcMain } from "electron";
 import fetch from "node-fetch";
 import fs from "fs";
+import extract from "extract-zip";
 import { PackageConfigFile } from "types/config";
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -148,12 +149,12 @@ ipcMain.on("authenticate", (event, provider, client) => {
   }
 });
 
-// Handle downloads for private repo assets
-ipcMain.on("download-private-asset", async (event, info) => {
+// Handle downloads for github repo assets and source code
+ipcMain.on("download-github-asset", async (event, info) => {
   try {
     const response = await fetch(info.url, {
       headers: {
-        Accept: "application/octet-stream",
+        Accept: info.acceptType,
         Authorization: `Bearer ${info.token}`
       },
       redirect: "manual" // prevents automatic redirect with returns 400 response
@@ -171,7 +172,22 @@ ipcMain.on("download-private-asset", async (event, info) => {
     }
   } catch (err) {
     console.log(err);
-    win!.webContents.send("download-failure", err);
+    win!.webContents.send(`download-failure-${info.assetId}`, err);
+  }
+});
+
+ipcMain.on("extract-zip", async (event, info) => {
+  try {
+    let dirName: string | null = null;
+    await extract(info.sourcePath, {
+      dir: info.destPath,
+      onEntry: (entry, zipFile) => {
+        dirName = dirName || entry.fileName;
+      }
+    });
+    win!.webContents.send("extract-success", info.isGithubSource ? dirName : null);
+  } catch (error) {
+    win!.webContents.send("extract-failure", error);
   }
 });
 

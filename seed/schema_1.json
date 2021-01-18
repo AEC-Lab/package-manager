@@ -48,7 +48,7 @@
           "action": {
             "type": "string",
             "required": true,
-            "enum": ["run", "copy"]
+            "enum": ["run", "copy", "download-source-code"]
           },
           "destination": {
             "type": "string",

@@ -3,16 +3,17 @@ import { PackageConfigLocal } from "../../types/config";
 import { ButtonConfigEnum, ButtonActions } from "../../types/enums";
 import { GenericObject } from "types/github";
 import { ProcessConfig } from "types/install";
+import GitHub from "../integrations/github";
 
 import _ from "lodash";
 import fs from "fs-extra";
+import path from "path";
 import { shell } from "electron";
-import extract from "extract-zip";
 
 import psList from "ps-list";
 import helpers from "../utils/helpers";
 
-const packageFile = "manage.package";
+const PACKAGE_FILE = "manage.package";
 import Vue from "../main";
 import { Package } from "types/package";
 
@@ -75,13 +76,13 @@ export const installPackage = async (pkg: Package, release?: GenericObject) => {
   if (!releasePackage) {
     throw new Error("No release found for this package");
   }
-  const { assets } = releasePackage;
+  const { assets, zipball_url } = releasePackage;
   await downloadHandler(assets, releasePackage, pkg);
 
   const encodedPath = `$TEMP\\${helpers.ownerName(pkg.sourceData).replace("/", "-")}-${releasePackage.id}`;
   const actualPath = await helpers.createActualPath(encodedPath);
   try {
-    const instructions = fs.readJSONSync(`${actualPath}\\${packageFile}`);
+    const instructions = fs.readJSONSync(`${actualPath}\\${PACKAGE_FILE}`);
     console.log("validating schema");
     await helpers.validateSchema(instructions);
     // for future support of other package versions
@@ -104,7 +105,7 @@ export const installPackage = async (pkg: Package, release?: GenericObject) => {
 
       // 4.  process install
       console.log("installing based on instructions");
-      await installOperation(instructions.install, actualPath);
+      await installOperation(instructions.install, actualPath, zipball_url, pkg);
     }
   } catch (err) {
     throw new Error(err);
@@ -134,12 +135,18 @@ export const uninstallPackage = async (pkg: Package, release?: GenericObject) =>
     throw new Error("No release found for this pkg");
   }
   const { assets } = releasePackage;
-  await downloadHandler(assets, releasePackage, pkg);
   const encodedPath = `$TEMP\\${helpers.ownerName(pkg.sourceData).replace("/", "-")}-${releasePackage.id}`;
   const actualPath = await helpers.createActualPath(encodedPath);
 
+  // Check to see if cached assets still exist; otherwise, re-download
+  if (!(await helpers.cachedAssetsExist(actualPath, PACKAGE_FILE))) {
+    await downloadHandler(assets, releasePackage, pkg);
+  } else {
+    console.log("Cached assets found");
+  }
+
   try {
-    const instructions = fs.readJSONSync(`${actualPath}\\${packageFile}`);
+    const instructions = fs.readJSONSync(`${actualPath}\\${PACKAGE_FILE}`);
     console.log("validating schema");
     await helpers.validateSchema(instructions);
     // for future support of other package versions
@@ -153,6 +160,9 @@ export const uninstallPackage = async (pkg: Package, release?: GenericObject) =>
       // 3.  process uninstall
       console.log("uninstalling");
       await uninstallOperation(instructions.uninstall, actualPath);
+
+      // 4. delete temp folder
+      fs.removeSync(actualPath);
     }
   } catch (err) {
     throw new Error(err);
@@ -246,21 +256,35 @@ const getExtension = (asset: string) => {
  * @param operations
  * @param parentPath
  */
-const installOperation = async (operations: GenericObject[], parentPath: string) => {
+const installOperation = async (
+  operations: GenericObject[],
+  parentPath: string,
+  sourceUrl: string,
+  pkg: Package
+) => {
   for (const i in operations) {
     const operation = operations[i];
-    const fileName = await helpers.createActualPath(operation.source);
-    const tempFilePath = `${parentPath}\\${fileName}`;
-
-    if (operation.action === "copy") {
+    const sourcePath = await helpers.createActualPath(operation.source);
+    const tempFilePath = `${parentPath}\\${sourcePath}`;
+    if (operation.action === "download-source-code") {
+      const sourceZipPath = await GitHub.getSource(pkg.sourceData, sourceUrl, parentPath);
+      try {
+        const extractedDirectoryName = await helpers.extractZip(sourceZipPath, parentPath, true);
+        const renameSource = path.join(parentPath, extractedDirectoryName);
+        const renameDest = path.join(parentPath, sourcePath);
+        fs.renameSync(renameSource, renameDest);
+      } catch (error) {
+        throw new Error(error);
+      }
+    } else if (operation.action === "copy") {
       const decodedPath = await helpers.createActualPath(operation.destination);
-      const destFilePath = `${decodedPath}\\${fileName}`;
-      fs.copyFileSync(tempFilePath, destFilePath);
+      const destFilePath = `${decodedPath}\\${path.basename(sourcePath)}`;
+      fs.copySync(tempFilePath, destFilePath);
 
-      const extension = getExtension(fileName);
+      const extension = getExtension(sourcePath);
       if (extension === "zip" || extension === "tar" || extension === "gz") {
         try {
-          await extract(tempFilePath, { dir: destFilePath });
+          helpers.extractZip(tempFilePath, destFilePath, false);
         } catch (error) {
           throw new Error(error);
         }
@@ -280,7 +304,7 @@ const uninstallOperation = async (operations: GenericObject[], parentPath: strin
     if (operation.action === "delete") {
       // delete file on file system
       try {
-        fs.unlinkSync(fileName);
+        fs.removeSync(fileName);
       } catch (error) {
         console.log("file to delete is not present");
       }
