@@ -8,7 +8,7 @@ import GitHub from "../integrations/github";
 import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
-import { shell } from "electron";
+import { spawnSync } from "child_process";
 
 import psList from "ps-list";
 import helpers from "../utils/helpers";
@@ -162,6 +162,7 @@ export const uninstallPackage = async (pkg: Package, release?: GenericObject) =>
       await uninstallOperation(instructions.uninstall, actualPath);
 
       // 4. delete temp folder
+      console.log("deleting temp folder");
       fs.removeSync(actualPath);
     }
   } catch (err) {
@@ -279,18 +280,18 @@ const installOperation = async (
     } else if (operation.action === "copy") {
       const decodedPath = await helpers.createActualPath(operation.destination);
       const destFilePath = `${decodedPath}\\${path.basename(sourcePath)}`;
-      fs.copySync(tempFilePath, destFilePath);
-
       const extension = getExtension(sourcePath);
       if (extension === "zip" || extension === "tar" || extension === "gz") {
         try {
-          helpers.extractZip(tempFilePath, destFilePath, false);
+          helpers.extractZip(tempFilePath, decodedPath, false);
         } catch (error) {
           throw new Error(error);
         }
+      } else {
+        fs.copySync(tempFilePath, destFilePath);
       }
     } else if (operation.action === "run") {
-      await shell.openExternal(tempFilePath);
+      spawnSync("cmd.exe", ["/c", tempFilePath]);
     }
   }
   return;
@@ -310,8 +311,9 @@ const uninstallOperation = async (operations: GenericObject[], parentPath: strin
       }
     } else if (operation.action === "run") {
       // run a file in local temp directory
-      const filePath = `${parentPath}\\${fileName}`;
-      await shell.openExternal(filePath);
+      const filePath = await helpers.createActualPath(`${parentPath}\\${fileName}`);
+      // await shell.openExternal(filePath);  // <-- can't get this to work on test package
+      spawnSync("cmd.exe", ["/c", filePath]);
     }
   }
   return;
