@@ -1,5 +1,5 @@
 <template>
-  <v-container id="container">
+  <v-container class="vo-if-container">
     <ValidateSchema />
   </v-container>
 </template>
@@ -15,20 +15,4 @@ export default defineComponent({
   }
 });
 </script>
-<style lang="scss" scoped>
-#container {
-  background-color: rgb(255, 255, 255);
-  height: 100%;
-  max-width: 100%;
-  padding: 20px;
-  position: absolute;
-  overflow: auto;
-
-  .is-success {
-    color: green;
-  }
-  .is-failed {
-    color: red;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

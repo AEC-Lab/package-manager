@@ -35,6 +35,7 @@ export const actions: ActionTree<IAuthState, IRootState> = {
    */
   async onAuthStateChangedAction(context, user: firebase.User | null) {
     if (user) {
+      console.log(user);
       unsubscribe = await firestore
         .collection("users")
         .doc(user.uid)

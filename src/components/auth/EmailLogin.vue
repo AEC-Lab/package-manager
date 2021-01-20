@@ -16,13 +16,13 @@
       </v-btn>
       <v-spacer />
       <div class="text-end">
-        <div class="link" @click="() => $router.push('/register')" color="teal darken-1">
+        <div class="vo-link" @click="() => $router.push('/register')" color="teal darken-1">
           Register
         </div>
-        <div class="link" @click="resetPassword">Forgot password?</div>
+        <div class="vo-link" @click="resetPassword">Forgot password?</div>
       </div>
     </v-card-actions>
-    <div class="link mt-8" @click="toggleMode">
+    <div class="vo-link mt-8" @click="toggleMode">
       Sign in with Third Party Provider
     </div>
   </v-card-text>
@@ -80,12 +80,4 @@ export default class ProviderLogin extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-.link {
-  cursor: pointer;
-  color: #00897b;
-  &:hover {
-    color: #13aa9b;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

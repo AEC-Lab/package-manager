@@ -1,5 +1,5 @@
 <template>
-  <v-container id="container">Settings </v-container>
+  <v-container class="vo-container">Settings </v-container>
 </template>
 
 <script lang="ts">

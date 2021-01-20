@@ -1,5 +1,5 @@
 <template>
-  <v-container id="container">
+  <v-container class="vo-container">
     <v-expansion-panels v-model="panels">
       <v-expansion-panel>
         <v-expansion-panel-header>
@@ -195,13 +195,4 @@ export default class Admin extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-#container {
-  background-color: rgb(255, 255, 255);
-  height: 100%;
-  max-width: 100%;
-  padding: 20px;
-  position: absolute;
-  overflow: auto;
-}
-</style>
+<style lang="scss" scoped></style>

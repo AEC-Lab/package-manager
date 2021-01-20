@@ -31,7 +31,7 @@
         Sign in with GitHub
       </span>
     </v-btn>
-    <div class="link mt-8" @click="toggleMode">
+    <div class="vo-link mt-8" @click="toggleMode">
       Sign in with Email and Password
     </div>
   </v-card-text>
@@ -70,12 +70,4 @@ export default class ProviderLogin extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-.link {
-  cursor: pointer;
-  color: #00897b;
-  &:hover {
-    color: #13aa9b;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

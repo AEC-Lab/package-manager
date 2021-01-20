@@ -1,0 +1,150 @@
+.vo-container {
+  background-color: rgb(255, 255, 255);
+  height: 100%;
+  max-width: 100%;
+  padding: 20px;
+  position: absolute;
+  overflow: auto;
+}
+
+.vo-if-container {
+  background-color: rgb(255, 255, 255);
+  height: 100%;
+  max-width: 100%;
+  padding: 20px;
+  position: absolute;
+  overflow: auto;
+
+  .v-is-success {
+    color: green;
+  }
+
+  .v-is-failed {
+    color: red;
+  }
+}
+
+.vo-browse-container {
+  background-color: rgb(224, 224, 224);
+  height: 100%;
+  max-width: 100%;
+  padding: 20px;
+  position: absolute;
+  overflow: auto;
+}
+
+.vo-link {
+  cursor: pointer;
+  color: #00897b;
+  &:hover {
+    color: #13aa9b;
+  }
+}
+
+.vo-snackText {
+  color: teal;
+}
+
+.vo-card {
+  float: left;
+  margin-right: 20px;
+  margin-bottom: 20px;
+
+  &:not(:first-child) {
+    margin-left: 20px;
+  }
+}
+
+.vo-control-bar {
+  margin-bottom: 30px;
+  width: 100%;
+
+  //CHECK
+
+  // #toggle-buttons {
+  //   // float: right;
+  //   & > .v-btn {
+  //     width: 75px;
+  //   }
+  // }
+}
+
+#details-container {
+  background-color: rgb(255, 255, 255);
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  padding: 20px;
+  position: absolute;
+  z-index: 10;
+  left: -100%;
+  overflow: auto;
+  animation: slide-open 0.6s forwards;
+  &.closed {
+    left: 0;
+    animation: slide-closed 0.5s forwards;
+  }
+
+  .back-btn {
+    color: rgb(192, 192, 192);
+    &:hover {
+      color: black;
+    }
+  }
+
+  #detail-specs {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .main-btn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    // padding-right: 2px !important;
+    flex: 1;
+  }
+  .actions-btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding: 0 !important;
+    min-width: 35px !important;
+    margin-left: -3.5px;
+  }
+  .split-btn {
+    display: inline-block;
+    display: flex;
+  }
+}
+.release-item {
+  padding: 0;
+  cursor: pointer;
+  &:hover {
+    background-color: rgb(222, 222, 222);
+  }
+  &:not(:last-child) {
+    border-bottom: 1px solid rgb(192, 192, 192);
+  }
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+.img-wrapper {
+  height: 120px;
+  cursor: pointer;
+}
+
+@keyframes slide-open {
+  100% {
+    left: 0;
+  }
+}
+
+@keyframes slide-closed {
+  100% {
+    left: -100%;
+  }
+}
