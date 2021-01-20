@@ -20,6 +20,15 @@
             :value="setting.value"
           ></v-radio>
         </v-radio-group>
+        <v-autocomplete
+          v-model="packageTemp.dependencyIds"
+          chips
+          deletable-chips
+          multiple
+          label="Package Dependencies"
+          :search-input.sync="dependencySearch"
+          :items="packages"
+        ></v-autocomplete>
         <v-combobox
           v-model="packageTemp.tags"
           :items="existingTags"
@@ -115,6 +124,7 @@ export default class PackageEdit extends Vue {
     "Drawing Management"
   ];
   tagSearch: string | null = null;
+  dependencySearch: string | null = null;
   imageInput = "";
 
   packageTemp: Package = this.defaultPackageData();
@@ -136,6 +146,16 @@ export default class PackageEdit extends Vue {
       (key: string) => (PackageStatus as any)[key] === this.packageTemp.status
     );
   }
+  get packages() {
+    return this.$store.state.packages.packages
+      .filter((pkg: Package) => pkg.id !== this.packageTemp.id)
+      .map((pkg: Package) => {
+        return {
+          text: `${pkg.name} (${this.$store.getters["authors/getAuthorNameById"](pkg.authorId)})`,
+          value: pkg.id
+        };
+      });
+  }
 
   // METHODS
   defaultPackageData(): Package {
@@ -150,7 +170,8 @@ export default class PackageEdit extends Vue {
       status: PackageStatus.Inactive,
       visibility: PackageVisibility.Private,
       source: PackageSource.Github,
-      sourceData: {}
+      sourceData: {},
+      dependencyIds: []
     };
   }
 

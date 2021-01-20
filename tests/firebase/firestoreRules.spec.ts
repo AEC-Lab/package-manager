@@ -51,7 +51,8 @@ const githubPackagePublic: Package = {
   status: PackageStatus.Active,
   visibility: PackageVisibility.Public,
   source: PackageSource.Github,
-  sourceData: {}
+  sourceData: {},
+  dependencyIds: []
 };
 
 const githubPackageAuthor: Author = {

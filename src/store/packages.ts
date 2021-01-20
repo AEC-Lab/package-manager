@@ -18,6 +18,9 @@ export const state: IPackagesState = {
 export const getters: GetterTree<IPackagesState, IRootState> = {
   getPackageAdmins: (state, getters, rootState, rootGetters) => (pkg: Package): number[] => {
     return rootGetters["authors/getAuthorAdmins"](pkg.authorId);
+  },
+  getPackageById: state => (id: string): Package | null => {
+    return state.packages.find((pkg: Package) => pkg.id === id) || null;
   }
 };
 
@@ -84,7 +87,8 @@ export const actions: ActionTree<IPackagesState, IRootState> = {
           website: payload.website,
           status: payload.status,
           visibility: payload.visibility,
-          "sourceData.releaseSetting": srcData.releaseSetting
+          "sourceData.releaseSetting": srcData.releaseSetting,
+          dependencyIds: payload.dependencyIds
         });
       Vue.$snackbar.flash({ content: "Package updated", color: "success" });
       return true;

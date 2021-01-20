@@ -12,6 +12,7 @@ export interface Package {
   visibility: PackageVisibility;
   source: PackageSource;
   sourceData: GithubRepository | AzureRepository | UrlSource;
+  dependencyIds: string[];
 }
 
 export interface GithubRepository {

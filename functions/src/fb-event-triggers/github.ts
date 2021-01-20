@@ -144,7 +144,8 @@ async function _createPackage(repo: any, event: any) {
     visibility: repo.private ? PackageVisibility.Private : PackageVisibility.Public,
     source: PackageSource.Github,
     sourceData: githubRepoData,
-    authorId: authorId
+    authorId: authorId,
+    dependencyIds: []
   };
 
   return newPackageDocRef.set(newPackage);

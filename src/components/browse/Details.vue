@@ -10,7 +10,17 @@
           {{ pkg.description }}
         </div>
         <br /><br />
+        <div class="text-caption">Tags:</div>
+        <br />
         <v-chip v-for="tag in pkg.tags" :key="tag" class="mr-2">{{ tag }}</v-chip>
+        <div v-if="pkg.dependencyIds.length">
+          <br /><br />
+          <div class="text-caption">Dependencies:</div>
+          <br />
+          <v-chip v-for="dependencyId in pkg.dependencyIds" :key="dependencyId" class="mr-2">{{
+            getDependencyDisplayName(dependencyId)
+          }}</v-chip>
+        </div>
       </v-col>
       <v-col id="detail-specs">
         <!-- <v-btn class="mb-4">Install</v-btn> -->
@@ -190,6 +200,12 @@ export default defineComponent({
       isLoading.value = false;
     }
 
+    function getDependencyDisplayName(packageId: string): string {
+      const pkg: Package = context.root.$store.getters["packages/getPackageById"](packageId);
+      const authorName: string = context.root.$store.getters["authors/getAuthorNameById"](pkg.authorId);
+      return `${pkg.name} (${authorName})`;
+    }
+
     return {
       gallery,
       imageIndex,
@@ -204,7 +220,8 @@ export default defineComponent({
       latestRelease,
       latestReleaseVersion,
       latestReleaseDate,
-      buttonConfig
+      buttonConfig,
+      getDependencyDisplayName
     };
   }
 });
