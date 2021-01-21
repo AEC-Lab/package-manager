@@ -2,7 +2,6 @@
 
 ## Voyansi Styling guide
 
-
 See how styling is using on Voyansi Package Manager.
 
 ### How the classes are structurated:
@@ -13,12 +12,14 @@ See how styling is using on Voyansi Package Manager.
 - `components/buttons.scss` contains classes related with buttons. Create a scss file for a component if you think it could have many classes related.
 - `components/generic.scss` contains all the code that are not in the described files.
 
+### Color variables
+
 There are `Initial colors`, `Primary colors`, and `Secondary colors`.
 
 | name                   | file          | type        | value                                                                     |
 | ---------------------- | ------------- | ----------- | ------------------------------------------------------------------------- |
 | `$voyansi-white`       | `colors.scss` | `initial`   | ![#FFFFFF](https://via.placeholder.com/15/FFFFFF/000000?text=+) `#FFFFFF` |
-| `$$voyansi-black`      | `colors.scss` | `initial`   | ![#000000](https://via.placeholder.com/15/000000/000000?text=+) `#000000` |
+| `$voyansi-black`       | `colors.scss` | `initial`   | ![#000000](https://via.placeholder.com/15/000000/000000?text=+) `#000000` |
 | `$voyansi-primary-1`   | `colors.scss` | `primery`   | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96` |
 | `$voyansi-primary-2`   | `colors.scss` | `primery`   | ![#6c8088](https://via.placeholder.com/15/6c8088/000000?text=+) `#6c8088` |
 | `$voyansi-support-1`   | `colors.scss` | `support`   | ![#b5c0c9](https://via.placeholder.com/15/b5c0c9/000000?text=+) `#b5c0c9` |
@@ -31,7 +32,7 @@ There are `Initial colors`, `Primary colors`, and `Secondary colors`.
 | `$voyansi-secondary-5` | `colors.scss` | `secondary` | ![#af4db3](https://via.placeholder.com/15/af4db3/000000?text=+) `#af4db3` |
 | `$voyansi-secondary-6` | `colors.scss` | `secondary` | ![#dd949a](https://via.placeholder.com/15/dd949a/000000?text=+) `#dd949a` |
 
-### Derived variables
+### Derived Color variables
 
 Derivate colors uses `Initial colors`, `Primary colors`, and `Secondary colors`. You should use this colors.
 
@@ -44,3 +45,12 @@ Derivate colors uses `Initial colors`, `Primary colors`, and `Secondary colors`.
 | `$voyansi-warning` | `colors.scss` | `$voyansi-secondary-4` | ![#c3e57f](https://via.placeholder.com/15/c3e57f/000000?text=+) `#c3e57f` |
 | `$voyansi-danger`  | `colors.scss` | `$voyansi-secondary-5` | ![#af4db3](https://via.placeholder.com/15/af4db3/000000?text=+) `#af4db3` |
 | `$voyansi-dark`    | `colors.scss` | `$voyansi-black`       | ![#000000](https://via.placeholder.com/15/000000/000000?text=+) `#000000` |
+
+### Generic variables
+
+You can use the following `generic` variables for general customization
+
+| name                        | parameters         | value                                                                     |
+| --------------------------- | ------------------ | ------------------------------------------------------------------------- |
+| `.voyansi-background-light` | `background-color` | ![#f4f4f4](https://via.placeholder.com/15/f4f4f4/000000?text=+) `#f4f4f4` |
+| `.voyansi-background-dark`  | `background-color` | ![#b5c0c9](https://via.placeholder.com/15/b5c0c9/000000?text=+) `#b5c0c9` |
