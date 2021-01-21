@@ -12,8 +12,8 @@ See how styling is using on this project.
 
 There are `Primary colors` in colors.scss. You should use this colors.
 
-| bame                 | file          |             | type                                                                      | value |
-| -------------------- | ------------- | ----------- | ------------------------------------------------------------------------- | ----- |
+| bame                 | file          | type        | value                                                                     |
+| -------------------- | ------------- | ----------- | ------------------------------------------------------------------------- |
 | `$voyansi-primary-1` | `colors.scss` | `primery`   | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96` |
 | `$voyansi-primary-2` | `colors.scss` | `primery`   | ![#6c8088](https://via.placeholder.com/15/6c8088/000000?text=+) `#6c8088` |
 | `$voyansi-support-1` | `colors.scss` | `secondary` | ![#b5c0c9](https://via.placeholder.com/15/b5c0c9/000000?text=+) `#b5c0c9` |
