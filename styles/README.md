@@ -32,12 +32,12 @@ There are `Initial colors`, `Primary colors`, and `Secondary colors`.
 
 Derivate colors uses `Initial colors`, `Primary colors`, and `Secondary colors`. You should use this colors.
 
-| name               | file          | use                  | value                                                                     |
-| ------------------ | ------------- | -------------------- | ------------------------------------------------------------------------- |
-| `$voyansi-primary` | `colors.scss` | `$voyansi-primary-1` | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96` |
-| `$voyansi-link`    | `colors.scss` | `initial`            | ![#dd949a](https://via.placeholder.com/15/dd949a/000000?text=+) `#dd949a` |
-| `$voyansi-info`    | `colors.scss` | `primery`            | ![#d8d8d8](https://via.placeholder.com/15/d8d8d8/000000?text=+) `#d8d8d8` |
-| `$voyansi-success` | `colors.scss` | `primery`            | ![#4fa578](https://via.placeholder.com/15/4fa578/000000?text=+) `#4fa578` |
-| `$voyansi-warning` | `colors.scss` | `support`            | ![#c3e57f](https://via.placeholder.com/15/c3e57f/000000?text=+) `#c3e57f` |
-| `$voyansi-danger`  | `colors.scss` | `support`            | ![#af4db3](https://via.placeholder.com/15/af4db3/000000?text=+) `#af4db3` |
-| `$voyansi-dark`    | `colors.scss` | `support`            | ![#000000](https://via.placeholder.com/15/000000/000000?text=+) `#000000` |
+| name               | file          | is using               | value                                                                     |
+| ------------------ | ------------- | ---------------------- | ------------------------------------------------------------------------- |
+| `$voyansi-primary` | `colors.scss` | `$voyansi-primary-1`   | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96` |
+| `$voyansi-link`    | `colors.scss` | `$voyansi-secondary-6` | ![#dd949a](https://via.placeholder.com/15/dd949a/000000?text=+) `#dd949a` |
+| `$voyansi-info`    | `colors.scss` | `$voyansi-secondary-2` | ![#d8d8d8](https://via.placeholder.com/15/d8d8d8/000000?text=+) `#d8d8d8` |
+| `$voyansi-success` | `colors.scss` | `$voyansi-secondary-3` | ![#4fa578](https://via.placeholder.com/15/4fa578/000000?text=+) `#4fa578` |
+| `$voyansi-warning` | `colors.scss` | `$voyansi-secondary-4` | ![#c3e57f](https://via.placeholder.com/15/c3e57f/000000?text=+) `#c3e57f` |
+| `$voyansi-danger`  | `colors.scss` | `$voyansi-secondary-5` | ![#af4db3](https://via.placeholder.com/15/af4db3/000000?text=+) `#af4db3` |
+| `$voyansi-dark`    | `colors.scss` | `$voyansi-black`       | ![#000000](https://via.placeholder.com/15/000000/000000?text=+) `#000000` |
