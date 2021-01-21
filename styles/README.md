@@ -1,6 +1,7 @@
-![Voyansi](assets/voyansi.png =100x)
+<img src="assets/voyansi.png" lign="left" height="175">
 
 ## Voyansi Styling guide
+
 
 See how styling is using on Voyansi Package Manager.
 
