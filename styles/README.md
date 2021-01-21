@@ -12,18 +12,13 @@ See how styling is using on this project.
 
 There are `Primary colors` in colors.scss. You should use this colors.
 
-| Name                 | File          | Value                                                                     |
-| -------------------- | ------------- | ------------------------------------------------------------------------- |
-| `$voyansi-primary-1` | `colors.scss` | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96` |
-| `$voyansi-primary-2` | `colors.scss` | ![#6c8088](https://via.placeholder.com/15/6c8088/000000?text=+) `#6c8088` |
-
-There are `Secondary colors` in colors.scss. You should use this colors.
-
-| Name                 | File          | Value                                                                     |
-| -------------------- | ------------- | ------------------------------------------------------------------------- |
-| `$voyansi-support-1` | `colors.scss` | ![#b5c0c9](https://via.placeholder.com/15/b5c0c9/000000?text=+) `#b5c0c9` |
-| `$voyansi-support-2` | `colors.scss` | ![#d8d8d8](https://via.placeholder.com/15/d8d8d8/000000?text=+) `#d8d8d8` |
-| `$voyansi-support-3` | `colors.scss` | ![#f4f4f4](https://via.placeholder.com/15/f4f4f4/000000?text=+) `#f4f4f4` |
+| bame                 | file          |             | type                                                                      | value |
+| -------------------- | ------------- | ----------- | ------------------------------------------------------------------------- | ----- |
+| `$voyansi-primary-1` | `colors.scss` | `primery`   | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96` |
+| `$voyansi-primary-2` | `colors.scss` | `primery`   | ![#6c8088](https://via.placeholder.com/15/6c8088/000000?text=+) `#6c8088` |
+| `$voyansi-support-1` | `colors.scss` | `secondary` | ![#b5c0c9](https://via.placeholder.com/15/b5c0c9/000000?text=+) `#b5c0c9` |
+| `$voyansi-support-2` | `colors.scss` | `secondary` | ![#d8d8d8](https://via.placeholder.com/15/d8d8d8/000000?text=+) `#d8d8d8` |
+| `$voyansi-support-3` | `colors.scss` | `secondary` | ![#f4f4f4](https://via.placeholder.com/15/f4f4f4/000000?text=+) `#f4f4f4` |
 
 // Initial colors
 $voyansi-white: black;
