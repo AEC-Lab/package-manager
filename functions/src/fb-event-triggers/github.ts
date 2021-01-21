@@ -116,6 +116,14 @@ async function _removeAuthor(event: any) {
 }
 
 async function _createPackage(repo: any, event: any) {
+  // First make sure a package for the same repo doesn't already exist
+  // (Shouldn't happen, but I've noticed some duplicated GH webhook deliveries)
+  const existingPackage = await db
+    .collection("packages")
+    .where("sourceData.id", "==", repo.id)
+    .get();
+  if (!existingPackage.empty) return;
+
   const newPackageDocRef = db.collection("packages").doc();
   const existingReleases = await getRepoReleases(repo, event);
   const releaseDocIds = await _createReleaseDocs(existingReleases);
