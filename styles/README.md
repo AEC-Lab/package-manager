@@ -1,4 +1,4 @@
-![Voyansi](assets/voyansi.png)
+![Voyansi](assets/voyansi.png =100x)
 
 ## Voyansi Styling guide
 
