@@ -12,7 +12,7 @@ See how styling is using on this project.
 
 There are derivated variables in colors.scss. You should use this colors.
 
-| variable             | file          | value              |
-| -------------------- | ------------- | ------------------ |
-| `$voyansi-primary-1` | `colors.scss` | `Multiple Options` | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96` |
-| `$voyansi-primary-2` | `colors.scss` | `Multiple Options` | ![#6c8088](https://via.placeholder.com/15/6c8088/000000?text=+) `#6c8088` |
+| variable             | file          | value                                                                     |
+| -------------------- | ------------- | ------------------------------------------------------------------------- |
+| `$voyansi-primary-1` | `colors.scss` | [#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96`  |
+| `$voyansi-primary-2` | `colors.scss` | ![#6c8088](https://via.placeholder.com/15/6c8088/000000?text=+) `#6c8088` |
