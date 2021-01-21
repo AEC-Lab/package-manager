@@ -63,7 +63,9 @@ Additional development and hosting platforms (e.g. Azure DevOps, static URL stor
 
 Separate environments are maintained for development and production, including distinct Firebase projects and GitHub Apps. Local development (including the `.env` specified under Project Setup) points to the development version of each of these. A Circle CI pipeline is configured with production environment variables and manages the deployment of app releases.
 
-[![CircleCI](https://circleci.com/gh/AEC-Lab/package-manager/tree/master.svg?style=svg&circle-token=f5e6bedaa0c0dc652b1672d074e38090371780a5)](https://circleci.com/gh/voyansi/package-manager)
+Current production build status:
+
+[![CircleCI](https://circleci.com/gh/voyansi/package-manager/tree/master.svg?style=svg&circle-token=f5e6bedaa0c0dc652b1672d074e38090371780a5)](https://circleci.com/gh/voyansi/package-manager)
 
 ## Project Setup
 
