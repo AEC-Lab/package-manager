@@ -15,7 +15,7 @@ There are `Initial colors`, `Primary colors`, and `Secondary colors`.
 | name                   | file          | type        | value                                                                      |
 | ---------------------- | ------------- | ----------- | -------------------------------------------------------------------------- |
 | `$voyansi-white`       | `colors.scss` | `initial`   | ![#FFFFFF](https://via.placeholder.com/15/FFFFFF/000000?text=+) `#FFFFFF`  |
-| `$$voyansi-black`      | `colors.scss` | `initial`   | ![##000000](https://via.placeholder.com/15/#000000/000000?text=+) `#black` |
+| `$$voyansi-black`      | `colors.scss` | `initial`   | ![#000000](https://via.placeholder.com/15/#000000/000000?text=+) `#000000` |
 | `$voyansi-primary-1`   | `colors.scss` | `primery`   | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96`  |
 | `$voyansi-primary-2`   | `colors.scss` | `primery`   | ![#6c8088](https://via.placeholder.com/15/6c8088/000000?text=+) `#6c8088`  |
 | `$voyansi-support-1`   | `colors.scss` | `support`   | ![#b5c0c9](https://via.placeholder.com/15/b5c0c9/000000?text=+) `#b5c0c9`  |
