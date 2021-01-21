@@ -11,6 +11,7 @@ See how styling is using on Voyansi Package Manager.
 - `components/helpers.scss` contains classes related with `Flexbox`.
 - `components/buttons.scss` contains classes related with buttons. Create a scss file for a component if you think it could have many classes related.
 - `components/generic.scss` contains all the code that are not in the described files.
+- `variables.scss` use this file to modify vuetify sass variables.
 
 ### Color variables
 
