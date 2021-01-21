@@ -1,4 +1,7 @@
 @import "./variables/colors";
+@import "./components/helpers.scss";
+@import "./components/buttons.scss";
+@import "./components/generic.scss";
 
 .vo-container {
   background-color: rgb(255, 255, 255);
