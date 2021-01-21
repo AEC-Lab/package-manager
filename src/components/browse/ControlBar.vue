@@ -1,5 +1,5 @@
 <template>
-  <v-row id="control-bar">
+  <v-row class="vo-control-bar">
     <v-col cols="8">
       <v-toolbar dense floating>
         <v-text-field
@@ -15,7 +15,7 @@
     </v-col>
     <v-spacer />
     <v-col>
-      <v-btn-toggle mandatory v-model="tempDisplayToggle" id="toggle-buttons">
+      <v-btn-toggle mandatory v-model="tempDisplayToggle" class="vo-toggle-buttons">
         <v-btn>
           <v-icon>mdi-view-grid</v-icon>
         </v-btn>
@@ -43,16 +43,4 @@ export default class ControlBar extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-#control-bar {
-  margin-bottom: 30px;
-  // width: 100%;
-
-  #toggle-buttons {
-    // float: right;
-    & > .v-btn {
-      width: 75px;
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

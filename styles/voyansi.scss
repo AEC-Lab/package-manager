@@ -1,3 +1,5 @@
+@import "./variables/colors";
+
 .vo-container {
   background-color: rgb(255, 255, 255);
   height: 100%;
@@ -59,14 +61,12 @@
   margin-bottom: 30px;
   width: 100%;
 
-  //CHECK
-
-  // #toggle-buttons {
-  //   // float: right;
-  //   & > .v-btn {
-  //     width: 75px;
-  //   }
-  // }
+  #toggle-buttons {
+    // float: right;
+    & > .v-btn {
+      width: 75px;
+    }
+  }
 }
 
 #details-container {
@@ -146,5 +146,17 @@ img {
 @keyframes slide-closed {
   100% {
     left: -100%;
+  }
+}
+
+.control-bar {
+  margin-bottom: 30px;
+  width: 100%;
+
+  #toggle-buttons {
+    // float: right;
+    & > .v-btn {
+      width: 75px;
+    }
   }
 }
