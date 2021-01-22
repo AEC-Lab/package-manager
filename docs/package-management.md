@@ -1,3 +1,5 @@
+[Go to Main Page](README.md)
+
 # Package Management
 
 _Guide for package developers and managers_
@@ -6,7 +8,7 @@ Package Manager currently supports packages deployed and hosted through GitHub r
 
 ## Install GitHub App
 
-1. **Install the [Package Manager GitHub App]()** (_link forthcoming_) from the App Marketplace onto either a personal GitHub account or an organization. You will be asked to accept permissions granting the app access to limited scopes for your organization.
+1. **Install the [Package Manager GitHub App]()** (_TODO: get link_) from the App Marketplace onto either a personal GitHub account or an organization. You will be asked to accept permissions granting the app access to limited scopes for your organization.
 
 2. **Set repository access**. Only selected repositories will be available to be published through Package Manager. You may add or remove repositories at any time (note, however, that removing a repository will delete the corresponding package from Package Manager).
 

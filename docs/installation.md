@@ -1,3 +1,5 @@
+[Go to Main Page](README.md)
+
 # Installation
 
 Download and run the `package-manager-setup.exe` file from the latest GitHub release [here](https://github.com/voyansi/package-manager/releases)
