@@ -76,6 +76,37 @@ export const installPackage = async (pkg: Package, release?: GenericObject) => {
   if (!releasePackage) {
     throw new Error("No release found for this package");
   }
+
+  // Check if any dependencies exist and are installed
+  if (pkg.dependencyIds && pkg.dependencyIds.length) {
+    const missingDependencies = findMissingDependencies(pkg);
+    if (missingDependencies.length) {
+      console.log(`Missing ${missingDependencies.length} dependencies: `, missingDependencies);
+      const pkgNameString = missingDependencies
+        .map(
+          (pkg: Package) => `&#8226 ${pkg.name} (${store.getters["authors/getAuthorNameById"](pkg.authorId)})`
+        )
+        .join("\n");
+      const response = await Vue.$confirm(
+        `The following dependencies for this package were not found on your system. Would you like to install them automatically?\n\n${pkgNameString}`,
+        {
+          title: "Package Dependencies",
+          buttonTrueText: "Yes, please!",
+          buttonFalseText: "No thanks",
+          color: "info",
+          icon: ""
+        }
+      );
+      if (response) {
+        // Install missing dependencies
+        Vue.$snackbar.flash({ content: "Installing dependencies...", color: "info" });
+        await Promise.all(missingDependencies.map((pkg: Package) => installPackage(pkg)));
+        Vue.$snackbar.flash({ content: "Dependencies installed. Installing package...", color: "info" });
+        console.log("dependencies installed!");
+      }
+    }
+  }
+
   const { assets, zipball_url } = releasePackage;
   await downloadHandler(assets, releasePackage, pkg);
 
@@ -87,13 +118,11 @@ export const installPackage = async (pkg: Package, release?: GenericObject) => {
     await helpers.validateSchema(instructions);
     // for future support of other package versions
     if (instructions.version == 1) {
-      // 1.  check that dependencies are installed?
-
-      // 2.  check for open processes
+      // 1.  check for open processes
       console.log("checking for processes");
       await checkForProcessesOpen(instructions.processes);
 
-      // 3.  process uninstall
+      // 2.  process uninstall
       const existingInstall: PackageConfigLocal | undefined = store.state.config.localConfig.packages.find(
         (obj: PackageConfigLocal) => obj.packageId === pkg.id
       );
@@ -103,7 +132,7 @@ export const installPackage = async (pkg: Package, release?: GenericObject) => {
         await uninstallOperation(instructions.uninstall, actualPath);
       }
 
-      // 4.  process install
+      // 3.  process install
       console.log("installing based on instructions");
       await installOperation(instructions.install, actualPath, zipball_url, pkg);
     }
@@ -273,8 +302,10 @@ const installOperation = async (
         const extractedDirectoryName = await helpers.extractZip(sourceZipPath, parentPath, true);
         const renameSource = path.join(parentPath, extractedDirectoryName);
         const renameDest = path.join(parentPath, sourcePath);
+        await new Promise(resolve => setTimeout(() => resolve(null), 100)); // delay added to ensure resource available to write to
         fs.renameSync(renameSource, renameDest);
       } catch (error) {
+        console.log(error);
         throw new Error(error);
       }
     } else if (operation.action === "copy") {
@@ -317,4 +348,13 @@ const uninstallOperation = async (operations: GenericObject[], parentPath: strin
     }
   }
   return;
+};
+
+const findMissingDependencies = (pkg: Package) => {
+  // TODO: check for recursive dependencies (i.e., a dependency of a dependency), and merge into one list
+  const installedPackageIds: string[] = store.state.config.localConfig.packages.map(
+    (config: PackageConfigLocal) => config.packageId
+  );
+  const missingPackageIds = pkg.dependencyIds.filter(pkgId => !installedPackageIds.includes(pkgId));
+  return missingPackageIds.map(id => store.getters["packages/getPackageById"](id)).filter(pkg => pkg);
 };
