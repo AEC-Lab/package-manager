@@ -13,10 +13,12 @@ export const createUser = functions.auth.user().onCreate(async (user: admin.auth
     uid: user.uid,
     config: []
   };
-  // If provider is GitHub, and user has no public name, use username for name
-  if (user.providerData[0].providerId === "github.com" && !user.displayName) {
-    payload.name = await getGithubUsername(user.providerData[0].uid);
+  if (user.providerData[0].providerId === "github.com") {
     payload.githubId = parseInt(user.providerData[0].uid);
+    // User has no public name, use username for name
+    if (!user.displayName) {
+      payload.name = await getGithubUsername(user.providerData[0].uid);
+    }
   }
   return await db
     .collection("users")

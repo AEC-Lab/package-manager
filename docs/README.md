@@ -1,82 +1,49 @@
 # Package Manager
 
-_an AEC standard for tool deployment and management_
+_An open-source AEC standard for tool deployment and management_
 
-## Production Build
+[Install the App](installation.md)
 
-[![CircleCI](https://circleci.com/gh/AEC-Lab/package-manager/tree/master.svg?style=svg&circle-token=f5e6bedaa0c0dc652b1672d074e38090371780a5)](https://circleci.com/gh/AEC-Lab/package-manager)
+[Publish and Manage Packages](package-management.md)
+
+[Contribute to Core Development](core-development.md)
 
 ## Overview
 
-_important files_
+<_TODO: insert GIF here_>
 
-```
-├── .circleci               # configuration for automatic testing, build, and deployment
-├── .vscode                 # text editor settings
-├── build                   # build assets (icon, etc.)
-├── functions               # API, backend database management
-│   ├── src                 # typescript source files
-│   └── package.json        # necessary packages for API
-├── src                     # source files for electron application
-│   ├── components          # reusable Vue components
-│   ├── integrations        # third-party integrations (firebase, etc.)
-│   ├── plugins             # Vuetify configuration (colors, themes, etc.)
-│   ├── store               # application state
-│   ├── views               # container views used with routing
-│   ├── router              # routing configuration
-│   ├── App.vue             # entrance to application
-│   └── background.ts       # handles electron's backend event handling (application open, close, etc.)
-├── tests                   # end to end and unit tests
-```
+Package Manager is a community-managed central marketplace to discover, install, manage, and deploy software serving the AEC community. The existing market for third-party tools is scattered, difficult to navigate, and suffers from a disconnect between developer and community. Package Manager seeks to bridge that gap and provide a reliable means to deliver tools directly to their intended audience.
 
-## Project Setup
+### Who is it for?
 
-_you will need a .env file in your root directory with the necessary environment variables_
+Package Manager is designed for all members of the AEC ecosystem:
 
-#### 1. Install Packages
+- **AEC Community**
+  - As an end-user of tools deployed via Package Manager, you can search, discover, and install plugins and tools available in the marketplace. Monitor a list of your installed applications and check for periodic updates. Get additional information about an application.
+- **Developers**
+  - Deploy and share your custom application, plugin, and scripts with the AEC community. Provide useful contextual information and examples. Manage user-facing metadata. Integrate directly with your GitHub code.
+- **Enterprises** _[future implementation]_
+  - Deploy and manage internal tools across your company.
 
-```
-yarn setup
-```
+## Roadmap
 
-#### 2. Serve Application
+The initial release focuses on getting core functionality features off the ground, including GitHub integration, download/install, and basic Admin and Developer views. Future features on our list include:
 
-```
-yarn serve
-```
+- [ ] **Tool analytics**
 
-## Deployment
+  - Provide developers with installation statistics, error logs, and other metrics to help measure success
 
-_Package Manager uses Circle CI to automatically test, build, and release new versions on any commit to the master branch._
+- [ ] **Troubleshooting forum and developer feedback**
 
-## Testing
+  - Offer a space for community conversation to ask questions, report bugs, provide feedback, post reviews, and rate packages
 
-#### Unit
+- [ ] **Create package collections**
 
-```
-yarn test:unit
-```
+  - Define and share a group of packages; highlight interdependent tools; bundle packages needed for your group or organization
 
-#### End To End
+- [ ] **Private enterprise management**
 
-```
-yarn test:e2e
-```
+  - Deploy internal tools available only to members of your company; manage user access and permissions
 
-#### Firebase
-
-In separate terminals:
-
-```
-yarn emulate
-```
-
-```
-yarn test:firebase
-```
-
-## Resources
-
-[Circle Ci](https://app.circleci.com/pipelines/github/AEC-Lab/package-manager)
-[Firebase](https://console.firebase.google.com/u/0/project/package-manager-development/overview)
-[GitHub Applications](https://github.com/organizations/AEC-Lab/settings/installations)
+- [ ] **Paid applications**
+  - Integration with third-party payment systems (e.g. Stripe)

@@ -1,7 +1,7 @@
 import Vue from "vue";
 import Vuetify from "vuetify/lib";
+import VuetifyConfirm from "vuetify-confirm";
 
-Vue.use(Vuetify);
 const vuetify = new Vuetify({
   theme: {
     themes: {
@@ -16,4 +16,9 @@ const vuetify = new Vuetify({
     }
   }
 });
-export default new Vuetify({});
+
+Vue.use(Vuetify);
+
+Vue.use(VuetifyConfirm, { vuetify });
+
+export default vuetify;

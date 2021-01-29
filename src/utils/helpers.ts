@@ -90,7 +90,12 @@ helpers.cachedAssetsExist = async (cacheDirectory: string, packageFile: string):
     if (fs.existsSync(pkgFilePath)) {
       const instructions = fs.readJSONSync(pkgFilePath);
       const assetPaths: string[] = await Promise.all(
-        instructions.uninstall.map((operation: any) => helpers.createActualPath(operation.source))
+        instructions.uninstall
+          .filter((operation: any) => operation.action === "run")
+          .map(
+            async (operation: any) =>
+              await helpers.createActualPath(path.join(cacheDirectory, operation.source))
+          )
       );
       const uninstallSourcesExist = assetPaths.every((path: string) => fs.existsSync(path));
       if (uninstallSourcesExist) return true;

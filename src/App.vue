@@ -54,3 +54,8 @@ export default Vue.extend({
   z-index: 100;
 }
 </style>
+<style lang="scss">
+.v-dialog > .v-card > .v-card__text {
+  white-space: pre-wrap;
+}
+</style>

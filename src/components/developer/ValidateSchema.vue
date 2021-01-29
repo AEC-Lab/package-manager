@@ -70,7 +70,9 @@ export default defineComponent({
         responseMessage.value = response.data;
         responseTypeSuccess.value = true;
       } catch (error) {
-        if (error.response.status === 500) {
+        if (error instanceof SyntaxError) {
+          responseMessage.value = "Unable to parse JSON data";
+        } else if (error.response.status === 500) {
           responseMessage.value = "Server error... please try again later";
         } else if (error.response.status === 400) {
           responseMessage.value = "Invalid schema; see details below";
