@@ -1,14 +1,14 @@
 // Modify Vuetify variables in this file
 // List of sass variables https://vuetifyjs.com/en/api/vuetify/#sass-variables
 
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap");
 
 $body-font-family: "Poppins", serif;
-
-$btn-letter-spacing: 0;
+$btn-font-weight: 300;
 
 //Some variables to modify.
 
+// $btn-letter-spacing: 0;
 // $btn-font-weight: 400;
 // $list-item-title-font-size: 0.929rem;
 // $list-item-dense-title-font-size: 0.929rem;
@@ -30,4 +30,4 @@ $btn-letter-spacing: 0;
 //     'size': 2.25rem,
 //     'line-height': 1.5em
 //   )
-// );
+// style);

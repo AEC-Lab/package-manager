@@ -3,21 +3,11 @@
     <v-expansion-panels id="container">
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <span class="title font-weight-bold">Personal information</span>
+          <span class="voyansi-font-title">Personal information</span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-text-field label="Name" placeholder="Complete your name" outlined v-model="name"></v-text-field>
           <p>Your name may appear around Package Manager when you install a package</p>
-          <br />
-
-          <v-text-field label="Email" placeholder="Set your Email" outlined v-model="email"></v-text-field>
-          <v-text-field
-            label="Password"
-            placeholder="Set your password"
-            type="password"
-            outlined
-            v-model="pass"
-          ></v-text-field>
           <br />
           <v-text-field
             label="Company"
@@ -25,10 +15,11 @@
             outlined
             v-model="company"
           ></v-text-field>
-          <v-text-field label="URL" placeholder="Complete your name" outlined v-model="url"></v-text-field>
+          <v-text-field label="URL" placeholder="Complete the URL" outlined v-model="url"></v-text-field>
+
           <v-text-field
             label="Location"
-            placeholder="Complete your name"
+            placeholder="Complete your Location"
             outlined
             v-model="location"
           ></v-text-field>
@@ -44,20 +35,25 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import { User } from "types/auth";
+import { fireAuth } from "../integrations/firebase";
 
 @Component
 export default class Settings extends Vue {
-  name = "Fran";
-  email = "franp@voyansi.com";
-  pass = "123456";
+  name = this.user.name;
   company = "Voyansi";
   url = "www.voyansi.com";
   location = "US";
+
+  // COMPUTED PROPERTIES
+  get user(): User {
+    return this.$store.state.auth.user;
+  }
 }
 </script>
 <style lang="scss">
 #container {
   background-color: rgb(224, 224, 224);
-  width: 50%;
+  width: 60%;
 }
 </style>

@@ -62,7 +62,7 @@ export default class Register extends Vue {
   mini = true;
   items = [
     { title: "Browse", icon: "mdi-archive" },
-    { title: "Settings", icon: "mdi-cog" },
+    //{ title: "Settings", icon: "mdi-cog" },
     { title: "Admin", icon: "mdi-shield" },
     { title: "Developer", icon: "mdi-lead-pencil" }
   ];

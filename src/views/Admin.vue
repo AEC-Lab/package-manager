@@ -3,7 +3,7 @@
     <v-expansion-panels v-model="panels">
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <span class="title font-weight-bold">Packages</span>
+          <span class="voyansi-font-title">Packages</span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-data-table
@@ -47,12 +47,12 @@
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <span class="title font-weight-bold">Users</span>
+          <span class="voyansi-font-title">Users</span>
         </v-expansion-panel-header>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <span class="title font-weight-bold">Authors</span>
+          <span class="voyansi-font-title">Authors</span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-data-table
@@ -88,7 +88,7 @@
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <span class="title font-weight-bold">Enterprises</span>
+          <span class="voyansi-font-title">Enterprises</span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-data-table
