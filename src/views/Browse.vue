@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container class="vo-browse-container">
+    <v-container class="vo-container">
       <ControlBar :searchText.sync="searchText" :displayToggle.sync="displayToggle" />
       <CardView v-if="displayToggle === 0" :packages="filteredPackages" :showDetails="showDetails" />
       <TableView v-else-if="displayToggle === 1" :packages="filteredPackages" :showDetails="showDetails" />

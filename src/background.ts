@@ -78,6 +78,17 @@ ipcMain.on("check-for-updates", event => {
   autoUpdater.checkForUpdates();
 });
 
+// handle window min/max/close events from title bar
+ipcMain.on("close", () => {
+  app.quit();
+});
+ipcMain.on("minimize", () => {
+  win!.minimize();
+});
+ipcMain.on("maximize", () => {
+  win!.isMaximized() ? win!.unmaximize() : win!.maximize();
+});
+
 // setup authenticator in the main process
 ipcMain.on("authenticate", (event, provider, client) => {
   if (provider === "google") {
@@ -229,7 +240,8 @@ function createWindow() {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean
-    }
+    },
+    frame: false
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {

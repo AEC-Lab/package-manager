@@ -27,3 +27,18 @@ $voyansi-success: $voyansi-secondary-3;
 $voyansi-warning: $voyansi-secondary-4;
 $voyansi-danger: $voyansi-secondary-5;
 $voyansi-dark: $voyansi-black;
+
+// Exports for use in JS code
+:export {
+  voyansi-primary-1: $voyansi-primary-1;
+  voyansi-primary-2: $voyansi-primary-2;
+  voyansi-support-1: $voyansi-support-1;
+  voyansi-support-2: $voyansi-support-2;
+  voyansi-support-3: $voyansi-support-3;
+  voyansi-secondary-1: $voyansi-secondary-1;
+  voyansi-secondary-2: $voyansi-secondary-2;
+  voyansi-secondary-3: $voyansi-secondary-3;
+  voyansi-secondary-4: $voyansi-secondary-4;
+  voyansi-secondary-5: $voyansi-secondary-5;
+  voyansi-secondary-6: $voyansi-secondary-6;
+}

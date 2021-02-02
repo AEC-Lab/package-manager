@@ -1,5 +1,5 @@
 <template>
-  <v-container class="vo-if-container">
+  <v-container class="vo-container">
     <ValidateSchema />
   </v-container>
 </template>

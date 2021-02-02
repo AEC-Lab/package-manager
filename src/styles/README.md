@@ -4,7 +4,7 @@
 
 See how styling is using on Voyansi Package Manager.
 
-### How the classes are structurated:
+### How the classes are structured:
 
 - `voyansi.scss` file links all the file that manage styling. You should not write your styles on this file. it only have to contain `imports`.
 - `variables/colors.scss` file contains variables related with colors. You should use the the derivated `variables`. It is an easy way to understand where the color should be used.
@@ -21,8 +21,8 @@ There are `Initial colors`, `Primary colors`, and `Secondary colors`.
 | ---------------------- | ------------- | ----------- | ------------------------------------------------------------------------- |
 | `$voyansi-white`       | `colors.scss` | `initial`   | ![#FFFFFF](https://via.placeholder.com/15/FFFFFF/000000?text=+) `#FFFFFF` |
 | `$voyansi-black`       | `colors.scss` | `initial`   | ![#000000](https://via.placeholder.com/15/000000/000000?text=+) `#000000` |
-| `$voyansi-primary-1`   | `colors.scss` | `primery`   | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96` |
-| `$voyansi-primary-2`   | `colors.scss` | `primery`   | ![#6c8088](https://via.placeholder.com/15/6c8088/000000?text=+) `#6c8088` |
+| `$voyansi-primary-1`   | `colors.scss` | `primary`   | ![#493e96](https://via.placeholder.com/15/493e96/000000?text=+) `#493e96` |
+| `$voyansi-primary-2`   | `colors.scss` | `primary`   | ![#6c8088](https://via.placeholder.com/15/6c8088/000000?text=+) `#6c8088` |
 | `$voyansi-support-1`   | `colors.scss` | `support`   | ![#b5c0c9](https://via.placeholder.com/15/b5c0c9/000000?text=+) `#b5c0c9` |
 | `$voyansi-support-2`   | `colors.scss` | `support`   | ![#d8d8d8](https://via.placeholder.com/15/d8d8d8/000000?text=+) `#d8d8d8` |
 | `$voyansi-support-3`   | `colors.scss` | `support`   | ![#f4f4f4](https://via.placeholder.com/15/f4f4f4/000000?text=+) `#f4f4f4` |

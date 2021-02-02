@@ -6,16 +6,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap");
 
 .vo-container {
-  background-color: rgb(255, 255, 255);
-  height: 100%;
-  max-width: 100%;
-  padding: 20px;
-  position: absolute;
-  overflow: auto;
-}
-
-.vo-if-container {
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(244, 244, 244);
   height: 100%;
   max-width: 100%;
   padding: 20px;
@@ -29,15 +20,6 @@
   .v-is-failed {
     color: red;
   }
-}
-
-.vo-browse-container {
-  background-color: rgb(224, 224, 224);
-  height: 100%;
-  max-width: 100%;
-  padding: 20px;
-  position: absolute;
-  overflow: auto;
 }
 
 .vo-link {
@@ -71,6 +53,23 @@
     & > .v-btn {
       width: 75px;
     }
+  }
+}
+
+.vo-titlebar {
+  -webkit-app-region: drag;
+
+  .vo-titlebar-title {
+    color: white;
+    font-weight: 300;
+  }
+
+  .vo-titlebar-btn {
+    color: $voyansi-support-1 !important;
+    &:hover {
+      color: white !important;
+    }
+    -webkit-app-region: no-drag;
   }
 }
 
