@@ -1,5 +1,13 @@
 <template>
   <v-app>
+    <v-system-bar window app class="vo-titlebar" color="primary">
+      <v-img class="mr-4" src="@/assets/v-icon-white.png" max-height="30" max-width="30"> </v-img>
+      <span class="vo-titlebar-title">Package Manager</span>
+      <v-spacer></v-spacer>
+      <v-icon @click="minimize" class="vo-titlebar-btn">mdi-minus</v-icon>
+      <v-icon small @click="maximize" class="vo-titlebar-btn">mdi-checkbox-blank-outline</v-icon>
+      <v-icon @click="close" class="vo-titlebar-btn">mdi-close</v-icon>
+    </v-system-bar>
     <!-- <v-app-bar app color="primary" dark></v-app-bar> -->
     <v-main id="router" v-bind:class="{ 'nav-padding': user }">
       <router-view></router-view>
@@ -13,6 +21,7 @@
 import Vue from "vue";
 import Menu from "@/components/Menu.vue";
 import Snackbar from "@/components/Snackbar.vue";
+import { ipcRenderer } from "electron";
 
 // import { Component } from "vue-property-decorator";
 
@@ -38,6 +47,17 @@ export default Vue.extend({
     user() {
       return this.$store.state.auth.user;
     }
+  },
+  methods: {
+    close() {
+      ipcRenderer.send("close");
+    },
+    minimize() {
+      ipcRenderer.send("minimize");
+    },
+    maximize() {
+      ipcRenderer.send("maximize");
+    }
   }
 });
 </script>
@@ -50,7 +70,9 @@ export default Vue.extend({
 }
 #menu {
   position: absolute;
-  height: 100%;
+  top: 32px !important;
+  bottom: 0 !important;
+  height: unset !important;
   z-index: 100;
 }
 </style>

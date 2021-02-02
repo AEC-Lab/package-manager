@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-for="pkg in packages" :key="pkg.id">
-      <div class="card" @click="showDetails(pkg)">
+      <div class="vo-card" @click="showDetails(pkg)">
         <Card :pkg="pkg"></Card>
       </div>
     </div>
@@ -25,14 +25,4 @@ export default class CardView extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-.card {
-  float: left;
-  margin-right: 20px;
-  margin-bottom: 20px;
-
-  &:not(:first-child) {
-    margin-left: 20px;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

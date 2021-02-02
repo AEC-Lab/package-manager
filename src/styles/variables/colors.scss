@@ -1,0 +1,44 @@
+// Initial colors
+$voyansi-white: black;
+$voyansi-black: white;
+
+//Primary Colors
+$voyansi-primary-1: #493e96;
+$voyansi-primary-2: #6c8088;
+
+//Support Colors
+$voyansi-support-1: #b5c0c9;
+$voyansi-support-2: #d8d8d8;
+$voyansi-support-3: #f4f4f4;
+
+//Secondary colors
+$voyansi-secondary-1: #02cad5;
+$voyansi-secondary-2: #c1efe6;
+$voyansi-secondary-3: #4fa578;
+$voyansi-secondary-4: #c3e57f;
+$voyansi-secondary-5: #af4db3;
+$voyansi-secondary-6: #dd949a;
+
+// Derived variables
+$voyansi-primary: $voyansi-primary-1;
+$voyansi-link: $voyansi-secondary-6;
+$voyansi-info: $voyansi-secondary-2;
+$voyansi-success: $voyansi-secondary-3;
+$voyansi-warning: $voyansi-secondary-4;
+$voyansi-danger: $voyansi-secondary-5;
+$voyansi-dark: $voyansi-black;
+
+// Exports for use in JS code
+:export {
+  voyansi-primary-1: $voyansi-primary-1;
+  voyansi-primary-2: $voyansi-primary-2;
+  voyansi-support-1: $voyansi-support-1;
+  voyansi-support-2: $voyansi-support-2;
+  voyansi-support-3: $voyansi-support-3;
+  voyansi-secondary-1: $voyansi-secondary-1;
+  voyansi-secondary-2: $voyansi-secondary-2;
+  voyansi-secondary-3: $voyansi-secondary-3;
+  voyansi-secondary-4: $voyansi-secondary-4;
+  voyansi-secondary-5: $voyansi-secondary-5;
+  voyansi-secondary-6: $voyansi-secondary-6;
+}

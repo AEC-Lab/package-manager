@@ -7,6 +7,7 @@ import router from "./router";
 import store from "./store";
 import vuetify from "./plugins/vuetify";
 import snackbarPlugin from "./plugins/snackbar";
+import "./styles/voyansi.scss";
 
 Vue.use(VueCompositionAPI);
 Vue.use(snackbarPlugin, { store });

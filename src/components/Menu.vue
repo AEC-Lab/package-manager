@@ -1,53 +1,46 @@
 <template>
-  <v-card>
-    <v-navigation-drawer
-      width="200"
-      v-model="drawer"
-      :mini-variant.sync="mini"
-      :expand-on-hover="true"
-      :permanent="true"
-      dark
-    >
-      <v-list dense nav class="py-0">
-        <v-list-item two-line :class="true && 'px-0'">
-          <v-list-item-avatar>
-            <v-avatar color="indigo" size="36">
-              <img v-if="userDisplay.photoURL" :src="userDisplay.photoURL" :alt="userDisplay.initials" />
-              <span v-else>{{ userDisplay.initials }}</span>
-            </v-avatar>
-          </v-list-item-avatar>
+  <v-navigation-drawer
+    width="200"
+    v-model="drawer"
+    :mini-variant.sync="mini"
+    :expand-on-hover="true"
+    :permanent="true"
+    color="primary"
+    dark
+  >
+    <v-list dense nav class="py-0">
+      <v-list-item two-line :class="true && 'px-0'">
+        <v-list-item-avatar>
+          <v-avatar color="indigo" size="36">
+            <img v-if="userDisplay.photoURL" :src="userDisplay.photoURL" :alt="userDisplay.initials" />
+            <span v-else>{{ userDisplay.initials }}</span>
+          </v-avatar>
+        </v-list-item-avatar>
 
+        <v-list-item-content>
+          <v-list-item-title>{{ userDisplay.title }}</v-list-item-title>
+          <v-list-item-subtitle>AEC Lab</v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider></v-divider>
+      <router-link :to="{ name: item.title }" v-for="item in items" :key="item.title" tag="div" class="mb-1">
+        <v-list-item link>
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>{{ userDisplay.title }}</v-list-item-title>
-            <v-list-item-subtitle>AEC Lab</v-list-item-subtitle>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-
-        <v-divider></v-divider>
-        <router-link
-          :to="{ name: item.title }"
-          v-for="item in items"
-          :key="item.title"
-          tag="div"
-          class="mb-1"
-        >
-          <v-list-item link>
-            <v-list-item-icon>
-              <v-icon>{{ item.icon }}</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </router-link>
-      </v-list>
-      <template v-slot:append>
-        <div v-if="!mini" class="pa-2">
-          <v-btn block @click="logout">Logout</v-btn>
-        </div>
-      </template>
-    </v-navigation-drawer>
-  </v-card>
+      </router-link>
+    </v-list>
+    <template v-slot:append>
+      <div v-if="!mini" class="pa-2">
+        <v-btn block color="white" outlined text @click="logout">Logout</v-btn>
+      </div>
+    </template>
+  </v-navigation-drawer>
 </template>
 
 <script lang="ts">
@@ -62,7 +55,7 @@ export default class Register extends Vue {
   mini = true;
   items = [
     { title: "Browse", icon: "mdi-archive" },
-    { title: "Settings", icon: "mdi-cog" },
+    //{ title: "Settings", icon: "mdi-cog" },
     { title: "Admin", icon: "mdi-shield" },
     { title: "Developer", icon: "mdi-lead-pencil" }
   ];
