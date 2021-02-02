@@ -1,18 +1,39 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // This rule allows anyone with your database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
+    function isPackageAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.githubId in getAuthorAdmins(resource.data.authorId)
+    }
+    function isAuthorAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.githubId in resource.data.sourceConfig.github.admins
+    }
+    function getAuthorAdmins(authorId) {
+      return get(/databases/$(database)/documents/authors/$(authorId)).data.sourceConfig.github.admins
+    }
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2021, 8, 21);
+      allow read, write: if false;
+    }
+    match /readonly/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth.uid == userId;
+    }
+    match /packages/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isPackageAdmin();
+    }
+    match /authors/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAuthorAdmin();
+    }
+    match /releases/{docId} {
+      allow read: if request.auth != null;
+    }
+    match /schemas/{docId} {
+      allow read: if request.auth != null;
     }
   }
 }

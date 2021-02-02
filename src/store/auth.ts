@@ -27,18 +27,27 @@ export const mutations: MutationTree<IAuthState> = {
 let unsubscribe: () => void;
 
 export const actions: ActionTree<IAuthState, IRootState> = {
+  /**
+   * On firebase Auth state change, set current user
+   *
+   * @param context - vuex action context
+   * @param user - firebase user
+   */
   async onAuthStateChangedAction(context, user: firebase.User | null) {
     if (user) {
+      console.log(user);
       unsubscribe = await firestore
         .collection("users")
         .doc(user.uid)
         .onSnapshot(snapshot => {
-          const docData = snapshot.data();
+          const docData = snapshot.data() as User;
           const _user: User = {
             email: user.email,
             name: docData?.name,
             roles: docData?.roles,
-            uid: user.uid
+            uid: user.uid,
+            config: docData?.config,
+            githubId: docData?.githubId
           };
           context.commit("setUser", _user);
         });
@@ -47,6 +56,12 @@ export const actions: ActionTree<IAuthState, IRootState> = {
       context.commit("setUser", null);
     }
   },
+  /**
+   * Authenticate through Google
+   *
+   * @throws - authentication error
+   *
+   */
   async loginWithGoogle() {
     try {
       _authenticate("google");
@@ -63,6 +78,15 @@ export const actions: ActionTree<IAuthState, IRootState> = {
       throw error;
     }
   },
+  /**
+   * log in with email and password credentials
+   * @async
+   * @param credentials
+   * @throws account doesn't exist
+   * @throws email not verified
+   * @throws log-in failed
+   * @returns firebase user
+   */
   async loginWithEmailAndPassword(context, credentials: LoginCredentials) {
     if (!(await context.dispatch("checkEmailExists", credentials.email))) {
       throw new Error("No account exists for this email address");
@@ -85,6 +109,12 @@ export const actions: ActionTree<IAuthState, IRootState> = {
       throw error;
     }
   },
+  /**
+   * register the new user with provided credentials in firebase
+   * @async
+   * @param credentials - registration data
+   * @throws registration failed
+   */
   async registerWithEmailAndPassword(context, credentials: RegisterCredentials) {
     try {
       const user = await fireAuth.createUserWithEmailAndPassword(credentials.email, credentials.password);
@@ -106,6 +136,12 @@ export const actions: ActionTree<IAuthState, IRootState> = {
       throw error;
     }
   },
+  /**
+   * check that email is a valid sign-in method
+   * @async
+   * @param email - email to check
+   * @returns if email is a valid sign-in method for this email
+   */
   async checkEmailExists(context, email: string) {
     try {
       const methods: string[] = await fireAuth.fetchSignInMethodsForEmail(email);
@@ -118,6 +154,12 @@ export const actions: ActionTree<IAuthState, IRootState> = {
       return false;
     }
   },
+  /**
+   * send a password reset email through firebase
+   * @async
+   * @param email - email for password reset
+   * @returns if email is successfully sent
+   */
   async sendPasswordResetEmail(context, email: string) {
     try {
       await fireAuth.sendPasswordResetEmail(email);
@@ -127,6 +169,12 @@ export const actions: ActionTree<IAuthState, IRootState> = {
       return false;
     }
   },
+  /**
+   * check if user exists in firebase
+   * @async
+   * @param uid - user id
+   * @returns - if user exists
+   */
   async checkUserDocExists(context, uid: string) {
     const doc = await firestore
       .collection("users")
@@ -137,6 +185,10 @@ export const actions: ActionTree<IAuthState, IRootState> = {
     }
     return doc.exists;
   },
+  /**
+   * log out and unsubscribe from all listeners
+   * @async
+   */
   async logout() {
     try {
       this.commit("unsubscribeAllListeners", null, { root: true });
@@ -160,6 +212,11 @@ export const auth: Module<IAuthState, IRootState> = {
 };
 
 // PRIVATE FUNCTIONS
+/**
+ * Kicks off authentication flow
+ *
+ * @param provider - authenticatin provider
+ */
 function _authenticate(provider: "google" | "github") {
   const authParams = _getAuthParams(provider);
   ipcRenderer.send("authenticate", provider, authParams);
@@ -168,6 +225,12 @@ function _authenticate(provider: "google" | "github") {
   });
 }
 
+/**
+ * Authenticate with firebase usinga sign-in token from the Auth provider
+ *
+ * @param provider - authentication provider
+ * @param tokens - token(s) from the provider
+ */
 async function _signInWithTokens(provider: "google" | "github", tokens: any) {
   let credential: firebase.auth.AuthCredential;
   if (provider === "google") {
@@ -178,6 +241,13 @@ async function _signInWithTokens(provider: "google" | "github", tokens: any) {
   await fireAuth.signInWithCredential(credential);
 }
 
+/**
+ * get Auth parameters from process environment
+ *
+ * @param provider - Auth provider
+ *
+ * @returns - provider id and secret
+ */
 function _getAuthParams(provider: "google" | "github") {
   switch (provider) {
     case "google":

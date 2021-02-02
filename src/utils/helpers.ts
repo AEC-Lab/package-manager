@@ -2,6 +2,8 @@
 import axios from "axios";
 
 import { ipcRenderer } from "electron";
+import fs from "fs-extra";
+import path from "path";
 import { GenericObject } from "types/github";
 import { GithubRepository } from "types/package";
 
@@ -13,10 +15,21 @@ helpers.ownerId = (repository: GenericObject) => {
   return `${owner}/${id}`;
 };
 
+/**
+ * Get the repo owner name
+ *
+ * @param repository
+ *
+ * @returns - full_name of repo owner
+ */
 helpers.ownerName = (repository: GithubRepository) => {
   return repository.full_name;
 };
 
+/**
+ *
+ * @param path
+ */
 helpers.createActualPath = (path: string) => {
   // this function will parse a single environment variable from a string
   // marked with a '$' before the varialbe, and return the string
@@ -56,6 +69,39 @@ helpers.validateSchema = async (schema: GenericObject) => {
       throw new Error("Unknown error: " + error.response.data);
     }
   }
+};
+
+helpers.extractZip = async (sourcePath: string, destPath: string, isGithubSource: boolean) => {
+  return new Promise((resolve, reject) => {
+    ipcRenderer.send("extract-zip", { sourcePath, destPath, isGithubSource });
+    ipcRenderer.once("extract-success", (event, sourceDirectoryName) => {
+      resolve(sourceDirectoryName);
+    });
+    ipcRenderer.once("extract-failure", (event, error) => {
+      console.log(error);
+      reject(error);
+    });
+  });
+};
+
+helpers.cachedAssetsExist = async (cacheDirectory: string, packageFile: string): Promise<boolean> => {
+  if (fs.existsSync(cacheDirectory)) {
+    const pkgFilePath = path.join(cacheDirectory, packageFile);
+    if (fs.existsSync(pkgFilePath)) {
+      const instructions = fs.readJSONSync(pkgFilePath);
+      const assetPaths: string[] = await Promise.all(
+        instructions.uninstall
+          .filter((operation: any) => operation.action === "run")
+          .map(
+            async (operation: any) =>
+              await helpers.createActualPath(path.join(cacheDirectory, operation.source))
+          )
+      );
+      const uninstallSourcesExist = assetPaths.every((path: string) => fs.existsSync(path));
+      if (uninstallSourcesExist) return true;
+    }
+  }
+  return false;
 };
 
 export default helpers;

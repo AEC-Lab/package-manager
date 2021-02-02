@@ -15,7 +15,14 @@ export const state: IPackagesState = {
   isPackageListenerSet: false
 };
 
-export const getters: GetterTree<IPackagesState, IRootState> = {};
+export const getters: GetterTree<IPackagesState, IRootState> = {
+  getPackageAdmins: (state, getters, rootState, rootGetters) => (pkg: Package): number[] => {
+    return rootGetters["authors/getAuthorAdmins"](pkg.authorId);
+  },
+  getPackageById: state => (id: string): Package | null => {
+    return state.packages.find((pkg: Package) => pkg.id === id) || null;
+  }
+};
 
 export const mutations: MutationTree<IPackagesState> = {
   setPackages(state, payload: Package[]) {
@@ -27,6 +34,9 @@ export const mutations: MutationTree<IPackagesState> = {
 };
 
 export const actions: ActionTree<IPackagesState, IRootState> = {
+  /**
+   *  Listen for package changes
+   */
   packagesListener({ commit, dispatch }) {
     if (state.isPackageListenerSet) return;
     try {
@@ -57,6 +67,11 @@ export const actions: ActionTree<IPackagesState, IRootState> = {
       console.error(error);
     }
   },
+  /**
+   * Update package metadata in firebase
+   * @param payload - package to update
+   * @returns if package is updated successfully
+   */
   async updatePackageData(context, payload: Package) {
     try {
       const srcData = payload.sourceData as GithubRepository;
@@ -72,12 +87,14 @@ export const actions: ActionTree<IPackagesState, IRootState> = {
           website: payload.website,
           status: payload.status,
           visibility: payload.visibility,
-          "sourceData.releaseSetting": srcData.releaseSetting
+          "sourceData.releaseSetting": srcData.releaseSetting,
+          dependencyIds: payload.dependencyIds
         });
       Vue.$snackbar.flash({ content: "Package updated", color: "success" });
       return true;
     } catch (error) {
-      Vue.$snackbar.flash({ content: `Error - ${error}`, color: "danger" });
+      Vue.$snackbar.flash({ content: `Error - ${error}`, color: "error" });
+      console.error(error);
       return false;
     }
   }

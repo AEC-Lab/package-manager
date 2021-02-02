@@ -15,7 +15,7 @@
     <v-row class="d-flex align-center mb-4">
       <v-col>
         <v-btn @click="validateSchema" :loading="validating" :disabled="!isFileValid">Validate</v-btn>
-        <span class="text-subtitle-1 ml-4" :class="responseTypeSuccess ? 'is-success' : 'is-failed'">{{
+        <span class="text-subtitle-1 ml-4" :class="responseTypeSuccess ? 'v-is-success' : 'v-is-failed'">{{
           responseMessage
         }}</span>
       </v-col>
@@ -65,12 +65,14 @@ export default defineComponent({
       validating.value = true;
       try {
         const payload = JSON.parse(await testFile.value!.text());
-        const uri = "https://us-central1-package-manager-development.cloudfunctions.net/validate";
+        const uri = `${process.env.VUE_APP_API}/validate`;
         const response = await axios.post(uri, payload);
         responseMessage.value = response.data;
         responseTypeSuccess.value = true;
       } catch (error) {
-        if (error.response.status === 500) {
+        if (error instanceof SyntaxError) {
+          responseMessage.value = "Unable to parse JSON data";
+        } else if (error.response.status === 500) {
           responseMessage.value = "Server error... please try again later";
         } else if (error.response.status === 400) {
           responseMessage.value = "Invalid schema; see details below";
@@ -108,20 +110,4 @@ export default defineComponent({
   }
 });
 </script>
-<style lang="scss" scoped>
-#container {
-  background-color: rgb(255, 255, 255);
-  height: 100%;
-  max-width: 100%;
-  padding: 20px;
-  position: absolute;
-  overflow: auto;
-
-  .is-success {
-    color: green;
-  }
-  .is-failed {
-    color: red;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

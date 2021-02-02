@@ -20,6 +20,15 @@
             :value="setting.value"
           ></v-radio>
         </v-radio-group>
+        <v-autocomplete
+          v-model="packageTemp.dependencyIds"
+          chips
+          deletable-chips
+          multiple
+          label="Package Dependencies"
+          :search-input.sync="dependencySearch"
+          :items="packages"
+        ></v-autocomplete>
         <v-combobox
           v-model="packageTemp.tags"
           :items="existingTags"
@@ -53,7 +62,7 @@
             </v-chip>
           </template>
         </v-combobox>
-        <v-text-field v-model="packageTemp.images" label="Website URL"></v-text-field>
+        <v-text-field v-model="packageTemp.website" label="Website URL"></v-text-field>
         <v-text-field
           v-model="imageInput"
           :append-outer-icon="imageInput && 'mdi-plus-thick'"
@@ -64,14 +73,16 @@
           @click:append-outer="addImage"
           @click:clear="clearImageInput"
         ></v-text-field>
-        <v-row class="" justify="start">
-          <div v-for="(image, index) in packageTemp.images" :key="image" class="mr-4">
+        <!-- <v-row class="" justify="start"> -->
+        <draggable v-model="packageTemp.images" class="row ml-0">
+          <div v-for="(image, index) in packageTemp.images" :key="image" class="mr-4 img-draggable">
             <v-icon @click="removeImage(index)">mdi-close</v-icon>
             <div class="img-wrapper">
               <img :src="image" alt="" />
             </div>
           </div>
-        </v-row>
+        </draggable>
+        <!-- </v-row> -->
         <v-switch
           v-model="packageTemp.status"
           :label="displayStatus"
@@ -88,10 +99,13 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import _ from "lodash";
+import draggable from "vuedraggable";
 import { GithubRepository, Package } from "../../../types/package";
 import { PackageStatus, PackageVisibility, PackageReleaseSetting, PackageSource } from "../../../types/enums";
 
-@Component
+@Component({
+  components: { draggable }
+})
 export default class PackageEdit extends Vue {
   PackageStatus = PackageStatus;
   PackageSource = PackageSource;
@@ -110,6 +124,7 @@ export default class PackageEdit extends Vue {
     "Drawing Management"
   ];
   tagSearch: string | null = null;
+  dependencySearch: string | null = null;
   imageInput = "";
 
   packageTemp: Package = this.defaultPackageData();
@@ -131,6 +146,16 @@ export default class PackageEdit extends Vue {
       (key: string) => (PackageStatus as any)[key] === this.packageTemp.status
     );
   }
+  get packages() {
+    return this.$store.state.packages.packages
+      .filter((pkg: Package) => pkg.id !== this.packageTemp.id)
+      .map((pkg: Package) => {
+        return {
+          text: `${pkg.name} (${this.$store.getters["authors/getAuthorNameById"](pkg.authorId)})`,
+          value: pkg.id
+        };
+      });
+  }
 
   // METHODS
   defaultPackageData(): Package {
@@ -145,7 +170,8 @@ export default class PackageEdit extends Vue {
       status: PackageStatus.Inactive,
       visibility: PackageVisibility.Private,
       source: PackageSource.Github,
-      sourceData: {}
+      sourceData: {},
+      dependencyIds: []
     };
   }
 
@@ -168,8 +194,8 @@ export default class PackageEdit extends Vue {
 
   async save() {
     try {
-      await this.$store.dispatch("packages/updatePackageData", this.packageTemp);
-      this.$router.push("/admin");
+      const success = await this.$store.dispatch("packages/updatePackageData", this.packageTemp);
+      if (success) this.$router.push("/admin");
     } catch (error) {
       console.log(error);
     }
@@ -195,16 +221,24 @@ export default class PackageEdit extends Vue {
   overflow: auto;
 }
 
-img {
-  max-width: 100%;
-  max-height: 100%;
-  display: block;
-}
+.img-draggable {
+  &:first-child {
+    .img-wrapper {
+      border: 2px solid black;
+    }
+  }
 
-.img-wrapper {
-  height: 80px;
-  &:not(:last-child) {
-    margin-right: 8px;
+  .img-wrapper {
+    height: 80px;
+    border: 1px solid rgb(192, 192, 192);
+    &:not(:last-child) {
+      margin-right: 8px;
+    }
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+    }
   }
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container id="browse-container">
+    <v-container class="vo-container">
       <ControlBar :searchText.sync="searchText" :displayToggle.sync="displayToggle" />
       <CardView v-if="displayToggle === 0" :packages="filteredPackages" :showDetails="showDetails" />
       <TableView v-else-if="displayToggle === 1" :packages="filteredPackages" :showDetails="showDetails" />
@@ -78,13 +78,4 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-#browse-container {
-  background-color: rgb(224, 224, 224);
-  height: 100%;
-  max-width: 100%;
-  padding: 20px;
-  position: absolute;
-  overflow: auto;
-}
-</style>
+<style lang="scss"></style>

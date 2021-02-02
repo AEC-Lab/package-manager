@@ -1,9 +1,9 @@
 <template>
-  <v-container id="container">
+  <v-container class="vo-container">
     <v-expansion-panels v-model="panels">
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <span class="title font-weight-bold">Packages</span>
+          <span class="voyansi-font-title">Packages</span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-data-table
@@ -47,12 +47,12 @@
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <span class="title font-weight-bold">Users</span>
+          <span class="voyansi-font-title">Users</span>
         </v-expansion-panel-header>
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <span class="title font-weight-bold">Authors</span>
+          <span class="voyansi-font-title">Authors</span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-data-table
@@ -88,7 +88,7 @@
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <span class="title font-weight-bold">Enterprises</span>
+          <span class="voyansi-font-title">Enterprises</span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-data-table
@@ -155,11 +155,6 @@ export default class Admin extends Vue {
     { text: "", value: "edit" }
   ];
 
-  // authors = [
-  //   { name: "Voyansi", id: 1, sources: ["GitHub"], packageCount: 14 },
-  //   { name: "John Smith (me)", id: 2, sources: ["GitHub", "URL"], packageCount: 3 }
-  // ];
-
   enterprises = [
     { name: "Salesforce", id: 1, memberCount: 257, packageCount: 6 },
     { name: "Voyansi", id: 2, memberCount: 144, packageCount: 11 },
@@ -169,11 +164,17 @@ export default class Admin extends Vue {
 
   // COMPUTED PROPERTIES
   get packages(): Package[] {
-    return this.$store.state.packages.packages;
+    return this.$store.state.packages.packages.filter((pkg: Package) => {
+      const packageAdmins = this.$store.getters["packages/getPackageAdmins"](pkg);
+      return packageAdmins.includes(this.$store.state.auth.user.githubId);
+    });
   }
 
   get authors() {
-    return this.$store.state.authors.authors;
+    return this.$store.state.authors.authors.filter((author: Author) => {
+      const authorAdmins = this.$store.getters["authors/getAuthorAdmins"](author.id);
+      return authorAdmins.includes(this.$store.state.auth.user.githubId);
+    });
   }
 
   // METHOD
@@ -194,13 +195,4 @@ export default class Admin extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-#container {
-  background-color: rgb(255, 255, 255);
-  height: 100%;
-  max-width: 100%;
-  padding: 20px;
-  position: absolute;
-  overflow: auto;
-}
-</style>
+<style lang="scss" scoped></style>

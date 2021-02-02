@@ -10,7 +10,17 @@
           {{ pkg.description }}
         </div>
         <br /><br />
+        <div class="text-caption">Tags:</div>
+        <br />
         <v-chip v-for="tag in pkg.tags" :key="tag" class="mr-2">{{ tag }}</v-chip>
+        <div v-if="pkg.dependencyIds.length">
+          <br /><br />
+          <div class="text-caption">Dependencies:</div>
+          <br />
+          <v-chip v-for="dependencyId in pkg.dependencyIds" :key="dependencyId" class="mr-2">{{
+            getDependencyDisplayName(dependencyId)
+          }}</v-chip>
+        </div>
       </v-col>
       <v-col id="detail-specs">
         <!-- <v-btn class="mb-4">Install</v-btn> -->
@@ -184,10 +194,16 @@ export default defineComponent({
       } catch (error) {
         context.root.$snackbar.flash({
           content: `${error} - ${props.pkg.name}`,
-          color: "danger"
+          color: "error"
         });
       }
       isLoading.value = false;
+    }
+
+    function getDependencyDisplayName(packageId: string): string {
+      const pkg: Package = context.root.$store.getters["packages/getPackageById"](packageId);
+      const authorName: string = context.root.$store.getters["authors/getAuthorNameById"](pkg.authorId);
+      return `${pkg.name} (${authorName})`;
     }
 
     return {
@@ -204,90 +220,11 @@ export default defineComponent({
       latestRelease,
       latestReleaseVersion,
       latestReleaseDate,
-      buttonConfig
+      buttonConfig,
+      getDependencyDisplayName
     };
   }
 });
 </script>
 
-<style lang="scss">
-#details-container {
-  background-color: rgb(255, 255, 255);
-  height: 100%;
-  width: 100%;
-  max-width: 100%;
-  padding: 20px;
-  position: absolute;
-  z-index: 10;
-  left: -100%;
-  overflow: auto;
-  animation: slide-open 0.6s forwards;
-  &.closed {
-    left: 0;
-    animation: slide-closed 0.5s forwards;
-  }
-
-  .back-btn {
-    color: rgb(192, 192, 192);
-    &:hover {
-      color: black;
-    }
-  }
-
-  #detail-specs {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .main-btn {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    // padding-right: 2px !important;
-    flex: 1;
-  }
-  .actions-btn {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    padding: 0 !important;
-    min-width: 35px !important;
-    margin-left: -3.5px;
-  }
-  .split-btn {
-    display: inline-block;
-    display: flex;
-  }
-}
-.release-item {
-  padding: 0;
-  cursor: pointer;
-  &:hover {
-    background-color: rgb(222, 222, 222);
-  }
-  &:not(:last-child) {
-    border-bottom: 1px solid rgb(192, 192, 192);
-  }
-}
-
-img {
-  max-width: 100%;
-  max-height: 100%;
-  display: block;
-}
-
-.img-wrapper {
-  height: 120px;
-  cursor: pointer;
-}
-
-@keyframes slide-open {
-  100% {
-    left: 0;
-  }
-}
-
-@keyframes slide-closed {
-  100% {
-    left: -100%;
-  }
-}
-</style>
+<style lang="scss"></style>

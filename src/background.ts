@@ -17,6 +17,7 @@ import { google } from "googleapis";
 import { ipcMain } from "electron";
 import fetch from "node-fetch";
 import fs from "fs";
+import extract from "extract-zip";
 import { PackageConfigFile } from "types/config";
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -75,6 +76,17 @@ ipcMain.on("check-for-updates", event => {
 
   autoUpdater.setFeedURL(data as any);
   autoUpdater.checkForUpdates();
+});
+
+// handle window min/max/close events from title bar
+ipcMain.on("close", () => {
+  app.quit();
+});
+ipcMain.on("minimize", () => {
+  win!.minimize();
+});
+ipcMain.on("maximize", () => {
+  win!.isMaximized() ? win!.unmaximize() : win!.maximize();
 });
 
 // setup authenticator in the main process
@@ -148,21 +160,39 @@ ipcMain.on("authenticate", (event, provider, client) => {
   }
 });
 
-// Handle downloads for private repo assets
-ipcMain.on("download-private-asset", async (event, info) => {
+// Handle downloads for github repo assets and source code
+ipcMain.on("download-github-asset", async (event, info) => {
   try {
     const response = await fetch(info.url, {
       headers: {
-        Accept: "application/octet-stream",
+        Accept: info.acceptType,
         Authorization: `Bearer ${info.token}`
       },
       redirect: "manual" // prevents automatic redirect with returns 400 response
     });
     const redirectUrl = response.headers.get("location"); // URL it would otherwise redirect to (AWS S3 bucket)
     if (response.status === 302 && redirectUrl) {
-      // Download asset with fully-authenticated download url (NO auth headers to add)
+      // 302 found redirects, e.g. to storage bucket; download asset with fully-authenticated download url (NO auth headers to add)
       const dl = await download(win!, redirectUrl, info.properties);
       win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
+    } else if (response.status === 301 && redirectUrl) {
+      // 301 permanent redirects, e.g. when a repo name has changed
+
+      const response2 = await fetch(redirectUrl, {
+        headers: {
+          Accept: info.acceptType,
+          Authorization: `Bearer ${info.token}`
+        },
+        redirect: "manual" // prevents automatic redirect with returns 400 response
+      });
+      const redirectUrl2 = response2.headers.get("location");
+      if (response2.status === 302 && redirectUrl2) {
+        const dl = await download(win!, redirectUrl2, info.properties);
+        win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
+      } else {
+        const dl = await download(win!, redirectUrl, info.properties);
+        win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
+      }
     } else {
       win!.webContents.send(
         `download-failure-${info.assetId}`,
@@ -171,7 +201,22 @@ ipcMain.on("download-private-asset", async (event, info) => {
     }
   } catch (err) {
     console.log(err);
-    win!.webContents.send("download-failure", err);
+    win!.webContents.send(`download-failure-${info.assetId}`, err);
+  }
+});
+
+ipcMain.on("extract-zip", async (event, info) => {
+  try {
+    let dirName: string | null = null;
+    await extract(info.sourcePath, {
+      dir: info.destPath,
+      onEntry: (entry, zipFile) => {
+        dirName = dirName || entry.fileName;
+      }
+    });
+    win!.webContents.send("extract-success", info.isGithubSource ? dirName : null);
+  } catch (error) {
+    win!.webContents.send("extract-failure", error);
   }
 });
 
@@ -213,7 +258,8 @@ function createWindow() {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean
-    }
+    },
+    frame: false
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {

@@ -19,6 +19,12 @@ export const getters: GetterTree<IAuthorsState, IRootState> = {
   getAuthorNameById: state => (authorId: string): string => {
     const author = state.authors.find(author => author.id === authorId);
     return author ? author.name : "Unknown";
+  },
+  getAuthorAdmins: state => (authorId: string): number[] => {
+    const author = state.authors.find(author => author.id === authorId);
+    if (author && author.sourceConfig.github) {
+      return author.sourceConfig.github.admins;
+    } else return [];
   }
 };
 
@@ -32,6 +38,9 @@ export const mutations: MutationTree<IAuthorsState> = {
 };
 
 export const actions: ActionTree<IAuthorsState, IRootState> = {
+  /**
+   * attach listeners for Author changes
+   */
   authorsListener({ commit }) {
     if (state.isAuthorListenerSet) return;
     try {
@@ -46,6 +55,11 @@ export const actions: ActionTree<IAuthorsState, IRootState> = {
       console.error(error);
     }
   },
+  /**
+   * Update Author metadata in firebase
+   * @param payload - Author metadata
+   * @returns if update waas successful
+   */
   async updateAuthorData(context, payload: Author) {
     try {
       // update editable fields only
@@ -61,7 +75,8 @@ export const actions: ActionTree<IAuthorsState, IRootState> = {
       Vue.$snackbar.flash({ content: "Author updated", color: "success" });
       return true;
     } catch (error) {
-      Vue.$snackbar.flash({ content: `Error - ${error}`, color: "danger" });
+      Vue.$snackbar.flash({ content: `Error - ${error}`, color: "error" });
+      console.error(error);
       return false;
     }
   }

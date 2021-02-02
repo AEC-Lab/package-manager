@@ -114,8 +114,4 @@ export default class ResetPassword extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-#snackText {
-  color: teal;
-}
-</style>
+<style lang="scss" scoped></style>

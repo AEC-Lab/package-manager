@@ -1,58 +1,49 @@
 # Package Manager
-*an AEC standard for tool deployment and management*
 
-## Production Build
-[![CircleCI](https://circleci.com/gh/AEC-Lab/package-manager/tree/master.svg?style=svg&circle-token=f5e6bedaa0c0dc652b1672d074e38090371780a5)](https://circleci.com/gh/AEC-Lab/package-manager)
+_An open-source AEC standard for tool deployment and management_
+
+[Install the App](installation.md)
+
+[Publish and Manage Packages](package-management.md)
+
+[Contribute to Core Development](core-development.md)
 
 ## Overview
-*important files*
-```
-├── .circleci               # configuration for automatic testing, build, and deployment 
-├── .vscode                 # text editor settings
-├── build                   # build assets (icon, etc.)
-├── functions               # API, backend database management
-│   ├── src                 # typescript source files
-│   └── package.json        # necessary packages for API
-├── src                     # source files for electron application
-│   ├── components          # reusable Vue components
-│   ├── integrations        # third-party integrations (firebase, etc.)
-│   ├── plugins             # Vuetify configuration (colors, themes, etc.)
-│   ├── store               # application state
-│   ├── views               # container views used with routing
-│   ├── router              # routing configuration
-│   ├── App.vue             # entrance to application
-│   └── background.ts       # handles electron's backend event handling (application open, close, etc.)
-├── tests                   # end to end and unit tests
-```
 
-## Project Setup
-*you will need a .env file in your root directory with the necessary environment variables*
+<_TODO: insert GIF here_>
 
-#### 1. Install Packages
-```
-yarn setup
-```
+Package Manager is a community-managed central marketplace to discover, install, manage, and deploy software serving the AEC community. The existing market for third-party tools is scattered, difficult to navigate, and suffers from a disconnect between developer and community. Package Manager seeks to bridge that gap and provide a reliable means to deliver tools directly to their intended audience.
 
-#### 2. Serve Application
-```
-yarn serve
-```
-## Deployment
-*Package Manager uses Circle CI to automatically test, build, and release new versions on any commit to the master branch.*
+### Who is it for?
 
-## Testing
+Package Manager is designed for all members of the AEC ecosystem:
 
-#### Unit
-```
-yarn test:unit
-```
+- **AEC Community**
+  - As an end-user of tools deployed via Package Manager, you can search, discover, and install plugins and tools available in the marketplace. Monitor a list of your installed applications and check for periodic updates. Get additional information about an application.
+- **Developers**
+  - Deploy and share your custom application, plugin, and scripts with the AEC community. Provide useful contextual information and examples. Manage user-facing metadata. Integrate directly with your GitHub code.
+- **Enterprises** _[future implementation]_
+  - Deploy and manage internal tools across your company.
 
-#### End To End
-```
-yarn test:e2e
-```
+## Roadmap
 
-## Resources
-[Circle Ci](https://app.circleci.com/pipelines/github/AEC-Lab/package-manager)
-[Firebase](https://console.firebase.google.com/u/0/project/package-manager-development/overview)
-[GitHub Applications](https://github.com/organizations/AEC-Lab/settings/installations)
+The initial release focuses on getting core functionality features off the ground, including GitHub integration, download/install, and basic Admin and Developer views. Future features on our list include:
+
+- [ ] **Tool analytics**
+
+  - Provide developers with installation statistics, error logs, and other metrics to help measure success
+
+- [ ] **Troubleshooting forum and developer feedback**
+
+  - Offer a space for community conversation to ask questions, report bugs, provide feedback, post reviews, and rate packages
+
+- [ ] **Create package collections**
+
+  - Define and share a group of packages; highlight interdependent tools; bundle packages needed for your group or organization
+
+- [ ] **Private enterprise management**
+
+  - Deploy internal tools available only to members of your company; manage user access and permissions
+
+- [ ] **Paid applications**
+  - Integration with third-party payment systems (e.g. Stripe)
