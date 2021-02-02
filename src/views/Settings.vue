@@ -51,7 +51,7 @@ export default class Settings extends Vue {
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 #container {
   background-color: rgb(224, 224, 224);
   width: 60%;

@@ -15,7 +15,7 @@
     <v-row class="d-flex align-center mb-4">
       <v-col>
         <v-btn @click="validateSchema" :loading="validating" :disabled="!isFileValid">Validate</v-btn>
-        <span class="text-subtitle-1 ml-4" :class="responseTypeSuccess ? 'is-success' : 'is-failed'">{{
+        <span class="text-subtitle-1 ml-4" :class="responseTypeSuccess ? 'v-is-success' : 'v-is-failed'">{{
           responseMessage
         }}</span>
       </v-col>
@@ -110,20 +110,4 @@ export default defineComponent({
   }
 });
 </script>
-<style lang="scss" scoped>
-#container {
-  background-color: rgb(255, 255, 255);
-  height: 100%;
-  max-width: 100%;
-  padding: 20px;
-  position: absolute;
-  overflow: auto;
-
-  .is-success {
-    color: green;
-  }
-  .is-failed {
-    color: red;
-  }
-}
-</style>
+<style lang="scss" scoped></style>
