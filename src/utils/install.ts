@@ -302,6 +302,10 @@ const installOperation = async (
         const extractedDirectoryName = await helpers.extractZip(sourceZipPath, parentPath, true);
         const renameSource = path.join(parentPath, extractedDirectoryName);
         const renameDest = path.join(parentPath, sourcePath);
+        // Remove existing source code folder if exists from previous install, otherwise rename will fail
+        if (fs.existsSync(renameDest)) {
+          fs.removeSync(renameDest);
+        }
         await new Promise(resolve => setTimeout(() => resolve(null), 100)); // delay added to ensure resource available to write to
         fs.renameSync(renameSource, renameDest);
       } catch (error) {

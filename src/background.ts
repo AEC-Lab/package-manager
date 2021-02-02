@@ -172,9 +172,27 @@ ipcMain.on("download-github-asset", async (event, info) => {
     });
     const redirectUrl = response.headers.get("location"); // URL it would otherwise redirect to (AWS S3 bucket)
     if (response.status === 302 && redirectUrl) {
-      // Download asset with fully-authenticated download url (NO auth headers to add)
+      // 302 found redirects, e.g. to storage bucket; download asset with fully-authenticated download url (NO auth headers to add)
       const dl = await download(win!, redirectUrl, info.properties);
       win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
+    } else if (response.status === 301 && redirectUrl) {
+      // 301 permanent redirects, e.g. when a repo name has changed
+
+      const response2 = await fetch(redirectUrl, {
+        headers: {
+          Accept: info.acceptType,
+          Authorization: `Bearer ${info.token}`
+        },
+        redirect: "manual" // prevents automatic redirect with returns 400 response
+      });
+      const redirectUrl2 = response2.headers.get("location");
+      if (response2.status === 302 && redirectUrl2) {
+        const dl = await download(win!, redirectUrl2, info.properties);
+        win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
+      } else {
+        const dl = await download(win!, redirectUrl, info.properties);
+        win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
+      }
     } else {
       win!.webContents.send(
         `download-failure-${info.assetId}`,
