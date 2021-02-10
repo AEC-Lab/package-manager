@@ -87,9 +87,10 @@ All PRs are validated for linting and TypeScript errors by the Circle CI pipelin
 
 When creating/submitting a PR, be sure to:
 
-1. Give the PR a helpful name, and describe the changes made and the reasons for them
-2. Reference any issues that were resolved using the `#` tag
-3. Request a review from a repository admin
+1. Choose `dev` as the target branch to merge into
+2. Give the PR a helpful name, and describe the changes made and the reasons for them
+3. Reference any issues that were resolved using the `#` tag
+4. Request a review from a repository admin
 
 ## Project Setup
 
