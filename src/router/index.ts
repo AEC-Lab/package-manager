@@ -50,6 +50,17 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
+    path: "/help",
+    beforeEnter() {
+      // Change redirect link to actual help page
+      window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    },
+    name: "Help",
+    meta: {
+      requiresAuth: false
+    }
+  },
+  {
     path: "/login",
     name: "Login",
     component: Login

@@ -12,6 +12,18 @@
         :color="buttonConfig.color"
         @click="e => installActionHandlerWrapper(e, pkg, buttonConfig.handler)"
       >
+        <template v-slot:loader>
+          <v-progress-linear
+            :active="show"
+            color="accent"
+            absolute
+            bottom
+            rounded
+            indeterminate
+            height="100%"
+          >
+          </v-progress-linear>
+        </template>
         {{ buttonConfig.text }}
       </v-btn>
     </v-card-actions>
@@ -19,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from "vue-property-decorator";
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 import { getButtonConfig } from "../utils/install";
 import { Package } from "types/package";
 
@@ -29,6 +41,7 @@ export default class Card extends Vue {
 
   // DATA PROPERTIES
   isLoading = false;
+  value = "0";
 
   // COMPUTED PROPERTIES
   get buttonConfig() {
@@ -42,10 +55,16 @@ export default class Card extends Vue {
       return "https://avatars0.githubusercontent.com/in/88051?s=120&u=447b1928428587566a78aa1aadba9283685b23e4&v=4";
   }
 
+  // @Watch("value")
+  // onPropertyChanged(value: string, oldValue: string) {
+
+  // }
+
   // METHODS
   async installActionHandlerWrapper(event: Event, pkg: Package, handler: Function) {
     this.isLoading = true;
     await handler(event, pkg);
+    this.value = "100";
     this.isLoading = false;
   }
 }
