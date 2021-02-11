@@ -69,6 +69,29 @@ Current production build status:
 
 [![CircleCI](https://circleci.com/gh/voyansi/package-manager/tree/master.svg?style=svg&circle-token=f5e6bedaa0c0dc652b1672d074e38090371780a5)](https://circleci.com/gh/voyansi/package-manager)
 
+## Git Workflow
+
+The latest development features will be consolidated in the `dev` branch. Repository admins will periodically issue new releases by merging `dev` into `master`.
+
+To contribute changes, create a new branch from `dev`. **Please do not work directly on the `dev` or `master` branches.**
+
+#### Branch Naming
+
+For new features: `feature-<feature name>`, e.g. `feature-update-user-schema`
+
+for bug fixes: `fix-<bug name>`, e.g. `fix-duplicate-login-credentials`
+
+#### Pull Requests
+
+All PRs are validated for linting and TypeScript errors by the Circle CI pipeline. Make sure to fix any warnings/errors you see in the development server console before submitting a pull request. PRs that fail the CI check cannot be approved until they pass.
+
+When creating/submitting a PR, be sure to:
+
+1. Choose `dev` as the target branch to merge into
+2. Give the PR a helpful name, and describe the changes made and the reasons for them
+3. Reference any issues that were resolved using the `#` tag
+4. Request a review from a repository admin
+
 ## Project Setup
 
 Be sure you have **Yarn** (version 1) and the **Firebase CLI** installed globally.
