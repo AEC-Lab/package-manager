@@ -173,7 +173,10 @@ ipcMain.on("download-github-asset", async (event, info) => {
     const redirectUrl = response.headers.get("location"); // URL it would otherwise redirect to (AWS S3 bucket)
     if (response.status === 302 && redirectUrl) {
       // 302 found redirects, e.g. to storage bucket; download asset with fully-authenticated download url (NO auth headers to add)
-      const dl = await download(win!, redirectUrl, info.properties);
+      const dl = await download(win!, redirectUrl, {
+        ...info.properties,
+        onProgress: progress => console.log("Transferred: " + progress.percent)
+      });
       win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
     } else if (response.status === 301 && redirectUrl) {
       // 301 permanent redirects, e.g. when a repo name has changed
@@ -187,10 +190,16 @@ ipcMain.on("download-github-asset", async (event, info) => {
       });
       const redirectUrl2 = response2.headers.get("location");
       if (response2.status === 302 && redirectUrl2) {
-        const dl = await download(win!, redirectUrl2, info.properties);
+        const dl = await download(win!, redirectUrl2, {
+          ...info.properties,
+          onProgress: progress => console.log("Transferred: " + progress.percent)
+        });
         win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
       } else {
-        const dl = await download(win!, redirectUrl, info.properties);
+        const dl = await download(win!, redirectUrl, {
+          ...info.properties,
+          onProgress: progress => console.log("Transferred: " + progress.percent)
+        });
         win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
       }
     } else {
