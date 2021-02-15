@@ -2,7 +2,7 @@
 
 ## Voyansi Styling guide
 
-See how styling is using on Voyansi Package Manager.
+See how styling is using on Voyansi Ship.
 
 ### How the classes are structured:
 

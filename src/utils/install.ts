@@ -13,7 +13,7 @@ import { spawnSync } from "child_process";
 import psList from "ps-list";
 import helpers from "../utils/helpers";
 
-const PACKAGE_FILE = "manage.package";
+const PACKAGE_FILE = "package.ship";
 import Vue from "../main";
 import { Package } from "types/package";
 

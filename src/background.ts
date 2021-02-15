@@ -69,8 +69,8 @@ ipcMain.on("check-for-updates", event => {
 
   const data = {
     provider: "github",
-    owner: "AEC-Lab",
-    repo: "package-manager",
+    owner: "voyansi",
+    repo: "ship",
     token: process.env.GH_TOKEN
   };
 
@@ -110,9 +110,7 @@ ipcMain.on("authenticate", (event, provider, client) => {
         if (req.url.indexOf("/oauth2callback") > -1) {
           const qs = querystring.parse(url.parse(req.url).query!);
 
-          res.end(
-            "Successfully Authenticated!  You can close this tab and return to the Package Manager application!"
-          );
+          res.end("Successfully Authenticated!  You can close this tab and return to the Ship application!");
           server.destroy();
           // @ts-ignore
           const { tokens } = await oauth2Client.getToken(qs.code);
@@ -137,9 +135,7 @@ ipcMain.on("authenticate", (event, provider, client) => {
         if (req.url.indexOf("/oauth2callback") > -1) {
           const qs = querystring.parse(url.parse(req.url).query!);
 
-          res.end(
-            "Successfully Authenticated!  You can close this tab and return to the Package Manager application!"
-          );
+          res.end("Successfully Authenticated!  You can close this tab and return to the Ship application!");
           server.destroy();
           const code = qs.code;
           const params = {
@@ -252,8 +248,8 @@ protocol.registerSchemesAsPrivileged([{ scheme: "app", privileges: { secure: tru
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info

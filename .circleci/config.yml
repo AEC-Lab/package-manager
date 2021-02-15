@@ -73,8 +73,8 @@ jobs:
       - persist_to_workspace:
           root: ./dist_electron
           paths:
-            - package-manager-setup.exe
-            - package-manager-setup.exe.blockmap
+            - ship-setup.exe
+            - ship-setup.exe.blockmap
             - latest.yml
             - version.txt
 
