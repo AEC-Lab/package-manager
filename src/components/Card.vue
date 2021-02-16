@@ -14,13 +14,13 @@
       >
         <template v-slot:loader>
           <v-progress-linear
-            :active="show"
+            v-model="value"
             color="accent"
             absolute
             bottom
             rounded
-            indeterminate
             height="100%"
+            :indeterminate="isIndeterminate"
           >
           </v-progress-linear>
         </template>
@@ -31,9 +31,10 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import { Vue, Component, Prop } from "vue-property-decorator";
 import { getButtonConfig } from "../utils/install";
 import { Package } from "types/package";
+import { ipcRenderer } from "electron";
 
 @Component
 export default class Card extends Vue {
@@ -41,6 +42,7 @@ export default class Card extends Vue {
 
   // DATA PROPERTIES
   isLoading = false;
+  isIndeterminate = true;
   value = "0";
 
   // COMPUTED PROPERTIES
@@ -55,16 +57,24 @@ export default class Card extends Vue {
       return "https://avatars0.githubusercontent.com/in/88051?s=120&u=447b1928428587566a78aa1aadba9283685b23e4&v=4";
   }
 
-  // @Watch("value")
-  // onPropertyChanged(value: string, oldValue: string) {
-
-  // }
-
   // METHODS
   async installActionHandlerWrapper(event: Event, pkg: Package, handler: Function) {
     this.isLoading = true;
+    this.isIndeterminate = true;
+
+    ipcRenderer.on("download-total", (event, arg) => {
+      const totalBytes = Number.parseFloat(arg);
+      if (totalBytes > 2000000) this.isIndeterminate = false;
+    });
+
+    ipcRenderer.on("download-progress", (event, arg) => {
+      let tempValue: number = Number.parseFloat(arg);
+      tempValue = tempValue * 100;
+      this.value = tempValue.toString();
+    });
+
     await handler(event, pkg);
-    this.value = "100";
+    this.isIndeterminate = true;
     this.isLoading = false;
   }
 }

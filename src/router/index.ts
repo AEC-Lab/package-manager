@@ -52,8 +52,7 @@ const routes: Array<RouteConfig> = [
   {
     path: "/help",
     beforeEnter() {
-      // Change redirect link to actual help page
-      window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+      window.open("https://airtable.com/shrB9pCCmMAW5uldg");
     },
     name: "Help",
     meta: {

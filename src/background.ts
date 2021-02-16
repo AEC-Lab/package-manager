@@ -171,7 +171,10 @@ ipcMain.on("download-github-asset", async (event, info) => {
       // 302 found redirects, e.g. to storage bucket; download asset with fully-authenticated download url (NO auth headers to add)
       const dl = await download(win!, redirectUrl, {
         ...info.properties,
-        onProgress: progress => console.log("Transferred: " + progress.percent)
+        onProgress: progress => {
+          win!.webContents.send("download-progress", progress.percent.toString());
+          win!.webContents.send("download-total", progress.totalBytes.toString());
+        }
       });
       win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
     } else if (response.status === 301 && redirectUrl) {
@@ -188,13 +191,19 @@ ipcMain.on("download-github-asset", async (event, info) => {
       if (response2.status === 302 && redirectUrl2) {
         const dl = await download(win!, redirectUrl2, {
           ...info.properties,
-          onProgress: progress => console.log("Transferred: " + progress.percent)
+          onProgress: progress => {
+            win!.webContents.send("download-progress", progress.percent.toString());
+            win!.webContents.send("download-total", progress.totalBytes.toString());
+          }
         });
         win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
       } else {
         const dl = await download(win!, redirectUrl, {
           ...info.properties,
-          onProgress: progress => console.log("Transferred: " + progress.percent)
+          onProgress: progress => {
+            win!.webContents.send("download-progress", progress.percent.toString());
+            win!.webContents.send("download-total", progress.totalBytes.toString());
+          }
         });
         win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
       }
