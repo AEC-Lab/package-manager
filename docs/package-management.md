@@ -4,13 +4,13 @@
 
 _Guide for package developers and managers_
 
-Package Manager currently supports packages deployed and hosted through GitHub repository releases. Additional development and hosting platforms (e.g. Azure DevOps, static URL storage) may be integrated in future versions.
+Ship currently supports packages deployed and hosted through GitHub repository releases. Additional development and hosting platforms (e.g. Azure DevOps, static URL storage) may be integrated in future versions.
 
 ## Install GitHub App
 
-1. **Install the [Package Manager GitHub App]()** (_TODO: get link_) from the App Marketplace onto either a personal GitHub account or an organization. You will be asked to accept permissions granting the app access to limited scopes for your organization.
+1. **Install the [Ship GitHub App]()** (_TODO: get link_) from the App Marketplace onto either a personal GitHub account or an organization. You will be asked to accept permissions granting the app access to limited scopes for your organization.
 
-2. **Set repository access**. Only selected repositories will be available to be published through Package Manager. You may add or remove repositories at any time (note, however, that removing a repository will delete the corresponding package from Package Manager).
+2. **Set repository access**. Only selected repositories will be available to be published through Ship. You may add or remove repositories at any time (note, however, that removing a repository will delete the corresponding package from Ship).
 
    Installation settings can be found in your GitHub settings:
 
@@ -21,15 +21,15 @@ Package Manager currently supports packages deployed and hosted through GitHub r
 
 ## Sign In with GitHub
 
-In order to manage and publish packages available from your selected repositories, you must sign into Package Manager using the GitHub sign-in option. You will be asked to accept some permissions requested by Package Manager the first time doing so. The packages available to you to manage will include any repositories added from that user's personal account, plus any repositories added to an organization for which the user has an `owner` role for the organization itself.
+In order to manage and publish packages available from your selected repositories, you must sign into Ship using the GitHub sign-in option. You will be asked to accept some permissions requested by Ship the first time doing so. The packages available to you to manage will include any repositories added from that user's personal account, plus any repositories added to an organization for which the user has an `owner` role for the organization itself.
 
 ## Define Package Installation Schema
 
-Instructions for installing and uninstalling a package must be specified in a `manage.package` asset file included in each release from a repository:
+Instructions for installing and uninstalling a package must be specified in a `package.ship` asset file included in each release from a repository:
 
 ![](images/release-assets.png)
 
-The `manage.package` file is a JSON-formatted object with defined fields and configuration options. The following is an example of a valid `manage.package` definition under schema version 1:
+The `package.ship` file is a JSON-formatted object with defined fields and configuration options. The following is an example of a valid `package.ship` definition under schema version 1:
 
 ```
 {
@@ -67,7 +67,7 @@ The `manage.package` file is a JSON-formatted object with defined fields and con
 }
 ```
 
-- `version`: the `manage.package` schema version number; currently there is only a schema version number 1
+- `version`: the `package.ship` schema version number; currently there is only a schema version number 1
 - `processes`: a list of applications which should be closed in order for the package to be installed; installation will be blocked until they are closed
 - `install`: a list of operations to perform with the downloaded package assets; the following actions are available:
 
@@ -84,7 +84,7 @@ You may choose whichever combination of operations they deem appropriate. Operat
 
 ### Validate a schema definition
 
-Before releasing a package, you can validate that the `manage.package` file is correctly formatted and defined using the validation feature in the Package Manager "Developer" panel:
+Before releasing a package, you can validate that the `package.ship` file is correctly formatted and defined using the validation feature in the Ship "Developer" panel:
 
 ![](images/validate-schema.png)
 
@@ -92,13 +92,13 @@ An incorrectly-defined file will return an error with additional details.
 
 ## Create a GitHub Release
 
-You can choose to create one or more GitHub releases for your repository, in whichever process you choose (e.g. manually, GitHub Actions, CI/CD pipelines). In the release assets, you must include the `manage.package` file, along with any other static asset files (e.g. compiled executables, .zip files) referred to in its `install` or `uninstall` operations.
+You can choose to create one or more GitHub releases for your repository, in whichever process you choose (e.g. manually, GitHub Actions, CI/CD pipelines). In the release assets, you must include the `package.ship` file, along with any other static asset files (e.g. compiled executables, .zip files) referred to in its `install` or `uninstall` operations.
 
-Package Manager will automatically pick up on and sync with any new or deleted releases.
+Ship will automatically pick up on and sync with any new or deleted releases.
 
 ## Publish and Manage a Package
 
-Repositories that were selected in your GitHub App installation configuration will appear in the "Admin" panel of Package Manager (remember to sign in with GitHub!). By default, newly-added respositories are set to `Inactive`, meaning they will not be visible to users in the "Browse" package listings.
+Repositories that were selected in your GitHub App installation configuration will appear in the "Admin" panel of Ship (remember to sign in with GitHub!). By default, newly-added respositories are set to `Inactive`, meaning they will not be visible to users in the "Browse" package listings.
 
 To publish the package and make it available for others to install, edit the package from the "Admin" panel:
 

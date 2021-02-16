@@ -9,14 +9,14 @@ module.exports = {
         publish: [
           {
             provider: "github",
-            owner: "AEC-Lab",
-            repo: "package-manager"
+            owner: "voyansi",
+            repo: "ship"
           }
         ],
-        productName: "Package Manager",
+        productName: "Ship",
         nsis: {
-          artifactName: "package-manager-setup.${ext}",
-          uninstallDisplayName: "Package Manager"
+          artifactName: "ship-setup.${ext}",
+          uninstallDisplayName: "Ship"
         }
       }
     }

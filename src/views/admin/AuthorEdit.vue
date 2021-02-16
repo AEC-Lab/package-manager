@@ -26,8 +26,7 @@
           Add Source
         </v-btn>
         <div class="caption mb-8 font-italic font-weight-light">
-          * GitHub organizations that have installed the Package Manager GitHub App will appear here
-          automatically.
+          * GitHub organizations that have installed the Ship GitHub App will appear here automatically.
         </div>
 
         <v-text-field

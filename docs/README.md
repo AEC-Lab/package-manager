@@ -1,4 +1,4 @@
-# Package Manager
+# Ship
 
 _An open-source AEC standard for tool deployment and management_
 
@@ -12,14 +12,14 @@ _An open-source AEC standard for tool deployment and management_
 
 <_TODO: insert GIF here_>
 
-Package Manager is a community-managed central marketplace to discover, install, manage, and deploy software serving the AEC community. The existing market for third-party tools is scattered, difficult to navigate, and suffers from a disconnect between developer and community. Package Manager seeks to bridge that gap and provide a reliable means to deliver tools directly to their intended audience.
+Ship is a community-managed central marketplace to discover, install, manage, and deploy software serving the AEC community. The existing market for third-party tools is scattered, difficult to navigate, and suffers from a disconnect between developer and community. Ship seeks to bridge that gap and provide a reliable means to deliver tools directly to their intended audience.
 
 ### Who is it for?
 
-Package Manager is designed for all members of the AEC ecosystem:
+Ship is designed for all members of the AEC ecosystem:
 
 - **AEC Community**
-  - As an end-user of tools deployed via Package Manager, you can search, discover, and install plugins and tools available in the marketplace. Monitor a list of your installed applications and check for periodic updates. Get additional information about an application.
+  - As an end-user of tools deployed via Ship, you can search, discover, and install plugins and tools available in the marketplace. Monitor a list of your installed applications and check for periodic updates. Get additional information about an application.
 - **Developers**
   - Deploy and share your custom application, plugin, and scripts with the AEC community. Provide useful contextual information and examples. Manage user-facing metadata. Integrate directly with your GitHub code.
 - **Enterprises** _[future implementation]_
