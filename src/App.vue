@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-system-bar window app class="vo-titlebar" color="primary">
-      <v-img class="mr-4" src="@/assets/v-icon-white.png" max-height="30" max-width="30"> </v-img>
+      <v-img class="ml-2 mr-4" src="@/assets/ship_logo_white.png" max-height="20" max-width="20"> </v-img>
       <span class="vo-titlebar-title">Ship</span>
       <v-spacer></v-spacer>
       <v-icon @click="minimize" class="vo-titlebar-btn">mdi-minus</v-icon>

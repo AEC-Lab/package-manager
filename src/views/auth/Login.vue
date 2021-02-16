@@ -1,15 +1,8 @@
 <template>
-  <v-container class="fill-height" fluid>
+  <v-container class="vo-container fill-height">
     <v-row align="center" justify="center">
       <v-col cols="10" sm="8" md="5" lg="5">
         <v-card>
-          <v-toolbar color="grey lighten-3" flat>
-            <v-toolbar-title>
-              <h1 class="overline">
-                Package Manager
-              </h1>
-            </v-toolbar-title>
-          </v-toolbar>
           <ProviderLogin v-if="mode === 'provider'" :toggleMode="toggleMode" />
           <EmailLogin v-else-if="mode === 'email'" :toggleMode="toggleMode" />
         </v-card>

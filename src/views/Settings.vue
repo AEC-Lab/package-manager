@@ -7,7 +7,7 @@
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-text-field label="Name" placeholder="Complete your name" outlined v-model="name"></v-text-field>
-          <p>Your name may appear around Package Manager when you install a package</p>
+          <p>Your name may appear around Ship when you install a package</p>
           <br />
           <v-text-field
             label="Company"

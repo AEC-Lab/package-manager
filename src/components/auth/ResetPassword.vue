@@ -6,7 +6,7 @@
           <v-toolbar color="grey lighten-3" flat>
             <v-toolbar-title>
               <h1 class="overline">
-                Package Manager
+                Ship
               </h1>
             </v-toolbar-title>
           </v-toolbar>

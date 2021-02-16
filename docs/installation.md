@@ -2,9 +2,9 @@
 
 # Installation
 
-Download and run the `package-manager-setup.exe` file from the latest GitHub release [here](https://github.com/voyansi/package-manager/releases)
+Download and run the `ship-setup.exe` file from the latest GitHub release [here](https://github.com/voyansi/ship/releases)
 
-Package Manager is currently available for Windows 10 and later.
+Ship is currently available for Windows 10 and later.
 
 ### Updates
 

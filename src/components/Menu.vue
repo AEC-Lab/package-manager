@@ -19,7 +19,8 @@
 
         <v-list-item-content>
           <v-list-item-title>{{ userDisplay.title }}</v-list-item-title>
-          <v-list-item-subtitle>Voyansi</v-list-item-subtitle>
+          <v-list-item-subtitle>Personal</v-list-item-subtitle>
+          <!--To do replace with user.info !-->
         </v-list-item-content>
       </v-list-item>
 

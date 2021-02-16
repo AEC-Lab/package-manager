@@ -1,9 +1,9 @@
 {
-  "name": "package-manager",
-  "version": "v0.0.72",
+  "name": "ship",
+  "version": "v0.0.73",
   "private": false,
-  "description": "does things",
-  "author": "AEC Lab",
+  "description": "Manages software package deployments and installations",
+  "author": "Voyansi",
   "scripts": {
     "serve": "vue-cli-service electron:serve",
     "build": "vue-cli-service electron:build --win",
