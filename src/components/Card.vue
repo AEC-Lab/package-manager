@@ -14,7 +14,7 @@
       >
         <template v-slot:loader>
           <v-progress-linear
-            v-model="value"
+            v-model="progressValue"
             color="accent"
             absolute
             bottom
@@ -43,7 +43,7 @@ export default class Card extends Vue {
   // DATA PROPERTIES
   isLoading = false;
   isIndeterminate = true;
-  value = "0";
+  progressValue = 0;
 
   // COMPUTED PROPERTIES
   get buttonConfig() {
@@ -62,15 +62,11 @@ export default class Card extends Vue {
     this.isLoading = true;
     this.isIndeterminate = true;
 
-    ipcRenderer.on("download-total", (event, arg) => {
-      const totalBytes = Number.parseFloat(arg);
-      if (totalBytes > 2000000) this.isIndeterminate = false;
+    ipcRenderer.on("download-total", (_event, dlTotalBytes) => {
+      if (dlTotalBytes > 2000000) this.isIndeterminate = false;
     });
-
-    ipcRenderer.on("download-progress", (event, arg) => {
-      let tempValue: number = Number.parseFloat(arg);
-      tempValue = tempValue * 100;
-      this.value = tempValue.toString();
+    ipcRenderer.on("download-progress", (_event, dlPercent) => {
+      this.progressValue = dlPercent * 100;
     });
 
     await handler(event, pkg);

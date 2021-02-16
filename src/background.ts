@@ -172,8 +172,8 @@ ipcMain.on("download-github-asset", async (event, info) => {
       const dl = await download(win!, redirectUrl, {
         ...info.properties,
         onProgress: progress => {
-          win!.webContents.send("download-progress", progress.percent.toString());
-          win!.webContents.send("download-total", progress.totalBytes.toString());
+          win!.webContents.send("download-progress", progress.percent);
+          win!.webContents.send("download-total", progress.totalBytes);
         }
       });
       win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
@@ -192,8 +192,8 @@ ipcMain.on("download-github-asset", async (event, info) => {
         const dl = await download(win!, redirectUrl2, {
           ...info.properties,
           onProgress: progress => {
-            win!.webContents.send("download-progress", progress.percent.toString());
-            win!.webContents.send("download-total", progress.totalBytes.toString());
+            win!.webContents.send("download-progress", progress.percent);
+            win!.webContents.send("download-total", progress.totalBytes);
           }
         });
         win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
@@ -201,8 +201,8 @@ ipcMain.on("download-github-asset", async (event, info) => {
         const dl = await download(win!, redirectUrl, {
           ...info.properties,
           onProgress: progress => {
-            win!.webContents.send("download-progress", progress.percent.toString());
-            win!.webContents.send("download-total", progress.totalBytes.toString());
+            win!.webContents.send("download-progress", progress.percent);
+            win!.webContents.send("download-total", progress.totalBytes);
           }
         });
         win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
