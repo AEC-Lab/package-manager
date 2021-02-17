@@ -8,6 +8,8 @@ _An open-source AEC standard for tool deployment and management_
 
 [Contribute to Core Development](core-development.md)
 
+[Privacy Policy](privacy-policy.md)
+
 ## Overview
 
 <_TODO: insert GIF here_>
