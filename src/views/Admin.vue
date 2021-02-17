@@ -104,7 +104,14 @@
                 <td>{{ item.memberCount }}</td>
                 <td>{{ item.packageCount }}</td>
                 <td>
-                  <v-icon @click="() => {}">mdi-pencil</v-icon>
+                  <v-icon
+                    @click="
+                      () => {
+                        if (item.name === 'Tesla') editEnterprise();
+                      }
+                    "
+                    >mdi-pencil</v-icon
+                  >
                 </td>
               </tr>
             </template>
@@ -124,6 +131,7 @@ import { Component, Vue } from "vue-property-decorator";
 import { PackageStatus, PackageSource } from "../../types/enums";
 import { Author } from "../../types/author";
 import { Package } from "../../types/package";
+import { shell } from "electron";
 
 @Component
 export default class Admin extends Vue {
@@ -156,10 +164,10 @@ export default class Admin extends Vue {
   ];
 
   enterprises = [
-    { name: "Salesforce", id: 1, memberCount: 257, packageCount: 6 },
+    { name: "Toyota", id: 1, memberCount: 257, packageCount: 6 },
     { name: "Voyansi", id: 2, memberCount: 144, packageCount: 11 },
-    { name: "Google", id: 3, memberCount: 1182, packageCount: 23 },
-    { name: "Amazon", id: 4, memberCount: 430, packageCount: 8 }
+    { name: "Tesla", id: 3, memberCount: 1182, packageCount: 23 },
+    { name: "Disney", id: 4, memberCount: 430, packageCount: 8 }
   ];
 
   // COMPUTED PROPERTIES
@@ -191,6 +199,10 @@ export default class Admin extends Vue {
 
   authorPackageCount(author: Author) {
     return this.$store.state.packages.packages.filter((pkg: Package) => pkg.authorId === author.id).length;
+  }
+
+  editEnterprise() {
+    shell.openExternal("https://tinyurl.com/zuw2r2r7");
   }
 }
 </script>
