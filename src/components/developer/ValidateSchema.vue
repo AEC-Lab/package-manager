@@ -7,7 +7,7 @@
           v-model="testFile"
           outlined
           placeholder="Drag and drop a file or click here"
-          accept=".package"
+          accept=".ship"
           :rules="fileRules"
         />
       </div>
