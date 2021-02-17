@@ -7,7 +7,7 @@
           v-model="testFile"
           outlined
           placeholder="Drag and drop a file or click here"
-          accept=".package"
+          accept=".ship"
           :rules="fileRules"
         />
       </div>
@@ -49,7 +49,7 @@ export default defineComponent({
     const fileRules = [
       (file: File) => {
         if (!file) return true;
-        return file.name === "manage.package" || "You must upload a '.package' file";
+        return file.name === "package.ship" || "You must upload a 'package.ship' file";
       }
     ];
 

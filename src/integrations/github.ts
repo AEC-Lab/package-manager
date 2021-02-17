@@ -59,7 +59,10 @@ GitHub.getAsset = async (repository: GithubRepository, assetId: string, director
       token: token,
       assetId,
       acceptType: "application/octet-stream",
-      properties: { directory: directoryPath, saveAs: false }
+      properties: {
+        directory: directoryPath,
+        saveAs: false
+      }
     });
     ipcRenderer.once(`download-success-${assetId}`, (event, savePath) => {
       console.log(`File downloaded to ${savePath}`);

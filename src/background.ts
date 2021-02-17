@@ -69,8 +69,8 @@ ipcMain.on("check-for-updates", event => {
 
   const data = {
     provider: "github",
-    owner: "AEC-Lab",
-    repo: "package-manager",
+    owner: "voyansi",
+    repo: "ship",
     token: process.env.GH_TOKEN
   };
 
@@ -110,9 +110,7 @@ ipcMain.on("authenticate", (event, provider, client) => {
         if (req.url.indexOf("/oauth2callback") > -1) {
           const qs = querystring.parse(url.parse(req.url).query!);
 
-          res.end(
-            "Successfully Authenticated!  You can close this tab and return to the Package Manager application!"
-          );
+          res.end("Successfully Authenticated!  You can close this tab and return to the Ship application!");
           server.destroy();
           // @ts-ignore
           const { tokens } = await oauth2Client.getToken(qs.code);
@@ -137,9 +135,7 @@ ipcMain.on("authenticate", (event, provider, client) => {
         if (req.url.indexOf("/oauth2callback") > -1) {
           const qs = querystring.parse(url.parse(req.url).query!);
 
-          res.end(
-            "Successfully Authenticated!  You can close this tab and return to the Package Manager application!"
-          );
+          res.end("Successfully Authenticated!  You can close this tab and return to the Ship application!");
           server.destroy();
           const code = qs.code;
           const params = {
@@ -173,7 +169,13 @@ ipcMain.on("download-github-asset", async (event, info) => {
     const redirectUrl = response.headers.get("location"); // URL it would otherwise redirect to (AWS S3 bucket)
     if (response.status === 302 && redirectUrl) {
       // 302 found redirects, e.g. to storage bucket; download asset with fully-authenticated download url (NO auth headers to add)
-      const dl = await download(win!, redirectUrl, info.properties);
+      const dl = await download(win!, redirectUrl, {
+        ...info.properties,
+        onProgress: progress => {
+          win!.webContents.send("download-progress", progress.percent);
+          win!.webContents.send("download-total", progress.totalBytes);
+        }
+      });
       win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
     } else if (response.status === 301 && redirectUrl) {
       // 301 permanent redirects, e.g. when a repo name has changed
@@ -187,10 +189,22 @@ ipcMain.on("download-github-asset", async (event, info) => {
       });
       const redirectUrl2 = response2.headers.get("location");
       if (response2.status === 302 && redirectUrl2) {
-        const dl = await download(win!, redirectUrl2, info.properties);
+        const dl = await download(win!, redirectUrl2, {
+          ...info.properties,
+          onProgress: progress => {
+            win!.webContents.send("download-progress", progress.percent);
+            win!.webContents.send("download-total", progress.totalBytes);
+          }
+        });
         win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
       } else {
-        const dl = await download(win!, redirectUrl, info.properties);
+        const dl = await download(win!, redirectUrl, {
+          ...info.properties,
+          onProgress: progress => {
+            win!.webContents.send("download-progress", progress.percent);
+            win!.webContents.send("download-total", progress.totalBytes);
+          }
+        });
         win!.webContents.send(`download-success-${info.assetId}`, dl.getSavePath());
       }
     } else {
@@ -252,8 +266,8 @@ protocol.registerSchemesAsPrivileged([{ scheme: "app", privileges: { secure: tru
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info

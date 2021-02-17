@@ -50,6 +50,16 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
+    path: "/help",
+    beforeEnter() {
+      window.open("https://airtable.com/shrB9pCCmMAW5uldg");
+    },
+    name: "Help",
+    meta: {
+      requiresAuth: false
+    }
+  },
+  {
     path: "/login",
     name: "Login",
     component: Login

@@ -19,7 +19,8 @@
 
         <v-list-item-content>
           <v-list-item-title>{{ userDisplay.title }}</v-list-item-title>
-          <v-list-item-subtitle>Personal</v-list-item-subtitle> <!--To do replace with user.info !-->
+          <v-list-item-subtitle>Personal</v-list-item-subtitle>
+          <!--To do replace with user.info !-->
         </v-list-item-content>
       </v-list-item>
 
@@ -57,7 +58,8 @@ export default class Register extends Vue {
     { title: "Browse", icon: "mdi-archive" },
     //{ title: "Settings", icon: "mdi-cog" },
     { title: "Admin", icon: "mdi-shield" },
-    { title: "Developer", icon: "mdi-lead-pencil" }
+    { title: "Developer", icon: "mdi-lead-pencil" },
+    { title: "Help", icon: "mdi-alarm-light" }
   ];
 
   // COMPUTED PROPERTIES

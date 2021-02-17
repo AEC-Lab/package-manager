@@ -12,6 +12,18 @@
         :color="buttonConfig.color"
         @click="e => installActionHandlerWrapper(e, pkg, buttonConfig.handler)"
       >
+        <template v-slot:loader>
+          <v-progress-linear
+            v-model="progressValue"
+            color="accent"
+            absolute
+            bottom
+            rounded
+            height="100%"
+            :indeterminate="isIndeterminate"
+          >
+          </v-progress-linear>
+        </template>
         {{ buttonConfig.text }}
       </v-btn>
     </v-card-actions>
@@ -22,6 +34,7 @@
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { getButtonConfig } from "../utils/install";
 import { Package } from "types/package";
+import { ipcRenderer } from "electron";
 
 @Component
 export default class Card extends Vue {
@@ -29,6 +42,8 @@ export default class Card extends Vue {
 
   // DATA PROPERTIES
   isLoading = false;
+  isIndeterminate = true;
+  progressValue = 0;
 
   // COMPUTED PROPERTIES
   get buttonConfig() {
@@ -45,7 +60,17 @@ export default class Card extends Vue {
   // METHODS
   async installActionHandlerWrapper(event: Event, pkg: Package, handler: Function) {
     this.isLoading = true;
+    this.isIndeterminate = true;
+
+    ipcRenderer.on("download-total", (_event, dlTotalBytes) => {
+      if (dlTotalBytes > 2000000) this.isIndeterminate = false;
+    });
+    ipcRenderer.on("download-progress", (_event, dlPercent) => {
+      this.progressValue = dlPercent * 100;
+    });
+
     await handler(event, pkg);
+    this.isIndeterminate = true;
     this.isLoading = false;
   }
 }

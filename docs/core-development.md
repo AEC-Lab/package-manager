@@ -6,7 +6,7 @@ Contribute to core product features and functionality.
 
 ## Overview
 
-Package Manager is a desktop application bundled and deployed with [Electron](https://www.electronjs.org/). The front-end renderer process (browser window) serves a [Vue](https://vuejs.org/) application, supported by and connected to [Firebase](https://firebase.google.com/) back-end services. Front- and back-end code is written in TypeScript.
+Ship is a desktop application bundled and deployed with [Electron](https://www.electronjs.org/). The front-end renderer process (browser window) serves a [Vue](https://vuejs.org/) application, supported by and connected to [Firebase](https://firebase.google.com/) back-end services. Front- and back-end code is written in TypeScript.
 
 #### Vue Application Features
 
@@ -67,7 +67,7 @@ Separate environments are maintained for development and production, including d
 
 Current production build status:
 
-[![CircleCI](https://circleci.com/gh/voyansi/package-manager/tree/master.svg?style=svg&circle-token=f5e6bedaa0c0dc652b1672d074e38090371780a5)](https://circleci.com/gh/voyansi/package-manager)
+[![CircleCI](https://circleci.com/gh/voyansi/ship/tree/master.svg?style=svg&circle-token=f5e6bedaa0c0dc652b1672d074e38090371780a5)](https://circleci.com/gh/voyansi/ship)
 
 ## Git Workflow
 
@@ -143,7 +143,7 @@ Please avoid deploying all functions at once unless you need to andare sure no o
 
 ## Deployment
 
-_Package Manager uses Circle CI to automatically test, build, and release new versions on any commit to the master branch._
+_Ship uses Circle CI to automatically test, build, and release new versions on any commit to the master branch._
 
 ## Testing
 
@@ -173,7 +173,7 @@ yarn test:firebase
 
 ## Resources
 
-[Circle Ci](https://app.circleci.com/pipelines/github/voyansi/package-manager)
+[Circle Ci](https://app.circleci.com/pipelines/github/voyansi/ship)
 
 [Firebase](https://console.firebase.google.com/u/0/project/package-manager-development/overview)
 
