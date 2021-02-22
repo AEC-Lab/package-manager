@@ -32,8 +32,20 @@
                 :color="buttonConfig.color"
                 class="main-btn"
                 @click="e => installActionHandlerWrapper(e, pkg, buttonConfig.handler)"
-                >{{ buttonConfig.text }}</v-btn
-              >
+                >{{ buttonConfig.text }}
+                <template v-slot:loader>
+                  <v-progress-linear
+                    v-model="progressValue"
+                    color="accent"
+                    absolute
+                    bottom
+                    rounded
+                    height="100%"
+                    :indeterminate="isIndeterminate"
+                  >
+                  </v-progress-linear>
+                </template>
+              </v-btn>
               <v-btn v-on="on" v-bind="attrs" :color="buttonConfig.color" class="actions-btn">
                 <v-icon>mdi-menu-down</v-icon>
               </v-btn>
@@ -94,6 +106,7 @@
 </template>
 
 <script lang="ts">
+import { ipcRenderer } from "electron";
 import { defineComponent, ref, computed, PropType } from "@vue/composition-api";
 // @ts-ignore
 import CoolLightBox from "vue-cool-lightbox";
@@ -122,6 +135,8 @@ export default defineComponent({
   setup(props, context) {
     const isClosed = ref(false);
     const isLoading = ref(false);
+    const isIndeterminate = ref(false);
+    const progressValue = ref(0);
 
     const gallery = computed(() => {
       return props.pkg.images.map(img => {
@@ -179,7 +194,17 @@ export default defineComponent({
 
     async function installActionHandlerWrapper(event: Event, pkg: Package, handler: Function) {
       isLoading.value = true;
+      isIndeterminate.value = true;
+
+      ipcRenderer.on("download-total", (_event, dlTotalBytes) => {
+        if (dlTotalBytes > 2000000) isIndeterminate.value = false;
+      });
+      ipcRenderer.on("download-progress", (_event, dlPercent) => {
+        progressValue.value = dlPercent * 100;
+      });
+
       await handler(event, pkg);
+      isIndeterminate.value = true;
       isLoading.value = false;
     }
 
@@ -211,6 +236,8 @@ export default defineComponent({
       imageIndex,
       isClosed,
       isLoading,
+      isIndeterminate,
+      progressValue,
       isReleaseInstalled,
       callClose,
       installActionHandlerWrapper,

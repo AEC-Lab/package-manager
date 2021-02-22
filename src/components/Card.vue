@@ -31,10 +31,10 @@
 </template>
 
 <script lang="ts">
+import { ipcRenderer } from "electron";
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { getButtonConfig } from "../utils/install";
 import { Package } from "types/package";
-import { ipcRenderer } from "electron";
 
 @Component
 export default class Card extends Vue {

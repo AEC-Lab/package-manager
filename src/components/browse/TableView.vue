@@ -20,6 +20,18 @@
             :color="getButtonConfig(item).color"
             @click="e => installActionHandlerWrapper(e, item, getButtonConfig(item).handler)"
           >
+            <template v-slot:loader>
+              <v-progress-linear
+                v-model="progressValue"
+                color="accent"
+                absolute
+                bottom
+                rounded
+                height="100%"
+                :indeterminate="isIndeterminate.includes(item.id)"
+              >
+              </v-progress-linear>
+            </template>
             {{ getButtonConfig(item).text }}
           </v-btn>
         </td>
@@ -29,6 +41,7 @@
 </template>
 
 <script lang="ts">
+import { ipcRenderer } from "electron";
 import { Package } from "types/package";
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { getButtonConfig } from "../../utils/install";
@@ -49,6 +62,8 @@ export default class TableView extends Vue {
   ];
 
   isLoading: string[] = [];
+  isIndeterminate: string[] = [];
+  progressValue = 0;
 
   // METHODS
   getButtonConfig(pkg: Package) {
@@ -56,7 +71,21 @@ export default class TableView extends Vue {
   }
   async installActionHandlerWrapper(event: Event, pkg: Package, handler: Function) {
     this.isLoading.push(pkg.id);
+    this.isIndeterminate.push(pkg.id);
+
+    ipcRenderer.on("download-total", (_event, dlTotalBytes) => {
+      if (dlTotalBytes > 2000000) {
+        this.isIndeterminate.forEach(pkgId => {
+          if (pkgId === pkg.id) this.isIndeterminate.splice(this.isIndeterminate.indexOf(pkgId));
+        });
+      }
+    });
+    ipcRenderer.on("download-progress", (_event, dlPercent) => {
+      this.progressValue = dlPercent * 100;
+    });
+
     await handler(event, pkg);
+    this.isIndeterminate.splice(this.isIndeterminate.indexOf(pkg.id));
     this.isLoading = this.isLoading.filter(id => id !== pkg.id);
   }
 }
