@@ -208,13 +208,16 @@ async function _addOrUpdateReleaseDoc(event: any) {
   let packageReleaseArray = packageDoc.data().sourceData.releases;
 
   if (existingReleaseDocQuery.empty) {
-    // Release doc doesn't exist && action != "delete" >> create doc, and add docId to corresponding package release array
-    if (event.action == "deleted" || event.release.draft) return; // ignore unpublished drafts
-    const release = { repository: event.repository.id, ...event.release }; // Add custom field for future use
-    const newDoc = db.collection("releases").doc();
-    promises.push(newDoc.set(release));
-    packageReleaseArray.push(newDoc.id);
-    promises.push(packageDoc.ref.update({ "sourceData.releases": packageReleaseArray }));
+    // create doc, and add docId to corresponding package release array
+    if (event.release.draft) return; // ignore (unpublished) drafts
+    // Create new release only on "published" event trigger
+    if (event.action == "published") {
+      const release = { repository: event.repository.id, ...event.release }; // Add custom field for future use
+      const newDoc = db.collection("releases").doc();
+      promises.push(newDoc.set(release));
+      packageReleaseArray.push(newDoc.id);
+      promises.push(packageDoc.ref.update({ "sourceData.releases": packageReleaseArray }));
+    }
   } else {
     const releaseDoc = existingReleaseDocQuery.docs[0];
     if (event.action == "deleted") {
@@ -226,7 +229,7 @@ async function _addOrUpdateReleaseDoc(event: any) {
       // Skip unpublished drafts (take no action); this is unlikely to ever hit
       return;
     } else {
-      // Update/overwrite existing release doc with new data from webhook
+      // Update/overwrite existing release doc with new data from webhook; should fire on "edited" action
       promises.push(releaseDoc.ref.update({ ...event.release }));
     }
   }
