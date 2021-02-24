@@ -18,6 +18,7 @@
             block
             :loading="isLoading.includes(item.id)"
             :color="getButtonConfig(item).color"
+            dark
             @click="e => installActionHandlerWrapper(e, item, getButtonConfig(item).handler)"
           >
             <template v-slot:loader>

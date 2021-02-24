@@ -28,12 +28,25 @@ export const getButtonConfig = (pkg: Package) => {
   const existingInstall: PackageConfigLocal | undefined = store.state.config.localConfig.packages.find(
     (obj: PackageConfigLocal) => obj.packageId === pkg.id
   );
+  const packageReleases = store.getters["github/getReleasesByPackage"](pkg);
   const latestRelease = store.getters["github/getLatestRelease"](pkg);
-  if (!latestRelease) return ButtonConfigs[ButtonActions.DISABLED]; // In reality there should be no packages without releases
+  const installedRelease = store.getters["github/getReleaseById"](existingInstall?.releaseId);
+  if (!packageReleases.length) return ButtonConfigs[ButtonActions.DISABLED]; // In reality there should be no packages without releases
   if (existingInstall) {
     if (existingInstall.releaseId === latestRelease.id) {
       return ButtonConfigs[ButtonActions.UNINSTALL];
-    } else return ButtonConfigs[ButtonActions.UPDATE];
+    } else {
+      console.log(installedRelease);
+      if (!installedRelease.prerelease) {
+        return ButtonConfigs[ButtonActions.UPDATE];
+      } else {
+        if (new Date(latestRelease.published_at) > new Date(installedRelease.published_at)) {
+          return ButtonConfigs[ButtonActions.UPDATE];
+        } else {
+          return ButtonConfigs[ButtonActions.UNINSTALL_PRE];
+        }
+      }
+    }
   } else return ButtonConfigs[ButtonActions.INSTALL];
 };
 
@@ -208,6 +221,7 @@ export const ButtonConfigs: ButtonConfigEnum = {
   INSTALL: {
     text: "Install",
     color: "primary",
+    installedVersion: (releaseId: string | null) => getInstalledVersion(releaseId),
     handler: async (event: Event, pkg: Package) => {
       event.stopPropagation();
       try {
@@ -221,6 +235,21 @@ export const ButtonConfigs: ButtonConfigEnum = {
   UNINSTALL: {
     text: "Uninstall",
     color: "success",
+    installedVersion: (releaseId: string | null) => getInstalledVersion(releaseId),
+    handler: async (event: Event, pkg: Package) => {
+      event.stopPropagation();
+      try {
+        await uninstallPackage(pkg);
+        Vue.$snackbar.flash({ content: `Successfully uninstalled ${pkg.name}`, color: "success" });
+      } catch (error) {
+        Vue.$snackbar.flash({ content: `Error uninstalling ${pkg.name} - ${error}`, color: "error" });
+      }
+    }
+  },
+  UNINSTALL_PRE: {
+    text: "Uninstall",
+    color: "light-blue", // or try #2D9BF0
+    installedVersion: (releaseId: string | null) => getInstalledVersion(releaseId),
     handler: async (event: Event, pkg: Package) => {
       event.stopPropagation();
       try {
@@ -234,6 +263,7 @@ export const ButtonConfigs: ButtonConfigEnum = {
   UPDATE: {
     text: "Update",
     color: "warning",
+    installedVersion: (releaseId: string | null) => getInstalledVersion(releaseId),
     handler: async (event: Event, pkg: Package) => {
       event.stopPropagation();
       try {
@@ -247,6 +277,7 @@ export const ButtonConfigs: ButtonConfigEnum = {
   DISABLED: {
     text: "Disabled",
     color: "grey",
+    installedVersion: (releaseId: string | null) => getInstalledVersion(releaseId),
     handler: (event: Event) => {
       event.stopPropagation();
     }
@@ -361,4 +392,13 @@ const findMissingDependencies = (pkg: Package) => {
   );
   const missingPackageIds = pkg.dependencyIds.filter(pkgId => !installedPackageIds.includes(pkgId));
   return missingPackageIds.map(id => store.getters["packages/getPackageById"](id)).filter(pkg => pkg);
+};
+
+const getInstalledVersion = (releaseId: string | null): string | null => {
+  if (releaseId === null) {
+    return null;
+  } else {
+    const installedRelease = store.getters["github/getReleaseById"](releaseId);
+    return installedRelease?.tag_name?.replace("v", "") || null;
+  }
 };
