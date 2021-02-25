@@ -23,52 +23,82 @@
         </div>
       </v-col>
       <v-col id="detail-specs">
-        <!-- <v-btn class="mb-4">Install</v-btn> -->
-        <v-menu bottom offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <div class="split-btn mb-4">
-              <v-btn
-                :loading="isLoading"
-                :color="buttonConfig.color"
-                class="main-btn"
-                @click="e => installActionHandlerWrapper(e, pkg, buttonConfig.handler)"
-                >{{ buttonConfig.text }}
-                <template v-slot:loader>
-                  <v-progress-linear
-                    v-model="progressValue"
-                    color="accent"
-                    absolute
-                    bottom
-                    rounded
-                    height="100%"
-                    :indeterminate="isIndeterminate"
-                  >
-                  </v-progress-linear>
-                </template>
-              </v-btn>
-              <v-btn v-on="on" v-bind="attrs" :color="buttonConfig.color" class="actions-btn">
-                <v-icon>mdi-menu-down</v-icon>
-              </v-btn>
-            </div>
-          </template>
-          <v-list>
-            <v-list-item
-              class="release-item"
-              v-for="release in releases"
-              :key="release.id"
-              @click="downloadRelease(release)"
-            >
-              <v-col cols="2" class="text-body-2">{{ release.tag_name.replace("v", "") }}</v-col>
-              <v-col class="text-body-2">{{ release.name }}</v-col>
-              <v-col cols="3" class="text-body-2">{{
-                new Date(release.published_at).toLocaleDateString()
-              }}</v-col>
-              <v-col cols="1">
-                <v-icon v-if="isReleaseInstalled(release)">mdi-check</v-icon>
-              </v-col>
-            </v-list-item>
-          </v-list>
-        </v-menu>
+        <div class="d-flex justify-space-between mb-4">
+          <v-btn
+            v-if="buttonConfig.text === 'Update'"
+            :loading="isLoadingUninstall"
+            :color="buttonConfig.color"
+            dark
+            @click="e => uninstallActionHandlerWrapper(e, pkg)"
+            class="mr-2"
+          >
+            Uninstall
+            <template v-slot:loader>
+              <v-progress-linear
+                v-model="progressValue"
+                color="accent"
+                absolute
+                bottom
+                rounded
+                height="100%"
+                :indeterminate="isIndeterminateUninstall"
+              >
+              </v-progress-linear>
+            </template>
+          </v-btn>
+          <v-menu bottom offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <div class="split-btn flex-grow-1">
+                <v-btn
+                  :loading="isLoading"
+                  :color="buttonConfig.color"
+                  dark
+                  class="main-btn"
+                  @click="e => installActionHandlerWrapper(e, pkg, buttonConfig.handler)"
+                >
+                  <template v-slot:default>
+                    <span style="position: absolute; left: 0;">
+                      {{ buttonConfig.installedVersion(installedRelease.id) }}
+                    </span>
+                    <span>{{ buttonConfig.text }}</span>
+                  </template>
+                  <template v-slot:loader>
+                    <v-progress-linear
+                      v-model="progressValue"
+                      color="accent"
+                      absolute
+                      bottom
+                      rounded
+                      height="100%"
+                      :indeterminate="isIndeterminate"
+                    >
+                    </v-progress-linear>
+                  </template>
+                </v-btn>
+                <v-btn v-on="on" v-bind="attrs" :color="buttonConfig.color" class="actions-btn" dark>
+                  <v-icon>mdi-menu-down</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <v-list>
+              <v-list-item
+                class="release-item"
+                v-for="release in releases"
+                :key="release.id"
+                @click="downloadRelease(release)"
+              >
+                <v-col cols="2" class="text-body-2">{{ release.tag_name.replace("v", "") }}</v-col>
+                <v-col class="text-body-2">{{ release.name }}</v-col>
+                <v-col cols="3" class="text-body-2">{{
+                  new Date(release.published_at).toLocaleDateString()
+                }}</v-col>
+                <v-col cols="1">
+                  <v-icon v-if="isReleaseInstalled(release)">mdi-check</v-icon>
+                </v-col>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
         <div class="d-flex justify-space-between mb-2 subtitle-1">
           <span>Latest Release:</span>
           <span>{{ latestReleaseVersion }}</span>
@@ -107,7 +137,7 @@
 
 <script lang="ts">
 import { ipcRenderer } from "electron";
-import { defineComponent, ref, computed, PropType } from "@vue/composition-api";
+import { defineComponent, ref, computed, ComputedRef, PropType } from "@vue/composition-api";
 // @ts-ignore
 import CoolLightBox from "vue-cool-lightbox";
 import "vue-cool-lightbox/dist/vue-cool-lightbox.min.css";
@@ -115,8 +145,8 @@ import { GenericObject } from "types/github";
 import { GithubRepository, Package } from "../../../types/package";
 import { PackageConfigLocal } from "../../../types/config";
 import { Author } from "../../../types/author";
-import { getButtonConfig, installPackage } from "../../utils/install";
-import { PackageReleaseSetting, PackageSource } from "../../../types/enums";
+import { getButtonConfig, installPackage, ButtonConfigs } from "../../utils/install";
+import { PackageReleaseSetting, PackageSource, ButtonActions } from "../../../types/enums";
 
 type CloseHandler = () => void;
 
@@ -136,6 +166,8 @@ export default defineComponent({
     const isClosed = ref(false);
     const isLoading = ref(false);
     const isIndeterminate = ref(false);
+    const isLoadingUninstall = ref(false);
+    const isIndeterminateUninstall = ref(false);
     const progressValue = ref(0);
 
     const gallery = computed(() => {
@@ -175,16 +207,21 @@ export default defineComponent({
     const latestReleaseDate = computed(
       () => latestRelease.value && new Date(latestRelease.value.published_at).toLocaleDateString()
     );
+    const existingInstall: ComputedRef<PackageConfigLocal> = computed(() =>
+      context.root.$store.state.config.localConfig.packages.find(
+        (obj: PackageConfigLocal) => obj.packageId === props.pkg.id
+      )
+    );
+    const installedRelease = computed(() =>
+      context.root.$store.getters["github/getReleaseById"](existingInstall.value?.releaseId)
+    );
     const buttonConfig = computed(() => {
       return getButtonConfig(props.pkg);
     });
 
     function isReleaseInstalled(release: GenericObject): boolean {
-      const localPackageConfig: PackageConfigLocal = context.root.$store.state.config.localConfig.packages.find(
-        (pkg: PackageConfigLocal) => pkg.packageId === props.pkg.id
-      );
-      if (!localPackageConfig) return false;
-      return release.id === localPackageConfig.releaseId;
+      if (!existingInstall.value) return false;
+      return release.id === existingInstall.value.releaseId;
     }
 
     function callClose() {
@@ -208,7 +245,27 @@ export default defineComponent({
       isLoading.value = false;
     }
 
+    async function uninstallActionHandlerWrapper(event: Event, pkg: Package) {
+      isLoadingUninstall.value = true;
+      isIndeterminateUninstall.value = true;
+
+      ipcRenderer.on("download-total", (_event, dlTotalBytes) => {
+        if (dlTotalBytes > 2000000) isIndeterminateUninstall.value = false;
+      });
+      ipcRenderer.on("download-progress", (_event, dlPercent) => {
+        progressValue.value = dlPercent * 100;
+      });
+
+      await ButtonConfigs[ButtonActions.UNINSTALL].handler(event, pkg);
+      isIndeterminateUninstall.value = true;
+      isLoadingUninstall.value = false;
+    }
+
     async function downloadRelease(release: GenericObject) {
+      if (isReleaseInstalled(release)) {
+        await uninstallActionHandlerWrapper(new Event(""), props.pkg);
+        return;
+      }
       isLoading.value = true;
       try {
         await installPackage(props.pkg, release);
@@ -241,12 +298,15 @@ export default defineComponent({
       isReleaseInstalled,
       callClose,
       installActionHandlerWrapper,
+      uninstallActionHandlerWrapper,
       downloadRelease,
       author,
       releases,
       latestRelease,
       latestReleaseVersion,
       latestReleaseDate,
+      existingInstall,
+      installedRelease,
       buttonConfig,
       getDependencyDisplayName
     };

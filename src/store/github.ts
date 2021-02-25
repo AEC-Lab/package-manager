@@ -42,6 +42,12 @@ export const getters: GetterTree<IGitHubState, IRootState> = {
         (release: GenericObject) =>
           new Date(release.published_at) >= new Date(getters.getLatestRelease(pkg).published_at)
       );
+  },
+  // Gets a specific release by its id
+  getReleaseById: state => (releaseId: string): GenericObject | null => {
+    const releaseFilter = state.releases.filter(release => release.id === releaseId);
+    if (!releaseFilter.length) return null;
+    else return releaseFilter[0];
   }
 };
 

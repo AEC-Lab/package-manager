@@ -96,6 +96,14 @@ You can choose to create one or more GitHub releases for your repository, in whi
 
 Ship will automatically pick up on and sync with any new or deleted releases.
 
+### Updating Release Assets
+
+GitHub release events are not automatically triggered by changes only to assets. If you need to add, update, rename, and/or delete release assets, you must do one of the following:
+
+1. **Create and publish a new release that supercedes the old one** _(recommended)_
+2. Delete the release, and recreate it with the same version tag
+3. Edit the release description (e.g. add a note about what changed) and click "Update release"
+
 ## Publish and Manage a Package
 
 Repositories that were selected in your GitHub App installation configuration will appear in the "Admin" panel of Ship (remember to sign in with GitHub!). By default, newly-added respositories are set to `Inactive`, meaning they will not be visible to users in the "Browse" package listings.

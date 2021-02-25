@@ -10,6 +10,7 @@
         block
         :loading="isLoading"
         :color="buttonConfig.color"
+        dark
         @click="e => installActionHandlerWrapper(e, pkg, buttonConfig.handler)"
       >
         <template v-slot:loader>
