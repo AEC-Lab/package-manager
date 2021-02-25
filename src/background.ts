@@ -48,7 +48,14 @@ ipcMain.on("check-for-updates", event => {
 
   autoUpdater.on("update-available", () => {
     event.sender.send("auto-updater-message", {
-      message: "update downloading..."
+      message: "Updates available. Starting download..."
+    });
+  });
+
+  autoUpdater.on("download-progress", progressInfo => {
+    const progressPercent = Math.round(progressInfo.percent);
+    event.sender.send("auto-updater-progress", {
+      message: `Update downloading ${progressPercent}%...`
     });
   });
 
@@ -61,8 +68,8 @@ ipcMain.on("check-for-updates", event => {
 
   autoUpdater.on("update-downloaded", () => {
     // trigger app to close and update install
-    event.sender.send("auto-updater-message", {
-      message: "installing update..."
+    event.sender.send("auto-updater-done", {
+      message: "Installing update..."
     });
     autoUpdater.quitAndInstall();
   });

@@ -18,6 +18,13 @@ export const mutations: MutationTree<ISnackbarState> = {
     state.content = payload.content;
     state.color = payload.color;
     state.timeout = payload.timeout;
+  },
+  update(state, payload) {
+    state.content = payload.content;
+  },
+  close(state, payload) {
+    state.content = payload.content;
+    state.timeout = payload.timeout;
   }
 };
 
