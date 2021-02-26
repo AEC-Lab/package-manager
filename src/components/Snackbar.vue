@@ -26,6 +26,13 @@ export default {
         this.timeout = state.snackbar.timeout;
         this.show = true;
       }
+      if (mutation.type === "snackbar/update") {
+        this.message = state.snackbar.content;
+      }
+      if (mutation.type === "snackbar/close") {
+        this.message = state.snackbar.content;
+        this.timeout = state.snackbar.timeout;
+      }
     });
   }
 };
