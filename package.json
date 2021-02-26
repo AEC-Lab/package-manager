@@ -1,6 +1,6 @@
 {
   "name": "ship",
-  "version": "v0.0.74",
+  "version": "v0.0.75",
   "private": false,
   "description": "Manages software package deployments and installations",
   "author": "Voyansi",
