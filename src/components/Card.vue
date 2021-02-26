@@ -10,6 +10,7 @@
         block
         :loading="isLoading"
         :color="buttonConfig.color"
+        dark
         @click="e => installActionHandlerWrapper(e, pkg, buttonConfig.handler)"
       >
         <template v-slot:loader>
@@ -31,10 +32,10 @@
 </template>
 
 <script lang="ts">
+import { ipcRenderer } from "electron";
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { getButtonConfig } from "../utils/install";
 import { Package } from "types/package";
-import { ipcRenderer } from "electron";
 
 @Component
 export default class Card extends Vue {

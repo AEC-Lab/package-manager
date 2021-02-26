@@ -3,12 +3,14 @@
 export interface ButtonConfig {
   text: string;
   color: string;
+  installedVersion: Function;
   handler: Function;
 }
 
 export enum ButtonActions {
   INSTALL = "INSTALL",
   UNINSTALL = "UNINSTALL",
+  UNINSTALL_PRE = "UNINSTALL_PRE",
   UPDATE = "UPDATE",
   DISABLED = "DISABLED" // placeholder for erroneous packages, e.g. those without releases
 }

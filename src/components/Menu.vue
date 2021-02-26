@@ -20,6 +20,7 @@
         <v-list-item-content>
           <v-list-item-title>{{ userDisplay.title }}</v-list-item-title>
           <v-list-item-subtitle>Personal</v-list-item-subtitle>
+          <v-list-item-subtitle>{{ appVersion }}</v-list-item-subtitle>
           <!--To do replace with user.info !-->
         </v-list-item-content>
       </v-list-item>
@@ -76,6 +77,10 @@ export default class Register extends Vue {
       photoURL: this.authUser.photoURL || null,
       initials: this.parseInitials(this.user.name) || this.authUser.email?.toUpperCase()[0] || "?"
     };
+  }
+  get appVersion() {
+    const appVersion = require("../../package.json").version;
+    return appVersion;
   }
 
   // METHODS
