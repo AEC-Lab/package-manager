@@ -57,7 +57,7 @@
                   @click="e => installActionHandlerWrapper(e, pkg, buttonConfig.handler)"
                 >
                   <template v-slot:default>
-                    <span style="position: absolute; left: 0;">
+                    <span style="position: absolute; left: 0;" v-if="installedRelease">
                       {{ buttonConfig.installedVersion(installedRelease.id) }}
                     </span>
                     <span>{{ buttonConfig.text }}</span>
