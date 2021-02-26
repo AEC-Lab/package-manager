@@ -49,7 +49,16 @@ export default class Login extends Vue {
     ipcRenderer.send("check-for-updates");
     // wait for response
     ipcRenderer.on("auto-updater-message", (event, payload) => {
-      this.$snackbar.flash({ content: payload.message, color: "info", timeout: 2000 });
+      this.$snackbar.flash({ content: payload.message, color: "info", timeout: 3000 });
+    });
+    ipcRenderer.once("auto-updater-progress", (event, payload) => {
+      this.$snackbar.flash({ content: payload.message, color: "info", timeout: -1 });
+    });
+    ipcRenderer.on("auto-updater-progress", (event, payload) => {
+      this.$snackbar.update({ content: payload.message });
+    });
+    ipcRenderer.on("auto-updater-done", (event, payload) => {
+      this.$snackbar.close({ content: payload.message, timeout: 3000 });
     });
     ipcRenderer.once("update-not-available", () => {
       this.loading = false;
