@@ -45,11 +45,11 @@
           </v-btn>
         </v-expansion-panel-content>
       </v-expansion-panel>
-      <v-expansion-panel>
+      <!-- <v-expansion-panel>
         <v-expansion-panel-header>
           <span class="voyansi-font-title">Users</span>
         </v-expansion-panel-header>
-      </v-expansion-panel>
+      </v-expansion-panel> -->
       <v-expansion-panel>
         <v-expansion-panel-header>
           <span class="voyansi-font-title">Authors</span>
@@ -86,7 +86,7 @@
           </v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
-      <v-expansion-panel>
+      <v-expansion-panel v-if="isUserAdmin">
         <v-expansion-panel-header>
           <span class="voyansi-font-title">Enterprises</span>
         </v-expansion-panel-header>
@@ -101,13 +101,18 @@
             <template v-slot:item="{ item }">
               <tr>
                 <td>{{ item.name }}</td>
-                <td>{{ item.memberCount }}</td>
-                <td>{{ item.packageCount }}</td>
+                <td>
+                  {{
+                    $store.getters["users/getUsersByDomains"](item.memberDomains).length +
+                      item.externalMembers.length
+                  }}
+                </td>
+                <td>{{ Object.keys(item.packageConfig).length }}</td>
                 <td>
                   <v-icon
                     @click="
                       () => {
-                        if (item.name === 'Tesla') editEnterprise();
+                        $router.push(`/enterprises/${item.id}/edit`);
                       }
                     "
                     >mdi-pencil</v-icon
@@ -116,7 +121,14 @@
               </tr>
             </template>
           </v-data-table>
-          <v-btn outlined @click="() => {}">
+          <v-btn
+            outlined
+            @click="
+              () => {
+                $router.push('/enterprises/create');
+              }
+            "
+          >
             <v-icon left>mdi-plus-thick</v-icon>
             Create Enterprise
           </v-btn>
@@ -132,6 +144,7 @@ import { PackageStatus, PackageSource } from "../../types/enums";
 import { Author } from "../../types/author";
 import { Package } from "../../types/package";
 import { shell } from "electron";
+import { Enterprise } from "types/enterprise";
 
 @Component
 export default class Admin extends Vue {
@@ -163,13 +176,6 @@ export default class Admin extends Vue {
     { text: "", value: "edit" }
   ];
 
-  enterprises = [
-    { name: "Toyota", id: 1, memberCount: 257, packageCount: 6 },
-    { name: "Voyansi", id: 2, memberCount: 144, packageCount: 11 },
-    { name: "Tesla", id: 3, memberCount: 1182, packageCount: 23 },
-    { name: "Disney", id: 4, memberCount: 430, packageCount: 8 }
-  ];
-
   // COMPUTED PROPERTIES
   get packages(): Package[] {
     return this.$store.state.packages.packages.filter((pkg: Package) => {
@@ -178,11 +184,19 @@ export default class Admin extends Vue {
     });
   }
 
-  get authors() {
+  get authors(): Author[] {
     return this.$store.state.authors.authors.filter((author: Author) => {
       const authorAdmins = this.$store.getters["authors/getAuthorAdmins"](author.id);
       return authorAdmins.includes(this.$store.state.auth.user.githubId);
     });
+  }
+
+  get enterprises(): Enterprise[] {
+    return this.$store.state.enterprises.enterprises;
+  }
+
+  get isUserAdmin() {
+    return this.$store.getters["auth/isAdmin"];
   }
 
   // METHOD

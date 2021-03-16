@@ -10,6 +10,9 @@ service cloud.firestore {
     function getAuthorAdmins(authorId) {
       return get(/databases/$(database)/documents/authors/$(authorId)).data.sourceConfig.github.admins
     }
+    function isUserAdmin() {
+      return "ADMIN" in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles
+    }
     match /{document=**} {
       allow read, write: if false;
     }
@@ -28,6 +31,10 @@ service cloud.firestore {
     match /authors/{docId} {
       allow read: if request.auth != null;
       allow write: if isAuthorAdmin();
+    }
+    match /enterprises/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isUserAdmin();
     }
     match /releases/{docId} {
       allow read: if request.auth != null;

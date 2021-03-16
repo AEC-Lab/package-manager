@@ -2,6 +2,7 @@ import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
 import { ipcRenderer } from "electron";
 import { IRootState } from ".";
 import { User, LoginCredentials, RegisterCredentials } from "../../types/auth";
+import { UserRole } from "../../types/enums";
 import firebase, { fireAuth, firestore, fireFunc } from "../integrations/firebase";
 
 export interface IAuthState {
@@ -15,6 +16,9 @@ export const state: IAuthState = {
 export const getters: GetterTree<IAuthState, IRootState> = {
   getUser: state => {
     return state.user;
+  },
+  isAdmin: state => {
+    return state.user?.roles.includes(UserRole.Admin) || false;
   }
 };
 
@@ -50,6 +54,10 @@ export const actions: ActionTree<IAuthState, IRootState> = {
             githubId: docData?.githubId
           };
           context.commit("setUser", _user);
+          // Set users listener for Admin users
+          if (context.getters["isAdmin"]) {
+            context.dispatch("users/usersListener", null, { root: true });
+          }
         });
     } else {
       unsubscribe && unsubscribe();

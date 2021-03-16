@@ -29,9 +29,9 @@ export default defineComponent({
   },
   setup(props, context) {
     onMounted(() => {
-      // $store.dispatch("github/init");
       $store.dispatch("packages/packagesListener");
       $store.dispatch("authors/authorsListener");
+      $store.dispatch("enterprises/enterprisesListener");
     });
 
     const searchText = ref("");

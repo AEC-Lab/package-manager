@@ -19,6 +19,13 @@ export interface ButtonConfigEnum {
   [key: string]: ButtonConfig;
 }
 
+// AUTH (USER) OBJECT ENUMS
+
+export enum UserRole {
+  User = "USER",
+  Admin = "ADMIN"
+}
+
 // PACKAGE OBJECT ENUMS
 
 export enum PackageStatus {
@@ -40,4 +47,11 @@ export enum PackageSource {
 export enum PackageReleaseSetting {
   LatestAndPrerelease = "LATEST_AND_PRERELEASE",
   All = "ALL"
+}
+
+// ENTERPRISE OBJECT ENUMS
+
+export enum EnterprisePackageAccess {
+  Default = "DEFAULT",
+  Custom = "CUSTOM"
 }
