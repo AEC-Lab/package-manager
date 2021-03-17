@@ -18,6 +18,9 @@
                 <td>{{ item.name }}</td>
                 <td>{{ $store.getters["authors/getAuthorNameById"](item.authorId) }}</td>
                 <td>{{ Object.keys(PackageSource).find(key => PackageSource[key] === item.source) }}</td>
+                <td>
+                  {{ Object.keys(PackageVisibility).find(key => PackageVisibility[key] === item.visibility) }}
+                </td>
                 <td>{{ Object.keys(PackageStatus).find(key => PackageStatus[key] === item.status) }}</td>
                 <td>
                   <v-icon
@@ -140,7 +143,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { PackageStatus, PackageSource } from "../../types/enums";
+import { PackageStatus, PackageSource, PackageVisibility } from "../../types/enums";
 import { Author } from "../../types/author";
 import { Package } from "../../types/package";
 import { shell } from "electron";
@@ -151,6 +154,7 @@ export default class Admin extends Vue {
   // DATA PROPERTIES
   PackageStatus = PackageStatus;
   PackageSource = PackageSource;
+  PackageVisibility = PackageVisibility;
 
   panels = 0;
 
@@ -158,6 +162,7 @@ export default class Admin extends Vue {
     { text: "Name", value: "name" },
     { text: "Author", value: "author" },
     { text: "Source", value: "source" },
+    { text: "Visibility", value: "visibility" },
     { text: "Status", value: "status" },
     { text: "", value: "edit" }
   ];

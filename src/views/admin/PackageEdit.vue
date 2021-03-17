@@ -83,6 +83,15 @@
           </div>
         </draggable>
         <!-- </v-row> -->
+        <div class="caption">Visibility</div>
+        <v-radio-group v-model="packageTemp.visibility" mandatory>
+          <v-radio
+            v-for="setting in visibilitySettings"
+            :key="setting.value"
+            :label="setting.label"
+            :value="setting.value"
+          ></v-radio>
+        </v-radio-group>
         <v-switch
           v-model="packageTemp.status"
           :label="displayStatus"
@@ -109,11 +118,20 @@ import { PackageStatus, PackageVisibility, PackageReleaseSetting, PackageSource 
 export default class PackageEdit extends Vue {
   PackageStatus = PackageStatus;
   PackageSource = PackageSource;
+  PackageVisibility = PackageVisibility;
 
   releaseSettings = [
     { label: "Latest and pre-release only", value: PackageReleaseSetting.LatestAndPrerelease },
     { label: "All", value: PackageReleaseSetting.All }
   ];
+
+  visibilitySettings = Object.entries(PackageVisibility).map(entry => {
+    return {
+      label: entry[0],
+      value: entry[1]
+    };
+  });
+
   existingTags = [
     "Dynamo",
     "Revit",
