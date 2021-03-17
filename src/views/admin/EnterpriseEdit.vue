@@ -56,9 +56,9 @@
 
           <br /><br />
 
+          <!-- PACKAGE SUBSCRIPTIONS -->
           <v-card elevation="4" outlined>
             <v-card-text>
-              <!-- PACKAGE SUBSCRIPTIONS -->
               <v-data-table
                 fixed-header
                 height="10%"
@@ -120,16 +120,13 @@
                         outlined
                       ></v-select>
                     </td>
-                    <td>
-                      <v-icon
+                    <td class="d-flex align-center justify-center">
+                      <ActionIconConfirm
                         v-if="item.visibility === 'PUBLIC'"
-                        @click="
-                          () => {
-                            removePackage(item.id);
-                          }
-                        "
-                        >mdi-close</v-icon
-                      >
+                        icon="mdi-delete"
+                        acceptColor="error"
+                        :acceptAction="() => removePackage(item.id)"
+                      />
                     </td>
                   </tr>
                 </template>
@@ -139,9 +136,9 @@
 
           <br /><br />
 
+          <!-- MEMBERS (INTERNAL + EXTERNAL) -->
           <v-card elevation="4" outlined>
             <v-card-text>
-              <!-- MEMBERS (INTERNAL + EXTERNAL) -->
               <v-data-table
                 fixed-header
                 height="10%"
@@ -232,15 +229,12 @@
                       ></v-select>
                     </td>
                     <td>
-                      <v-icon
+                      <ActionIconConfirm
                         v-if="item.isExternal"
-                        @click="
-                          () => {
-                            removeExternalMember(item.email);
-                          }
-                        "
-                        >mdi-close</v-icon
-                      >
+                        icon="mdi-delete"
+                        acceptColor="error"
+                        :acceptAction="() => removeExternalMember(item.email)"
+                      />
                     </td>
                     <td>
                       <v-btn v-if="item.access === 'CUSTOM'" icon @click="expand(!isExpanded)">
@@ -295,13 +289,18 @@ import { Package } from "../../../types/package";
 import { User } from "../../../types/auth";
 import { EnterprisePackageAccess, PackageVisibility } from "../../../types/enums";
 import { isValidDomain, isValidEmail } from "../../utils/helpers";
+import ActionIconConfirm from "../../components/ActionIconConfirm.vue";
 
 interface PackageSelect {
   text: string;
   value: string;
 }
 
-@Component
+@Component({
+  components: {
+    ActionIconConfirm
+  }
+})
 export default class EnterpriseEdit extends Vue {
   // DATA PROPERTIES
   packageAccessEnums = Object.entries(EnterprisePackageAccess).map(([key, value]) => {
@@ -319,15 +318,15 @@ export default class EnterpriseEdit extends Vue {
     { text: "Author", value: "author" },
     { text: "Visibility", value: "visibility" },
     { text: "Access", value: "access", width: 180 },
-    { text: "", value: "remove", width: 70 }
+    { text: "", value: "actions", sortable: false, align: "center", width: 105 }
   ];
   headersMembers = [
     { text: "", value: "isExternal", width: 70 },
     { text: "Name", value: "name" },
     { text: "Email", value: "email" },
     { text: "Access", value: "access", width: 180 },
-    { text: "", value: "remove", width: 70 },
-    { text: "", value: "data-table-expand", width: 70 }
+    { text: "", value: "actions", sortable: false, align: "center", width: 105 },
+    { text: "", value: "data-table-expand", sortable: false, width: 70 }
   ];
 
   nameRules = [(v: string) => !!v || "Field is required"];
