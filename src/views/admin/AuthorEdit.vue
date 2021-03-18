@@ -2,45 +2,65 @@
   <v-container id="container">
     <v-row>
       <v-col cols="12">
-        <v-text-field label="Name" v-model="authorTemp.name"></v-text-field>
-        <v-textarea label="Description" v-model="authorTemp.description" rows="3"></v-textarea>
-        <v-text-field label="Website" v-model="authorTemp.website" rows="3"></v-text-field>
+        <v-card elevation="4" outlined>
+          <v-card-title class="vo-card-title-light">Author Information</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-text-field label="Name" v-model="authorTemp.name"></v-text-field>
+            <v-textarea label="Description" v-model="authorTemp.description" rows="3"></v-textarea>
+            <v-text-field label="Website" v-model="authorTemp.website" rows="3"></v-text-field>
+            <v-text-field
+              v-model="authorTemp.thumbnailUrl"
+              clear-icon="mdi-close"
+              clearable
+              label="Profile image URL"
+              @click:clear="clearImageInput"
+            ></v-text-field>
+            <v-row class="mb-8 ml-0" justify="start">
+              <div class="img-wrapper">
+                <img
+                  :src="authorTemp.thumbnailUrl || fallbackImage"
+                  alt=""
+                  @error="e => imageLoadOnError(e)"
+                />
+              </div>
+            </v-row>
+          </v-card-text>
+        </v-card>
 
-        <div class="caption">Sources</div>
-        <v-list-item-group class="mb-2">
-          <v-list-item v-for="source in sources" :key="source.title">
-            <v-list-item-icon>
-              <v-icon>{{ source.icon }}</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title>{{ source.title }}</v-list-item-title>
-              <v-list-item-subtitle>{{ source.subtitle }}</v-list-item-subtitle>
-            </v-list-item-content>
-            <template>
-              <v-divider> </v-divider>
-            </template>
-          </v-list-item>
-        </v-list-item-group>
-        <v-btn small outlined @click="() => {}" class="mb-1">
-          <v-icon left>mdi-plus-thick</v-icon>
-          Add Source
-        </v-btn>
-        <div class="caption mb-8 font-italic font-weight-light">
-          * GitHub organizations that have installed the Ship GitHub App will appear here automatically.
-        </div>
+        <br /><br />
 
-        <v-text-field
-          v-model="authorTemp.thumbnailUrl"
-          clear-icon="mdi-close"
-          clearable
-          label="Profile image URL"
-          @click:clear="clearImageInput"
-        ></v-text-field>
-        <v-row class="mb-8 ml-0" justify="start">
-          <div class="img-wrapper">
-            <img :src="authorTemp.thumbnailUrl || fallbackImage" alt="" @error="e => imageLoadOnError(e)" />
-          </div>
-        </v-row>
+        <v-card elevation="4" outlined>
+          <v-card-title class="vo-card-title-light">Configuration</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <div class="subtitle-1">Sources</div>
+            <v-list-item-group class="mb-2">
+              <v-list-item v-for="source in sources" :key="source.title">
+                <v-list-item-icon>
+                  <v-icon>{{ source.icon }}</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>{{ source.title }}</v-list-item-title>
+                  <v-list-item-subtitle>{{ source.subtitle }}</v-list-item-subtitle>
+                </v-list-item-content>
+                <template>
+                  <v-divider> </v-divider>
+                </template>
+              </v-list-item>
+            </v-list-item-group>
+            <v-btn small outlined @click="() => {}" class="mb-1">
+              <v-icon left>mdi-plus-thick</v-icon>
+              Add Source
+            </v-btn>
+            <div class="caption mb-8 font-italic font-weight-light">
+              * GitHub organizations that have installed the Ship GitHub App will appear here automatically.
+            </div>
+          </v-card-text>
+        </v-card>
+
+        <br /><br />
+
         <v-btn class="mr-4" @click="() => $router.push('/admin')">Cancel</v-btn>
         <v-btn @click="save" color="primary">Save</v-btn>
       </v-col>

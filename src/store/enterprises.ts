@@ -1,4 +1,4 @@
-import { Module, MutationTree, ActionTree } from "vuex";
+import { Module, MutationTree, ActionTree, GetterTree } from "vuex";
 import { IRootState } from ".";
 import { Enterprise } from "../../types/enterprise";
 import { firestore } from "../integrations/firebase";
@@ -14,19 +14,13 @@ export const state: IEnterprisesState = {
   isEnterpriseListenerSet: false
 };
 
-// export const getters: GetterTree<IEnterprisesState, IRootState> = {
-//   // Gets all releases for a given repository
-//   getAuthorNameById: state => (authorId: string): string => {
-//     const author = state.authors.find(author => author.id === authorId);
-//     return author ? author.name : "Unknown";
-//   },
-//   getAuthorAdmins: state => (authorId: string): number[] => {
-//     const author = state.authors.find(author => author.id === authorId);
-//     if (author && author.sourceConfig.github) {
-//       return author.sourceConfig.github.admins;
-//     } else return [];
-//   }
-// };
+export const getters: GetterTree<IEnterprisesState, IRootState> = {
+  // Gets all releases for a given repository
+  getEnterpriseNameById: state => (enterpriseId: string): string => {
+    const enterprise = state.enterprises.find(enterprise => enterprise.id === enterpriseId);
+    return enterprise ? enterprise.name : "Unknown";
+  }
+};
 
 export const mutations: MutationTree<IEnterprisesState> = {
   setEnterprises(state, payload: Enterprise[]) {
@@ -122,7 +116,7 @@ const namespaced = true;
 export const enterprises: Module<IEnterprisesState, IRootState> = {
   namespaced,
   state,
-  //   getters,
+  getters,
   mutations,
   actions
 };

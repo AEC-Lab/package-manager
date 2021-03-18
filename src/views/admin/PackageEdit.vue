@@ -2,102 +2,168 @@
   <v-container id="container">
     <v-row>
       <v-col cols="12">
-        <v-text-field label="Name" v-model="packageTemp.name"></v-text-field>
-        <v-textarea label="Description" v-model="packageTemp.description" rows="3"></v-textarea>
-        <v-text-field
-          label="Author"
-          disabled
-          filled
-          :placeholder="$store.getters['authors/getAuthorNameById'](packageTemp.authorId)"
-        ></v-text-field>
-        <v-text-field label="Source" disabled filled :placeholder="displaySource"></v-text-field>
-        <div class="caption">Releases available</div>
-        <v-radio-group v-model="packageTemp.sourceData.releaseSetting" mandatory>
-          <v-radio
-            v-for="setting in releaseSettings"
-            :key="setting.value"
-            :label="setting.label"
-            :value="setting.value"
-          ></v-radio>
-        </v-radio-group>
-        <v-autocomplete
-          v-model="packageTemp.dependencyIds"
-          chips
-          deletable-chips
-          multiple
-          label="Package Dependencies"
-          :search-input.sync="dependencySearch"
-          :items="packages"
-        ></v-autocomplete>
-        <v-combobox
-          v-model="packageTemp.tags"
-          :items="existingTags"
-          :search-input.sync="tagSearch"
-          hide-selected
-          hint=""
-          label="Tags"
-          multiple
-          persistent-hint
-          append-icon=""
-        >
-          <template v-slot:no-data>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title>
-                  No results matching "<strong>{{ tagSearch }}</strong
-                  >". Press <kbd>enter</kbd> to create a new one
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </template>
-          <template v-slot:selection="{ attrs, item, select, selected }">
-            <v-chip
-              v-bind="attrs"
-              :input-value="selected"
-              close
-              @click="select"
-              @click:close="removeTag(item)"
+        <v-card elevation="4" outlined>
+          <v-card-title class="vo-card-title-light">Listing Information</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-text-field label="Name" v-model="packageTemp.name"></v-text-field>
+            <v-text-field
+              label="Author"
+              disabled
+              filled
+              :placeholder="$store.getters['authors/getAuthorNameById'](packageTemp.authorId)"
+            ></v-text-field>
+            <v-textarea label="Description" v-model="packageTemp.description" rows="3"></v-textarea>
+            <v-combobox
+              v-model="packageTemp.tags"
+              :items="existingTags"
+              :search-input.sync="tagSearch"
+              hide-selected
+              hint=""
+              label="Tags"
+              multiple
+              persistent-hint
+              append-icon=""
             >
-              {{ item }}
-            </v-chip>
-          </template>
-        </v-combobox>
-        <v-text-field v-model="packageTemp.website" label="Website URL"></v-text-field>
-        <v-text-field
-          v-model="imageInput"
-          :append-outer-icon="imageInput && 'mdi-plus-thick'"
-          clear-icon="mdi-close"
-          clearable
-          label="Add an image URL"
-          hint="The first image will be used as the thumbnail in the browse listing"
-          @click:append-outer="addImage"
-          @click:clear="clearImageInput"
-        ></v-text-field>
-        <!-- <v-row class="" justify="start"> -->
-        <draggable v-model="packageTemp.images" class="row ml-0">
-          <div v-for="(image, index) in packageTemp.images" :key="image" class="mr-4 img-draggable">
-            <v-icon @click="removeImage(index)">mdi-close</v-icon>
-            <div class="img-wrapper">
-              <img :src="image" alt="" />
+              <template v-slot:no-data>
+                <v-list-item>
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      No results matching "<strong>{{ tagSearch }}</strong
+                      >". Press <kbd>enter</kbd> to create a new one
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
+              <template v-slot:selection="{ attrs, item, select, selected }">
+                <v-chip
+                  v-bind="attrs"
+                  :input-value="selected"
+                  close
+                  @click="select"
+                  @click:close="removeTag(item)"
+                >
+                  {{ item }}
+                </v-chip>
+              </template>
+            </v-combobox>
+            <v-text-field v-model="packageTemp.website" label="Website URL"></v-text-field>
+            <v-text-field
+              v-model="imageInput"
+              :append-outer-icon="imageInput && 'mdi-plus-thick'"
+              clear-icon="mdi-close"
+              clearable
+              label="Add an image URL"
+              hint="The first image will be used as the thumbnail in the browse listing"
+              @click:append-outer="addImage"
+              @click:clear="clearImageInput"
+            ></v-text-field>
+            <!-- <v-row class="" justify="start"> -->
+            <draggable v-model="packageTemp.images" class="row ml-0 mb-8">
+              <div v-for="(image, index) in packageTemp.images" :key="image" class="mr-4 img-draggable">
+                <v-icon @click="removeImage(index)">mdi-close</v-icon>
+                <div class="img-wrapper">
+                  <img :src="image" alt="" />
+                </div>
+              </div>
+            </draggable>
+            <!-- </v-row> -->
+          </v-card-text>
+        </v-card>
+
+        <br /><br />
+
+        <v-card elevation="4" outlined>
+          <v-card-title class="vo-card-title-light">Configuration</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-text-field label="Source" disabled filled :placeholder="displaySource"></v-text-field>
+            <div class="subtitle-1">Releases available</div>
+            <v-radio-group v-model="packageTemp.sourceData.releaseSetting" mandatory>
+              <v-radio
+                v-for="setting in releaseSettings"
+                :key="setting.value"
+                :label="setting.label"
+                :value="setting.value"
+              ></v-radio>
+            </v-radio-group>
+            <v-autocomplete
+              v-model="packageTemp.dependencyIds"
+              chips
+              deletable-chips
+              multiple
+              label="Package Dependencies"
+              :search-input.sync="dependencySearch"
+              :items="packages"
+            ></v-autocomplete>
+          </v-card-text>
+        </v-card>
+
+        <br /><br />
+
+        <v-card elevation="4" outlined>
+          <v-card-title class="vo-card-title-light">Accessibility</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <div class="subtitle-1">Visibility</div>
+            <div class="caption warning--text">
+              Please note the following side effects of changing package visibility:
+              <br />
+              PUBLIC -> PRIVATE: access will be removed from any enterprise or individual; private
+              subscriptions will be required to grant access
+              <br />
+              PRIVATE -> PUBLIC: any enterprise or individual will have access; subscriber data will be
+              deleted
             </div>
-          </div>
-        </draggable>
-        <!-- </v-row> -->
-        <div class="caption">Visibility</div>
-        <v-radio-group v-model="packageTemp.visibility" mandatory>
-          <v-radio
-            v-for="setting in visibilitySettings"
-            :key="setting.value"
-            :label="setting.label"
-            :value="setting.value"
-          ></v-radio>
-        </v-radio-group>
-        <v-switch
-          v-model="packageTemp.status"
-          :label="displayStatus"
-          :true-value="PackageStatus.Active"
-          :false-value="PackageStatus.Inactive"
-        ></v-switch>
+            <v-radio-group v-model="packageTemp.visibility" mandatory>
+              <v-radio
+                v-for="setting in visibilitySettings"
+                :key="setting.value"
+                :label="setting.label"
+                :value="setting.value"
+              ></v-radio>
+            </v-radio-group>
+            <v-data-table
+              v-if="packageTemp.visibility === PackageVisibility.Private"
+              fixed-header
+              :headers="headersSubscribers"
+              :items="subscribers"
+              :items-per-page="10"
+              sort-by="name"
+            >
+              <template v-slot:top>
+                <v-toolbar flat>
+                  <v-toolbar-title> Subscribers ({{ subscribers && subscribers.length }}) </v-toolbar-title>
+                </v-toolbar>
+              </template>
+              <template v-slot:[`item.actions`]="{ item }">
+                <td class="d-flex align-center justify-center">
+                  <ActionIconConfirm
+                    icon="mdi-delete"
+                    acceptColor="error"
+                    :acceptAction="() => removeSubscriber(item.enterpriseId)"
+                  />
+                </td>
+              </template>
+            </v-data-table>
+            <div class="subtitle-1">Status</div>
+            <div class="caption warning--text">
+              INACTIVE packages will not be accessible, regardless of visibility
+              <br />
+              ACTIVE packages' accessibility will be controlled by visibility
+            </div>
+            <v-switch
+              v-model="packageTemp.status"
+              :label="displayStatus"
+              :true-value="PackageStatus.Active"
+              :false-value="PackageStatus.Inactive"
+              class="mb-4"
+            ></v-switch>
+          </v-card-text>
+        </v-card>
+
+        <br /><br />
+
         <v-btn class="mr-4" @click="() => $router.push('/admin')">Cancel</v-btn>
         <v-btn @click="save" color="primary">Save</v-btn>
       </v-col>
@@ -111,9 +177,10 @@ import _ from "lodash";
 import draggable from "vuedraggable";
 import { GithubRepository, Package } from "../../../types/package";
 import { PackageStatus, PackageVisibility, PackageReleaseSetting, PackageSource } from "../../../types/enums";
+import ActionIconConfirm from "../../components/ActionIconConfirm.vue";
 
 @Component({
-  components: { draggable }
+  components: { draggable, ActionIconConfirm }
 })
 export default class PackageEdit extends Vue {
   PackageStatus = PackageStatus;
@@ -131,6 +198,11 @@ export default class PackageEdit extends Vue {
       value: entry[1]
     };
   });
+
+  headersSubscribers = [
+    { text: "Name", value: "name" },
+    { text: "", value: "actions", sortable: false, align: "center", width: 105 }
+  ];
 
   existingTags = [
     "Dynamo",
@@ -175,6 +247,15 @@ export default class PackageEdit extends Vue {
       });
   }
 
+  get subscribers() {
+    return this.packageTemp.subscriberIds?.map(enterpriseId => {
+      return {
+        enterpriseId,
+        name: this.$store.getters["enterprises/getEnterpriseNameById"](enterpriseId)
+      };
+    });
+  }
+
   // METHODS
   defaultPackageData(): Package {
     return {
@@ -208,6 +289,13 @@ export default class PackageEdit extends Vue {
 
   removeImage(index: number) {
     this.packageTemp.images.splice(index, 1);
+  }
+
+  removeSubscriber(subscriberId: string) {
+    // TODO: call function to remove the package id refs from the enterprise/subscriber
+    if (this.packageTemp.subscriberIds) {
+      this.packageTemp.subscriberIds = this.packageTemp.subscriberIds.filter(id => id !== subscriberId);
+    }
   }
 
   async save() {

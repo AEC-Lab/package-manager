@@ -4,6 +4,8 @@
       <v-col cols="12">
         <v-form v-model="isFormValid" ref="form" lazy-validation>
           <v-card elevation="4" outlined>
+            <v-card-title class="vo-card-title-light">Listing Data</v-card-title>
+            <v-divider></v-divider>
             <v-card-text>
               <!-- ENTERPRISE NAME -->
               <v-text-field
@@ -12,6 +14,30 @@
                 required
                 :rules="nameRules"
               ></v-text-field>
+              <br /><br />
+              <!-- ENTERPRISE IMAGE LOGO -->
+              <v-text-field
+                v-model="enterpriseTemp.imageUrl"
+                clear-icon="mdi-close"
+                clearable
+                label="Logo image URL"
+                hint="This image will be used as the icon next to this enterprise's sub-section of the marketplace browser"
+              ></v-text-field>
+              <v-row class="" justify="start">
+                <div class="img-wrapper">
+                  <img :src="enterpriseTemp.imageUrl" alt="" />
+                </div>
+              </v-row>
+            </v-card-text>
+          </v-card>
+
+          <br /><br />
+
+          <!-- PACKAGE SUBSCRIPTIONS -->
+          <v-card elevation="4" outlined>
+            <v-card-title class="vo-card-title-light">Configuration</v-card-title>
+            <v-divider></v-divider>
+            <v-card-text>
               <!-- ENTERPRISE DOMAINS -->
               <v-combobox
                 v-model="enterpriseTemp.memberDomains"
@@ -37,28 +63,9 @@
                   </v-chip>
                 </template>
               </v-combobox>
+
               <br /><br />
-              <!-- ENTERPRISE IMAGE LOGO -->
-              <v-text-field
-                v-model="enterpriseTemp.imageUrl"
-                clear-icon="mdi-close"
-                clearable
-                label="Logo image URL"
-                hint="This image will be used as the icon next to this enterprise's sub-section of the marketplace browser"
-              ></v-text-field>
-              <v-row class="" justify="start">
-                <div class="img-wrapper">
-                  <img :src="enterpriseTemp.imageUrl" alt="" />
-                </div>
-              </v-row>
-            </v-card-text>
-          </v-card>
 
-          <br /><br />
-
-          <!-- PACKAGE SUBSCRIPTIONS -->
-          <v-card elevation="4" outlined>
-            <v-card-text>
               <v-data-table
                 fixed-header
                 height="10%"
@@ -152,10 +159,14 @@
                     <td>
                       {{ item.author }}
                     </td>
-                    <td>{{ packageVisibilityEnums.find(([k, v]) => v === item.visibility)[0] }}</td>
+                    <td>
+                      {{ packageVisibilityEnums.find(([k, v]) => v === item.visibility)[0] }}
+                      <v-icon v-if="item.visibility === 'PRIVATE'" small>mdi-lock</v-icon>
+                    </td>
                     <td>
                       <v-select
                         v-model="enterpriseTemp.packageConfig[item.id]"
+                        @input="val => handlePackageAccessChange(item, val)"
                         :items="packageAccessEnums"
                         hide-details
                         dense
@@ -164,7 +175,6 @@
                     </td>
                     <td class="d-flex align-center justify-center">
                       <ActionIconConfirm
-                        v-if="item.visibility === 'PUBLIC'"
                         icon="mdi-delete"
                         acceptColor="error"
                         :acceptAction="() => removePackage(item.id)"
@@ -173,14 +183,10 @@
                   </tr>
                 </template>
               </v-data-table>
-            </v-card-text>
-          </v-card>
 
-          <br /><br />
+              <br /><br />
 
-          <!-- MEMBERS (INTERNAL + EXTERNAL) -->
-          <v-card elevation="4" outlined>
-            <v-card-text>
+              <!-- MEMBERS (INTERNAL + EXTERNAL) -->
               <v-data-table
                 fixed-header
                 height="10%"
@@ -295,7 +301,7 @@
                     <v-row class="ml-0">
                       <v-col>
                         <v-switch
-                          v-for="pkg in packageTableItems"
+                          v-for="pkg in packageTableItemsCustomAccess"
                           :key="pkg.id"
                           :label="`${pkg.name} (${pkg.author})`"
                           multiple
@@ -330,7 +336,7 @@ import _ from "lodash";
 import { Enterprise } from "../../../types/enterprise";
 import { Package } from "../../../types/package";
 import { User } from "../../../types/auth";
-import { EnterprisePackageAccess, PackageVisibility } from "../../../types/enums";
+import { EnterprisePackageAccess, PackageStatus, PackageVisibility } from "../../../types/enums";
 import { isValidDomain, isValidEmail } from "../../utils/helpers";
 import { fireFunc } from "../../integrations/firebase";
 import ActionIconConfirm from "../../components/ActionIconConfirm.vue";
@@ -398,19 +404,24 @@ export default class EnterpriseEdit extends Vue {
 
   // COMPUTED PROPERTIES
   get packageTableItems() {
-    const items = Object.entries(this.enterpriseTemp.packageConfig).map(
-      ([pkgId, val]: [string, EnterprisePackageAccess]) => {
+    const items = Object.entries(this.enterpriseTemp.packageConfig)
+      .map(([pkgId, val]: [string, EnterprisePackageAccess]) => {
         const pkg: Package = this.$store.getters["packages/getPackageById"](pkgId);
         return {
           id: pkgId,
           name: pkg.name,
           author: this.$store.getters["authors/getAuthorNameById"](pkg.authorId),
           visibility: pkg.visibility,
-          access: val
+          access: val,
+          status: pkg.status
         };
-      }
-    );
+      })
+      .filter(pkg => pkg.status === PackageStatus.Active);
     return _.orderBy(items, ["name", "author"]);
+  }
+
+  get packageTableItemsCustomAccess() {
+    return this.packageTableItems.filter(pkg => pkg.access === EnterprisePackageAccess.Custom);
   }
 
   get memberTableItems() {
@@ -469,6 +480,8 @@ export default class EnterpriseEdit extends Vue {
     const pkgConfig = { ...this.enterpriseTemp.packageConfig };
     delete pkgConfig[packageId];
     this.enterpriseTemp.packageConfig = pkgConfig;
+    // also remove package id from any memberConfig array (if it was set to Custom access)
+    this.removePackageIdFromMemberConfig(packageId);
   }
 
   async generateRequestCode() {
@@ -538,15 +551,25 @@ export default class EnterpriseEdit extends Vue {
       delete memberConfig[item.email];
       this.enterpriseTemp.memberConfig = memberConfig;
     } else {
-      const defaultPackages: string[] = [];
-      for (const pkgId in this.enterpriseTemp.packageConfig) {
-        if (this.enterpriseTemp.packageConfig[pkgId] === EnterprisePackageAccess.Default) {
-          defaultPackages.push(pkgId);
-        }
-      }
-      memberConfig[item.email] = defaultPackages;
+      memberConfig[item.email] = [];
     }
     this.enterpriseTemp.memberConfig = memberConfig;
+  }
+
+  handlePackageAccessChange(item: any, val: EnterprisePackageAccess) {
+    if (val === EnterprisePackageAccess.Default) {
+      this.removePackageIdFromMemberConfig(item.id);
+    }
+  }
+
+  removePackageIdFromMemberConfig(packageId: string) {
+    for (const memberId in this.enterpriseTemp.memberConfig) {
+      if (Array.isArray(this.enterpriseTemp.memberConfig[memberId])) {
+        this.enterpriseTemp.memberConfig[memberId] = this.enterpriseTemp.memberConfig[memberId].filter(
+          pkgId => pkgId !== packageId
+        );
+      }
+    }
   }
 
   defaultEnterpriseData(): Enterprise {

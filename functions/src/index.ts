@@ -40,11 +40,13 @@ export const github = functions.https.onRequest(configureApp(githubRoute));
 export const validate = functions.https.onRequest(configureApp(validateRoute));
 
 //////////////////////////////////////
-/////////  NON-HTTP TRIGGERS /////////
+/////////  FIREBASE TRIGGERS /////////
 //////////////////////////////////////
 
 export { createUser, deleteUser } from "./fb-event-triggers/auth";
 export { processGithubEvent } from "./fb-event-triggers/github";
+export { handlePackageDataChange } from "./fb-event-triggers/package";
+export { handleEnterpriseDataChange } from "./fb-event-triggers/enterprise";
 
 ////////////////////////////////////////////
 ///////// HTTPS CALLABLE FUNCTIONS /////////
