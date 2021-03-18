@@ -43,7 +43,7 @@
                 v-model="enterpriseTemp.imageUrl"
                 clear-icon="mdi-close"
                 clearable
-                label="Add an image URL"
+                label="Logo image URL"
                 hint="This image will be used as the icon next to this enterprise's sub-section of the marketplace browser"
               ></v-text-field>
               <v-row class="" justify="start">
@@ -73,6 +73,46 @@
                       >Packages ({{ Object.keys(enterpriseTemp.packageConfig).length }})</v-toolbar-title
                     >
                     <v-spacer></v-spacer>
+                    <v-dialog v-model="dialogRequestCode" max-width="500px">
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          text
+                          outlined
+                          v-bind="attrs"
+                          v-on="on"
+                          class="mr-4"
+                          @click="generateRequestCode"
+                        >
+                          Generate Request Code
+                        </v-btn>
+                      </template>
+                      <v-card>
+                        <v-card-text class="pb-0 pt-4">
+                          <v-row class="mx-0">
+                            <div class="subtitle-1">Your request code is:</div>
+                          </v-row>
+                        </v-card-text>
+                        <v-card-title>
+                          <span v-if="requestCode">{{ requestCode }}</span>
+                          <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
+                        </v-card-title>
+                        <v-card-text class="pt-4">
+                          <v-row class="mx-0">
+                            <div class="subtitle-2">
+                              Copy/save this code, and send it to an admin for the private package(s) for
+                              which you are requesting a subscription.<br /><br />This code will expire after
+                              10 days.
+                            </div>
+                          </v-row>
+                        </v-card-text>
+                        <v-divider></v-divider>
+                        <v-card-actions>
+                          <v-btn color="primary" @click="closeDialogRequestCode">
+                            Close
+                          </v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
                     <v-dialog v-model="dialogAddPackages" scrollable max-width="500px">
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn text outlined v-bind="attrs" v-on="on">
@@ -81,15 +121,17 @@
                         </v-btn>
                       </template>
                       <v-card>
-                        <v-card-text style="max-height: 300px; min-height: 150px;">
-                          <v-checkbox
-                            v-for="pkg in availablePublicPackages"
-                            :key="pkg.value"
+                        <v-card-text style="height: 300px;">
+                          <v-autocomplete
                             v-model="packagesToAdd"
-                            :label="pkg.text"
-                            :value="pkg.value"
-                          >
-                          </v-checkbox>
+                            label="Select packages"
+                            multiple
+                            chips
+                            deletable-chips
+                            clearable
+                            :items="availablePublicPackages"
+                            class="mt-4"
+                          />
                         </v-card-text>
                         <v-divider></v-divider>
                         <v-card-actions>
@@ -181,6 +223,7 @@
                               :search-input.sync="emailInput"
                               @update:search-input="processEmailInput"
                               :rules="emailRules"
+                              class="mt-4"
                             >
                               <template v-slot:selection="{ attrs, item, select, selected }">
                                 <v-chip
@@ -289,6 +332,7 @@ import { Package } from "../../../types/package";
 import { User } from "../../../types/auth";
 import { EnterprisePackageAccess, PackageVisibility } from "../../../types/enums";
 import { isValidDomain, isValidEmail } from "../../utils/helpers";
+import { fireFunc } from "../../integrations/firebase";
 import ActionIconConfirm from "../../components/ActionIconConfirm.vue";
 
 interface PackageSelect {
@@ -346,6 +390,8 @@ export default class EnterpriseEdit extends Vue {
 
   isFormValid = false;
   isEmailFormValid = false;
+  requestCode: string | null = null;
+  dialogRequestCode = false;
   dialogAddPackages = false;
   dialogAddMembers = false;
   processing = false;
@@ -423,6 +469,19 @@ export default class EnterpriseEdit extends Vue {
     const pkgConfig = { ...this.enterpriseTemp.packageConfig };
     delete pkgConfig[packageId];
     this.enterpriseTemp.packageConfig = pkgConfig;
+  }
+
+  async generateRequestCode() {
+    const requestCode = await (
+      await fireFunc.httpsCallable("generateRequestCode")({ enterpriseId: this.enterpriseTemp.id })
+    ).data;
+    if (!requestCode) this.$snackbar.flash({ content: "Unable to create request code", color: "error" });
+    this.requestCode = requestCode;
+  }
+
+  closeDialogRequestCode() {
+    this.dialogRequestCode = false;
+    this.requestCode = null;
   }
 
   addSelectedPackages() {

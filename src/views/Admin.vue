@@ -23,19 +23,22 @@
                 </td>
                 <td>{{ Object.keys(PackageStatus).find(key => PackageStatus[key] === item.status) }}</td>
                 <td>
-                  <v-icon
+                  <v-btn
+                    icon
                     @click="
                       () => {
                         $router.push(`/packages/${item.id}/edit`);
                       }
                     "
-                    >mdi-pencil</v-icon
                   >
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
                 </td>
               </tr>
             </template>
           </v-data-table>
           <v-btn
+            class="mr-4"
             outlined
             @click="
               () => {
@@ -46,6 +49,47 @@
             <v-icon left>mdi-plus-thick</v-icon>
             Create Package
           </v-btn>
+          <v-dialog v-model="dialogRequestCode" scrollable max-width="500px">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn outlined v-bind="attrs" v-on="on">
+                Process Subscription Request Code
+              </v-btn>
+            </template>
+            <v-card>
+              <ProcessRequestCodeForm :packages="packages" :closeDialog="closeDialogRequestCode" />
+              <!-- <v-card-text> -->
+              <!-- <v-text-field
+                  class="mt-4"
+                  v-model="requestCode"
+                  label="Request Code"
+                  hint="Paste in the request code given to you by the requesting subscriber or enterprise"
+                ></v-text-field>
+                <v-autocomplete
+                  v-model="requestCodeSelectedPackageIds"
+                  label="Select packages"
+                  multiple
+                  chips
+                  deletable-chips
+                  clearable
+                  :items="packages"
+                  :item-text="
+                    item => `${item.name} (${$store.getters['authors/getAuthorNameById'](item.authorId)})`
+                  "
+                  item-value="id"
+                  class="mt-4"
+                /> -->
+              <!-- </v-card-text> -->
+              <!-- <v-divider></v-divider> -->
+              <!-- <v-card-actions>
+                <v-btn color="primary" text @click="closeDialogRequestCode">
+                  Cancel
+                </v-btn>
+                <v-btn color="primary" @click="processRequestCode">
+                  Process Subscription Request
+                </v-btn>
+              </v-card-actions> -->
+            </v-card>
+          </v-dialog>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <!-- <v-expansion-panel>
@@ -75,14 +119,16 @@
                 </td>
                 <td>{{ authorPackageCount(item) }}</td>
                 <td>
-                  <v-icon
+                  <v-btn
+                    icon
                     @click="
                       () => {
                         $router.push(`/authors/${item.id}/edit`);
                       }
                     "
-                    >mdi-pencil</v-icon
                   >
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
                 </td>
               </tr>
             </template>
@@ -112,14 +158,16 @@
                 </td>
                 <td>{{ Object.keys(item.packageConfig).length }}</td>
                 <td>
-                  <v-icon
+                  <v-btn
+                    icon
                     @click="
                       () => {
                         $router.push(`/enterprises/${item.id}/edit`);
                       }
                     "
-                    >mdi-pencil</v-icon
                   >
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
                 </td>
               </tr>
             </template>
@@ -143,13 +191,18 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import { shell } from "electron";
 import { PackageStatus, PackageSource, PackageVisibility } from "../../types/enums";
 import { Author } from "../../types/author";
 import { Package } from "../../types/package";
-import { shell } from "electron";
-import { Enterprise } from "types/enterprise";
+import { Enterprise } from "../../types/enterprise";
+import ProcessRequestCodeForm from "../components/admin/ProcessRequestCodeForm.vue";
 
-@Component
+@Component({
+  components: {
+    ProcessRequestCodeForm
+  }
+})
 export default class Admin extends Vue {
   // DATA PROPERTIES
   PackageStatus = PackageStatus;
@@ -157,6 +210,9 @@ export default class Admin extends Vue {
   PackageVisibility = PackageVisibility;
 
   panels = 0;
+  dialogRequestCode = false;
+  requestCode = "";
+  requestCodeSelectedPackageIds: string[] = [];
 
   headersPackages = [
     { text: "Name", value: "name" },
@@ -222,6 +278,12 @@ export default class Admin extends Vue {
 
   editEnterprise() {
     shell.openExternal("https://tinyurl.com/zuw2r2r7");
+  }
+
+  closeDialogRequestCode() {
+    this.dialogRequestCode = false;
+    this.requestCode = "";
+    this.requestCodeSelectedPackageIds = [];
   }
 }
 </script>

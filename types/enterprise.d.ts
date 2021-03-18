@@ -17,3 +17,8 @@ export interface EnterprisePackageConfig {
 export interface EnterpriseMemberConfig {
   [key: string]: string[];
 }
+
+export interface EnterprisePackageRequest {
+  enterpriseId: string;
+  created: Date;
+}

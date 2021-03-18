@@ -51,9 +51,15 @@ export { processGithubEvent } from "./fb-event-triggers/github";
 ////////////////////////////////////////////
 
 export { isUserEmailVerified } from "./callables/auth";
+export {
+  generateRequestCode,
+  getEnterpriseNameByRequestCode,
+  processSubscriptions
+} from "./callables/enterprise";
 
 ///////////////////////////////////////
 ///////// SCHEDULED FUNCTIONS /////////
 ///////////////////////////////////////
 
 export { syncGithubOrgAdmins } from "./scheduled/github";
+export { removeExpiredRequests } from "./scheduled/enterprise";
