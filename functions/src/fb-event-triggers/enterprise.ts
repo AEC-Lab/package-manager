@@ -4,6 +4,7 @@ import * as _ from "lodash";
 import { db } from "../config/fbConfig";
 import { Package } from "../../../types/package";
 import { Enterprise } from "../../../types/enterprise";
+import { PackageVisibility } from "../../../types/enums";
 
 export const handleEnterpriseDataChange = functions.firestore
   .document("enterprises/{docId}")
@@ -30,6 +31,33 @@ export const handleEnterpriseDataChange = functions.firestore
           }
         }
       }
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  });
+
+export const handleEnterpriseDeleted = functions.firestore
+  .document("enterprises/{docId}")
+  .onDelete(async (snapshot, context) => {
+    // const docData = snapshot.data() as Enterprise;
+    const enterpriseId = snapshot.id;
+
+    try {
+      // Remove enterprise as subscriber from any private packages in which it was listed
+      const privatePackages = await db
+        .collection("packages")
+        .where("visibility", "==", PackageVisibility.Private)
+        .get();
+      privatePackages.forEach(async doc => {
+        const pkg = doc.data() as Package;
+        if (pkg.subscriberIds?.includes(enterpriseId)) {
+          const updatedSubscriberIds = pkg.subscriberIds.filter(id => id !== enterpriseId);
+          await doc.ref.update({ subscriberIds: updatedSubscriberIds });
+        }
+      });
 
       return true;
     } catch (error) {
