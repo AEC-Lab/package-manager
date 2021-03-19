@@ -321,8 +321,8 @@
           <br /><br />
 
           <v-btn class="mr-4" @click="() => $router.push('/admin')">Cancel</v-btn>
-          <v-btn class="mr-4" @click="save" color="primary" :loading="processing">Save</v-btn>
-          <v-btn @click="deleteEnterprise" color="error" :loading="processing">Delete</v-btn>
+          <v-btn class="mr-4" @click="save" color="primary" :loading="processingSave">Save</v-btn>
+          <v-btn @click="deleteEnterprise" color="error" :loading="processingDelete">Delete</v-btn>
         </v-form>
       </v-col>
     </v-row>
@@ -400,7 +400,8 @@ export default class EnterpriseEdit extends Vue {
   dialogRequestCode = false;
   dialogAddPackages = false;
   dialogAddMembers = false;
-  processing = false;
+  processingSave = false;
+  processingDelete = false;
 
   // COMPUTED PROPERTIES
   get packageTableItems() {
@@ -593,13 +594,13 @@ export default class EnterpriseEdit extends Vue {
     const payload = this.enterpriseTemp;
 
     try {
-      this.processing = true;
+      this.processingSave = true;
       const isSuccess = await this.$store.dispatch("enterprises/updateEnterpriseData", payload);
       if (isSuccess) this.$router.push("/admin");
-      else this.processing = false;
+      else this.processingSave = false;
     } catch (error) {
       this.$snackbar.flash({ content: error, color: "error" });
-      this.processing = false;
+      this.processingSave = false;
       console.log(error);
     }
   }
@@ -618,13 +619,13 @@ export default class EnterpriseEdit extends Vue {
     );
     if (response) {
       try {
-        this.processing = true;
+        this.processingDelete = true;
         const isSuccess = await this.$store.dispatch("enterprises/deleteEnterprise", this.enterpriseTemp.id);
         if (isSuccess) this.$router.push("/admin");
-        else this.processing = false;
+        else this.processingDelete = false;
       } catch (error) {
         this.$snackbar.flash({ content: error, color: "error" });
-        this.processing = false;
+        this.processingDelete = false;
         console.log(error);
       }
     }

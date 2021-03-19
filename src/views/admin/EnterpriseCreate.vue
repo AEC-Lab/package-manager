@@ -14,6 +14,7 @@
             append-icon=""
             prepend-icon=""
             required
+            :delimiters="[' ', ',']"
             :rules="domainRules"
           >
             <template v-slot:selection="{ attrs, item, select, selected }">
@@ -48,6 +49,7 @@
             persistent-hint
             append-icon=""
             prepend-icon=""
+            :delimiters="[' ', ',']"
             :rules="emailRules"
           >
             <template v-slot:selection="{ attrs, item, select, selected }">

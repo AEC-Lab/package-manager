@@ -49,7 +49,7 @@
             <v-icon left>mdi-plus-thick</v-icon>
             Create Package
           </v-btn>
-          <v-dialog v-model="dialogRequestCode" scrollable max-width="500px">
+          <v-dialog v-model="dialogRequestCode" scrollable max-width="500px" v-if="packages.length">
             <template v-slot:activator="{ on, attrs }">
               <v-btn outlined v-bind="attrs" v-on="on">
                 Process Subscription Request Code
@@ -57,37 +57,6 @@
             </template>
             <v-card>
               <ProcessRequestCodeForm :packages="packages" :closeDialog="closeDialogRequestCode" />
-              <!-- <v-card-text> -->
-              <!-- <v-text-field
-                  class="mt-4"
-                  v-model="requestCode"
-                  label="Request Code"
-                  hint="Paste in the request code given to you by the requesting subscriber or enterprise"
-                ></v-text-field>
-                <v-autocomplete
-                  v-model="requestCodeSelectedPackageIds"
-                  label="Select packages"
-                  multiple
-                  chips
-                  deletable-chips
-                  clearable
-                  :items="packages"
-                  :item-text="
-                    item => `${item.name} (${$store.getters['authors/getAuthorNameById'](item.authorId)})`
-                  "
-                  item-value="id"
-                  class="mt-4"
-                /> -->
-              <!-- </v-card-text> -->
-              <!-- <v-divider></v-divider> -->
-              <!-- <v-card-actions>
-                <v-btn color="primary" text @click="closeDialogRequestCode">
-                  Cancel
-                </v-btn>
-                <v-btn color="primary" @click="processRequestCode">
-                  Process Subscription Request
-                </v-btn>
-              </v-card-actions> -->
             </v-card>
           </v-dialog>
         </v-expansion-panel-content>
