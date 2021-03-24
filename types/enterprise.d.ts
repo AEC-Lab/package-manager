@@ -8,6 +8,7 @@ export interface Enterprise {
   packageConfig: EnterprisePackageConfig;
   memberConfig: EnterpriseMemberConfig;
   imageUrl: string;
+  admins: string[];
 }
 
 export interface EnterprisePackageConfig {

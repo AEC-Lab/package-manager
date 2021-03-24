@@ -18,7 +18,10 @@ export const getters: GetterTree<IAuthState, IRootState> = {
     return state.user;
   },
   isAdmin: state => {
-    return state.user?.roles.includes(UserRole.Admin) || false;
+    return [UserRole.Admin, UserRole.SuperAdmin].some(role => state.user?.roles.includes(role)) || false;
+  },
+  isSuperAdmin: state => {
+    return state.user?.roles.includes(UserRole.SuperAdmin) || false;
   }
 };
 
@@ -38,31 +41,56 @@ export const actions: ActionTree<IAuthState, IRootState> = {
    * @param user - firebase user
    */
   async onAuthStateChangedAction(context, user: firebase.User | null) {
-    if (user) {
-      console.log(user);
-      unsubscribe = await firestore
-        .collection("users")
-        .doc(user.uid)
-        .onSnapshot(snapshot => {
-          const docData = snapshot.data() as User;
-          const _user: User = {
-            email: user.email,
-            name: docData?.name,
-            roles: docData?.roles,
-            uid: user.uid,
-            config: docData?.config,
-            githubId: docData?.githubId
-          };
-          context.commit("setUser", _user);
-          // Set users listener for Admin users
-          if (context.getters["isAdmin"]) {
-            context.dispatch("users/usersListener", null, { root: true });
-          }
-        });
-    } else {
-      unsubscribe && unsubscribe();
-      context.commit("setUser", null);
+    // eslint-disable-next-line
+    return new Promise<void>(async resolve => {
+      if (user) {
+        console.log(user);
+        unsubscribe = await firestore
+          .collection("users")
+          .doc(user.uid)
+          .onSnapshot(async snapshot => {
+            const docData = snapshot.data() as User;
+            const _user: User = {
+              email: user.email,
+              name: docData?.name,
+              roles: docData?.roles,
+              uid: user.uid,
+              config: docData?.config,
+              githubId: docData?.githubId
+            };
+            context.commit("setUser", _user);
+            resolve();
+          });
+      } else {
+        unsubscribe && unsubscribe();
+        context.commit("setUser", null);
+        resolve();
+      }
+    });
+  },
+  /**
+   * Initialize Vuex store with data from Firestore and local config
+   *
+   * @param context - vuex action context
+   * @param user - user document data
+   */
+  async initializeStoreData(context) {
+    const storeInitPromises = [];
+
+    // Load local package config
+    storeInitPromises.push(context.dispatch("config/loadLocalConfig", null, { root: true }));
+
+    // Set Firestore collection listeners
+    storeInitPromises.push(context.dispatch("packages/packagesListener", null, { root: true }));
+    storeInitPromises.push(context.dispatch("authors/authorsListener", null, { root: true }));
+    storeInitPromises.push(context.dispatch("enterprises/enterprisesListener", null, { root: true }));
+
+    // Set users listener for Admin users
+    if (context.getters["isAdmin"]) {
+      storeInitPromises.push(context.dispatch("users/usersListener", null, { root: true }));
     }
+
+    await Promise.all(storeInitPromises);
   },
   /**
    * Authenticate through Google

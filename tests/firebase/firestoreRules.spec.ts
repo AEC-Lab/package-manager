@@ -12,10 +12,12 @@ const myIdGithub = "github_user_abc";
 const theirIdGithub = "github_user_xyz";
 const myIdEmail = "email_user_abc";
 const myIdAdmin = "admin_user_abc";
+const myIdSuperAdmin = "superadmin_user_abc";
 const myAuthGithub = { uid: myIdGithub };
 const theirAuthGithub = { uid: theirIdGithub };
 const myAuthEmail = { uid: myIdEmail };
 const myAuthAdmin = { uid: myIdAdmin };
+const myAuthSuperAdmin = { uid: myIdSuperAdmin };
 
 const myUserDocGithub: User = {
   uid: myIdGithub,
@@ -48,6 +50,14 @@ const userDocAdmin: User = {
   email: "my@gmail.com",
   name: "",
   roles: [UserRole.User, UserRole.Admin],
+  config: []
+};
+
+const userDocSuperAdmin: User = {
+  uid: myIdSuperAdmin,
+  email: "my@gmail.com",
+  name: "",
+  roles: [UserRole.User, UserRole.Admin, UserRole.SuperAdmin],
   config: []
 };
 
@@ -91,7 +101,8 @@ const enterpriseDoc: Enterprise = {
   externalMembers: [],
   packageConfig: {},
   memberConfig: {},
-  imageUrl: ""
+  imageUrl: "",
+  admins: [myIdAdmin]
 };
 
 function getFirestore(auth: any) {
@@ -267,9 +278,18 @@ describe("firestore", () => {
     await firebase.assertFails(testDoc.update({ foo: "bar" }));
   });
 
-  it("can write to enterprises if an admin user", async () => {
+  it("can update, delete an enterprise if an enterprise admin", async () => {
     await initializeTestDocs(userDocAdmin);
     const db = getFirestore(myAuthAdmin);
+    const testDoc = db.collection("enterprises").doc(enterpriseDoc.id);
+    await Promise.all([
+      firebase.assertSucceeds(testDoc.update({ foo: "bar" })),
+      firebase.assertSucceeds(testDoc.delete())
+    ]);
+  });
+  it("can write to enterprises if a superadmin", async () => {
+    await initializeTestDocs(userDocSuperAdmin);
+    const db = getFirestore(myAuthSuperAdmin);
     const testDoc = db.collection("enterprises").doc(enterpriseDoc.id);
     await firebase.assertSucceeds(testDoc.update({ foo: "bar" }));
   });

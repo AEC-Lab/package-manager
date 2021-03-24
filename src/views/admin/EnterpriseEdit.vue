@@ -173,7 +173,7 @@
                         outlined
                       ></v-select>
                     </td>
-                    <td class="d-flex align-center justify-center">
+                    <td class="data-table-cell-icon">
                       <ActionIconConfirm
                         icon="mdi-delete"
                         acceptColor="error"
@@ -262,6 +262,7 @@
                   <tr>
                     <td>
                       <v-icon v-if="!item.isExternal" color="primary">mdi-account-check</v-icon>
+                      <v-icon v-if="item.isAdmin" color="primary">mdi-shield-account</v-icon>
                     </td>
                     <td>{{ item.name }}</td>
                     <td>
@@ -277,7 +278,7 @@
                         outlined
                       ></v-select>
                     </td>
-                    <td>
+                    <td class="data-table-cell-icon">
                       <ActionIconConfirm
                         v-if="item.isExternal"
                         icon="mdi-delete"
@@ -285,7 +286,7 @@
                         :acceptAction="() => removeExternalMember(item.email)"
                       />
                     </td>
-                    <td>
+                    <td class="data-table-cell-icon">
                       <v-btn v-if="item.access === 'CUSTOM'" icon @click="expand(!isExpanded)">
                         <v-icon>{{ isExpanded ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
                       </v-btn>
@@ -296,7 +297,7 @@
                   <td
                     v-if="item.access === 'CUSTOM'"
                     :colspan="headers.length"
-                    class="member-config-expanded"
+                    class="table-expanded-content"
                   >
                     <v-row class="ml-0">
                       <v-col>
@@ -371,7 +372,7 @@ export default class EnterpriseEdit extends Vue {
     { text: "", value: "actions", sortable: false, align: "center", width: 105 }
   ];
   headersMembers = [
-    { text: "", value: "isExternal", width: 70 },
+    { text: "", value: "accountIcons", width: 105 },
     { text: "Name", value: "name" },
     { text: "Email", value: "email" },
     { text: "Access", value: "access", width: 180 },
@@ -454,7 +455,8 @@ export default class EnterpriseEdit extends Vue {
           user.email! in this.enterpriseTemp.memberConfig
             ? EnterprisePackageAccess.Custom
             : EnterprisePackageAccess.Default,
-        isExternal: !this.enterpriseTemp.memberDomains.includes(user.email!.split("@")[1])
+        isExternal: !this.enterpriseTemp.memberDomains.includes(user.email!.split("@")[1]),
+        isAdmin: this.enterpriseTemp.admins?.includes(user.uid)
       };
     });
   }
@@ -581,7 +583,8 @@ export default class EnterpriseEdit extends Vue {
       externalMembers: [],
       packageConfig: {},
       memberConfig: {},
-      imageUrl: ""
+      imageUrl: "",
+      admins: []
     };
   }
 
@@ -670,10 +673,5 @@ img {
   &:not(:last-child) {
     margin-right: 8px;
   }
-}
-
-.member-config-expanded {
-  background: rgb(247, 247, 247);
-  box-shadow: inset 0 2px 4px 2px rgba(0, 0, 0, 0.2);
 }
 </style>

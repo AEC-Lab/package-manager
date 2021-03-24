@@ -2,6 +2,7 @@ import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
 import { IRootState } from ".";
 import { User } from "../../types/auth";
 import { firestore } from "../integrations/firebase";
+import Vue from "../main";
 
 export interface IUsersState {
   users: User[];
@@ -55,6 +56,21 @@ export const actions: ActionTree<IUsersState, IRootState> = {
     } catch (error) {
       // ! integrate with stack driver in cases like these!
       console.error(error);
+    }
+  },
+  async updateUserRoles(context, payload: User) {
+    try {
+      await firestore
+        .collection("users")
+        .doc(payload.uid)
+        .update({
+          roles: payload.roles
+        });
+      Vue.$snackbar.flash({ content: "User roles updated", color: "success" });
+    } catch (error) {
+      Vue.$snackbar.flash({ content: `Error - ${error}`, color: "error" });
+      console.error(error);
+      throw error;
     }
   }
 };

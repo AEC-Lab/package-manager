@@ -156,7 +156,8 @@ export default class EnterpriseCreate extends Vue {
         this.initialPackages.map(pkgId => [pkgId, EnterprisePackageAccess.Default])
       ),
       memberConfig: {},
-      imageUrl: this.imageUrl
+      imageUrl: this.imageUrl,
+      admins: []
     };
 
     try {

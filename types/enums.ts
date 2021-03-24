@@ -23,7 +23,8 @@ export interface ButtonConfigEnum {
 
 export enum UserRole {
   User = "USER",
-  Admin = "ADMIN"
+  Admin = "ADMIN",
+  SuperAdmin = "SUPERADMIN"
 }
 
 // PACKAGE OBJECT ENUMS

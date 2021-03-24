@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, ComputedRef, Ref, onMounted } from "@vue/composition-api";
+import { defineComponent, ref, computed, ComputedRef, Ref } from "@vue/composition-api";
 import Card from "@/components/Card.vue";
 import Details from "@/components/browse/Details.vue";
 import ControlBar from "@/components/browse/ControlBar.vue";
@@ -44,12 +44,6 @@ export default defineComponent({
   },
   name: "Browse",
   setup(props, context) {
-    onMounted(() => {
-      $store.dispatch("packages/packagesListener");
-      $store.dispatch("authors/authorsListener");
-      $store.dispatch("enterprises/enterprisesListener");
-    });
-
     const searchText = ref("");
     const displayToggle = ref(0);
     const selectedPackage: Ref<Package | null> = ref(null);

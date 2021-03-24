@@ -1,12 +1,12 @@
 <template>
-  <v-btn icon v-if="!isActive" @click="isActive = true">
-    <v-icon>{{ icon }}</v-icon>
+  <v-btn icon v-if="!isActive" @click="init">
+    <v-icon :color="disabled ? 'rgb(222,222,222)' : undefined">{{ icon }}</v-icon>
   </v-btn>
   <div v-else class="active">
-    <v-btn icon @click="isActive = false">
+    <v-btn icon @click="cancel">
       <v-icon>mdi-close</v-icon>
     </v-btn>
-    <v-btn icon :color="acceptColor" @click="accept(acceptAction)">
+    <v-btn icon :color="acceptColor" @click="accept">
       <v-icon>mdi-check</v-icon>
     </v-btn>
   </div>
@@ -18,7 +18,10 @@ export default Vue.extend({
   props: {
     icon: String,
     acceptColor: String,
-    acceptAction: Function
+    initAction: Function,
+    cancelAction: Function,
+    acceptAction: Function,
+    disabled: Boolean
   },
   data() {
     return {
@@ -26,9 +29,22 @@ export default Vue.extend({
     };
   },
   methods: {
-    async accept(callback: Function) {
-      await callback();
+    init() {
+      if (this.disabled) return;
+      if (this.initAction) this.initAction();
+      this.isActive = true;
+    },
+    cancel() {
+      if (this.cancelAction) this.cancelAction();
       this.isActive = false;
+    },
+    async accept() {
+      try {
+        await this.acceptAction();
+        this.isActive = false;
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 });
