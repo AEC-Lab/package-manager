@@ -114,16 +114,18 @@ To publish the package and make it available for others to install, edit the pac
 
 Inside the package editor, you will find options to change and add metadata, as well as set the package status to "Active".
 
-![](images/admin-package-edit.png)
+![](images/admin-package-edit1.png)
+![](images/admin-package-edit2.png)
 
 - `Name`: the package display name that will be used throughout the app; this defaults to the GitHub repository name unless otherwise specified
 - `Description`: describe your package features or include any miscellaneous metadata
-- `Releases available`: choose which releases from the repository to make available to download via the package details panel
-- `Package Dependencies`: choose which, if any, other packages are required dependencies in order to use your package; if a user tries to install your package while missing its dependencies, they will be prompted to either have the dependencies installed automatically or to ignore the warning and manage dependencies manually
 - `Tags`: add helpful keywords and categories that others can use to search for and find your package
 - `Website URL`: optionally link to a website with more information about your package
 - `Image URLs`: add one or more images (separately hosted URL links) to illustrate your package, shown in the package Details panel; the first image will also be used as the thumbnail image throughout the app (you can drag-drop the images to rearrange them)
-- `Inactive | Active`: controls the visibility of your package in the Browse listings
+- `Releases available`: choose which releases from the repository to make available to download via the package details panel
+- `Package Dependencies`: choose which, if any, other packages are required dependencies in order to use your package; if a user tries to install your package while missing its dependencies, they will be prompted to either have the dependencies installed automatically or to ignore the warning and manage dependencies manually
+- `Visibility`: **Public** packages are visible to everyone by default; **Private** packages are only visible to approved subscribers (e.g. Enterprises); see [Enterprise](enterprise.md) for more details
+- `Status`: global access control; **Active** status accessibility will be controlled by Visibility setting
 
 ### Test Install / Uninstall Behavior
 
@@ -141,3 +143,4 @@ You can also edit metadata for authors available in your Admin panel:
 - `Description`: add information about the author or miscellaneous data
 - `Website`: a website for the author; defaults to the GitHub profile URL
 - `Profile Image`: a URL to a thumbnail image for the author used throughout the app; defaults to the GitHub account's profile thumbnail, if available
+- `Sources`: currently this is auto-populated with the Github owner (e.g. organization) from which repositories/packages are authored; future development plans may include the ability to add/merge additional sources into one Author profile
