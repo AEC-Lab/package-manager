@@ -35,7 +35,6 @@
 }
 
 .vo-card {
-  float: left;
   margin-right: 20px;
   margin-bottom: 20px;
 
@@ -44,9 +43,17 @@
   }
 }
 
+.vo-card-title-light {
+  color: $voyansi-primary-1;
+}
+
 .vo-control-bar {
   margin-bottom: 30px;
   width: 100%;
+
+  .v-toolbar__content {
+    width: 100%;
+  }
 
   #toggle-buttons {
     // float: right;
@@ -128,6 +135,16 @@
   &:not(:last-child) {
     border-bottom: 1px solid rgb(192, 192, 192);
   }
+}
+
+.data-table-cell-icon {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table-expanded-content {
+  background: rgb(247, 247, 247);
+  box-shadow: inset 0 2px 4px 2px rgba(0, 0, 0, 0.2);
 }
 
 img {

@@ -1,4 +1,4 @@
-import { PackageSource } from "../../types/enums";
+import { PackageSource, PackageVisibility } from "../../types/enums";
 import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
 import { IRootState } from ".";
 import { GithubRepository, Package } from "../../types/package";
@@ -76,20 +76,26 @@ export const actions: ActionTree<IPackagesState, IRootState> = {
     try {
       const srcData = payload.sourceData as GithubRepository;
       // update editable fields only
+      const updateData: any = {
+        name: payload.name,
+        description: payload.description,
+        tags: payload.tags,
+        images: payload.images,
+        website: payload.website,
+        status: payload.status,
+        visibility: payload.visibility,
+        "sourceData.releaseSetting": srcData.releaseSetting,
+        dependencyIds: payload.dependencyIds
+      };
+      if (payload.subscriberIds) {
+        // update subscriber ids, e.g. if visibility set to Public, set as empty array
+        updateData.subscriberIds =
+          payload.visibility === PackageVisibility.Public ? [] : payload.subscriberIds;
+      }
       await firestore
         .collection("packages")
         .doc(payload.id)
-        .update({
-          name: payload.name,
-          description: payload.description,
-          tags: payload.tags,
-          images: payload.images,
-          website: payload.website,
-          status: payload.status,
-          visibility: payload.visibility,
-          "sourceData.releaseSetting": srcData.releaseSetting,
-          dependencyIds: payload.dependencyIds
-        });
+        .update(updateData);
       Vue.$snackbar.flash({ content: "Package updated", color: "success" });
       return true;
     } catch (error) {

@@ -6,6 +6,8 @@ _An open-source AEC standard for tool deployment and management_
 
 [Publish and Manage Packages](package-management.md)
 
+[Enterprise Features (new!)](enterprise.md)
+
 [Contribute to Core Development](core-development.md)
 
 [Privacy Policy](privacy-policy.md)

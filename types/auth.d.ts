@@ -1,9 +1,10 @@
 import { PackageConfigCloud } from "./config";
+import { UserRole } from "./enums";
 
 export interface User {
   email: string | null;
   name: string | null;
-  roles: string[];
+  roles: UserRole[];
   uid: string;
   config: PackageConfigCloud[];
   githubId?: number;

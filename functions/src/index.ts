@@ -40,20 +40,28 @@ export const github = functions.https.onRequest(configureApp(githubRoute));
 export const validate = functions.https.onRequest(configureApp(validateRoute));
 
 //////////////////////////////////////
-/////////  NON-HTTP TRIGGERS /////////
+/////////  FIREBASE TRIGGERS /////////
 //////////////////////////////////////
 
 export { createUser, deleteUser } from "./fb-event-triggers/auth";
 export { processGithubEvent } from "./fb-event-triggers/github";
+export { handlePackageDataChange } from "./fb-event-triggers/package";
+export { handleEnterpriseDataChange, handleEnterpriseDeleted } from "./fb-event-triggers/enterprise";
 
 ////////////////////////////////////////////
 ///////// HTTPS CALLABLE FUNCTIONS /////////
 ////////////////////////////////////////////
 
-export { isUserEmailVerified } from "./callables/auth";
+export { isUserEmailVerified, getAuthUsers } from "./callables/auth";
+export {
+  generateRequestCode,
+  getEnterpriseNameByRequestCode,
+  processSubscriptions
+} from "./callables/enterprise";
 
 ///////////////////////////////////////
 ///////// SCHEDULED FUNCTIONS /////////
 ///////////////////////////////////////
 
 export { syncGithubOrgAdmins } from "./scheduled/github";
+export { removeExpiredRequests } from "./scheduled/enterprise";

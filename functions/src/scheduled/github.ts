@@ -15,9 +15,8 @@ export const syncGithubOrgAdmins = functions.pubsub.schedule("*/10 * * * *").onR
     const srcConfig = author.sourceConfig.github as GithubOrgConfig;
     const fetchedAdmins = await getOrganizationAdmins(author.name, srcConfig.installationId);
     const storedAdmins = srcConfig.admins;
-    if (_.isEqual(new Set(fetchedAdmins), new Set(storedAdmins))) return;
+    if (_.isEqual(new Set(fetchedAdmins), new Set(storedAdmins))) continue;
     await authorDoc.ref.update({ "sourceConfig.github.admins": fetchedAdmins });
     console.log(`Updated admins list for ${srcConfig.name}`);
-    return;
   }
 });

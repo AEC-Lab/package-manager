@@ -1,18 +1,23 @@
 require("dotenv").config();
 import * as firebase from "@firebase/rules-unit-testing";
 import { expect } from "chai";
+import { Enterprise } from "types/enterprise";
 import { User } from "../../types/auth";
 import { Author } from "../../types/author";
-import { PackageSource, PackageStatus, PackageVisibility } from "../../types/enums";
+import { PackageSource, PackageStatus, PackageVisibility, UserRole } from "../../types/enums";
 import { Package } from "../../types/package";
 
 const FB_PROJECT_ID = process.env.VUE_APP_PROJECTID;
 const myIdGithub = "github_user_abc";
 const theirIdGithub = "github_user_xyz";
 const myIdEmail = "email_user_abc";
+const myIdAdmin = "admin_user_abc";
+const myIdSuperAdmin = "superadmin_user_abc";
 const myAuthGithub = { uid: myIdGithub };
 const theirAuthGithub = { uid: theirIdGithub };
 const myAuthEmail = { uid: myIdEmail };
+const myAuthAdmin = { uid: myIdAdmin };
+const myAuthSuperAdmin = { uid: myIdSuperAdmin };
 
 const myUserDocGithub: User = {
   uid: myIdGithub,
@@ -37,6 +42,22 @@ const myUserDocEmail: User = {
   email: "my@email.com",
   name: "",
   roles: [],
+  config: []
+};
+
+const userDocAdmin: User = {
+  uid: myIdAdmin,
+  email: "my@gmail.com",
+  name: "",
+  roles: [UserRole.User, UserRole.Admin],
+  config: []
+};
+
+const userDocSuperAdmin: User = {
+  uid: myIdSuperAdmin,
+  email: "my@gmail.com",
+  name: "",
+  roles: [UserRole.User, UserRole.Admin, UserRole.SuperAdmin],
   config: []
 };
 
@@ -73,6 +94,17 @@ const githubPackageAuthor: Author = {
   }
 };
 
+const enterpriseDoc: Enterprise = {
+  id: "enterprise_abc",
+  name: "Acme Co.",
+  memberDomains: ["acme.com"],
+  externalMembers: [],
+  packageConfig: {},
+  memberConfig: {},
+  imageUrl: "",
+  admins: [myIdAdmin]
+};
+
 function getFirestore(auth: any) {
   return firebase.initializeTestApp({ projectId: FB_PROJECT_ID, auth: auth }).firestore();
 }
@@ -95,7 +127,11 @@ async function initializeTestDocs(userDoc: User) {
     admin
       .collection("users")
       .doc(userDoc.uid)
-      .set(userDoc)
+      .set(userDoc),
+    admin
+      .collection("enterprises")
+      .doc(enterpriseDoc.id)
+      .set(enterpriseDoc)
   ];
   return await Promise.all(promises);
 }
@@ -218,6 +254,44 @@ describe("firestore", () => {
     const db = getFirestore(myAuthGithub);
     const testDoc = db.collection("schemas").doc("random_doc");
     await firebase.assertFails(testDoc.update({ foo: "bar" }));
+  });
+
+  /////////////////////////////////////
+  //   ENTERPRISE COLLECTION TESTS   //
+  /////////////////////////////////////
+  it("cannot read enterprises while not authenticated", async () => {
+    const db = getFirestore(null);
+    const testDoc = db.collection("enterprises").doc("random_doc");
+    await firebase.assertFails(testDoc.get());
+  });
+
+  it("can read enterprises while authenticated", async () => {
+    const db = getFirestore(myAuthEmail);
+    const testDoc = db.collection("enterprises").doc("random_doc");
+    await firebase.assertSucceeds(testDoc.get());
+  });
+
+  it("cannot write to enterprises if not an admin user", async () => {
+    await initializeTestDocs(myUserDocEmail);
+    const db = getFirestore(myAuthEmail);
+    const testDoc = db.collection("enterprises").doc(enterpriseDoc.id);
+    await firebase.assertFails(testDoc.update({ foo: "bar" }));
+  });
+
+  it("can update, delete an enterprise if an enterprise admin", async () => {
+    await initializeTestDocs(userDocAdmin);
+    const db = getFirestore(myAuthAdmin);
+    const testDoc = db.collection("enterprises").doc(enterpriseDoc.id);
+    await Promise.all([
+      firebase.assertSucceeds(testDoc.update({ foo: "bar" })),
+      firebase.assertSucceeds(testDoc.delete())
+    ]);
+  });
+  it("can write to enterprises if a superadmin", async () => {
+    await initializeTestDocs(userDocSuperAdmin);
+    const db = getFirestore(myAuthSuperAdmin);
+    const testDoc = db.collection("enterprises").doc(enterpriseDoc.id);
+    await firebase.assertSucceeds(testDoc.update({ foo: "bar" }));
   });
 });
 
