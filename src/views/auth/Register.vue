@@ -43,6 +43,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { RegisterCredentials } from "../../../types/auth";
+import { isValidEmail } from "../../utils/helpers";
 
 @Component
 export default class Register extends Vue {
@@ -58,10 +59,7 @@ export default class Register extends Vue {
 
   processing = false;
 
-  emailRules = [
-    (v: string) => !!v || "Field is required",
-    (v: string) => this.isValidEmail(v) || "Invalid email"
-  ];
+  emailRules = [(v: string) => !!v || "Field is required", (v: string) => isValidEmail(v) || "Invalid email"];
   passwordRules = [(v: string) => !!v || "Field is required"];
   passwordConfirmationRules = [(v: string) => v === this.user.password || "Passwords do not match"];
 
@@ -87,11 +85,6 @@ export default class Register extends Vue {
       this.processing = false;
       console.log(error);
     }
-  }
-
-  isValidEmail(email: string) {
-    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
-    return re.test(email);
   }
 }
 </script>

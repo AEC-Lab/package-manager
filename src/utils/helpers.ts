@@ -104,4 +104,18 @@ helpers.cachedAssetsExist = async (cacheDirectory: string, packageFile: string):
   return false;
 };
 
+export function getEmailDomain(email: string) {
+  return email.split("@")[1];
+}
+
+export function isValidDomain(domain: string) {
+  const re = /^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
+  return re.test(domain);
+}
+
+export function isValidEmail(email: string) {
+  const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
+  return re.test(email);
+}
+
 export default helpers;

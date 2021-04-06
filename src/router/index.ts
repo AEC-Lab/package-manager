@@ -13,6 +13,8 @@ import LoginManagement from "../views/auth/LoginManagement.vue";
 import PackageEdit from "../views/admin/PackageEdit.vue";
 import PackageCreate from "../views/admin/PackageCreate.vue";
 import AuthorEdit from "../views/admin/AuthorEdit.vue";
+import EnterpriseEdit from "../views/admin/EnterpriseEdit.vue";
+import EnterpriseCreate from "../views/admin/EnterpriseCreate.vue";
 
 Vue.use(VueRouter);
 
@@ -88,6 +90,16 @@ const routes: Array<RouteConfig> = [
     path: "/authors/:authorId/edit",
     name: "AuthorEdit",
     component: AuthorEdit
+  },
+  {
+    path: "/enterprises/create",
+    name: "EnterpriseCreate",
+    component: EnterpriseCreate
+  },
+  {
+    path: "/enterprises/:enterpriseId/edit",
+    name: "EnterpriseEdit",
+    component: EnterpriseEdit
   }
 ];
 

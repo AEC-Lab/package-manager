@@ -1,7 +1,7 @@
 <template>
   <v-row class="vo-control-bar">
-    <v-col cols="8">
-      <v-toolbar dense floating>
+    <v-col cols="10">
+      <v-toolbar dense floating width="100%">
         <v-text-field
           hide-details
           prepend-icon="mdi-magnify"

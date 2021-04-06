@@ -10,6 +10,15 @@ service cloud.firestore {
     function getAuthorAdmins(authorId) {
       return get(/databases/$(database)/documents/authors/$(authorId)).data.sourceConfig.github.admins
     }
+    function isUserAdmin() {
+      return "ADMIN" in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles || "SUPERADMIN" in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles
+    }
+    function isUserSuperAdmin() {
+      return "SUPERADMIN" in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles
+    }
+    function isEnterpriseAdmin() {
+      return request.auth.uid in resource.data.admins
+    }
     match /{document=**} {
       allow read, write: if false;
     }
@@ -18,8 +27,8 @@ service cloud.firestore {
       allow write: if false;
     }
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth.uid == userId;
+      allow read: if request.auth.uid == userId || isUserAdmin();
+      allow write: if request.auth.uid == userId || isUserSuperAdmin();
     }
     match /packages/{docId} {
       allow read: if request.auth != null;
@@ -28,6 +37,11 @@ service cloud.firestore {
     match /authors/{docId} {
       allow read: if request.auth != null;
       allow write: if isAuthorAdmin();
+    }
+    match /enterprises/{docId} {
+      allow read: if request.auth != null;
+      allow create: if isUserSuperAdmin();
+      allow update, delete: if isEnterpriseAdmin() || isUserSuperAdmin();
     }
     match /releases/{docId} {
       allow read: if request.auth != null;

@@ -13,6 +13,7 @@ export interface Package {
   source: PackageSource;
   sourceData: GithubRepository | AzureRepository | UrlSource;
   dependencyIds: string[];
+  subscriberIds?: string[];
 }
 
 export interface GithubRepository {
