@@ -10,9 +10,32 @@
     <template v-slot:item="{ item }">
       <tr>
         <td>
-          <v-icon v-for="provider in userAuthProviders(item)" :key="provider" color="black">
+          <div v-for="provider in userAuthProviders(item)" :key="provider" class="float-left">
+            <img
+              v-if="getProviderIconName(provider) === 'google'"
+              src="@/assets/google.svg"
+              alt=""
+              class="provider-icon"
+            />
+            <img
+              v-else-if="getProviderIconName(provider) === 'github'"
+              src="@/assets/github.png"
+              alt=""
+              class="provider-icon"
+            />
+            <img
+              v-else-if="getProviderIconName(provider) === 'microsoft'"
+              src="@/assets/microsoft.svg"
+              alt=""
+              class="provider-icon"
+            />
+            <v-icon v-else color="darkgrey">
+              {{ `mdi-${getProviderIconName(provider)}` }}
+            </v-icon>
+          </div>
+          <!-- <v-icon v-for="provider in userAuthProviders(item)" :key="provider" color="black">
             {{ `mdi-${getProviderIconName(provider)}` }}
-          </v-icon>
+          </v-icon> -->
         </td>
         <td>{{ item.name }}</td>
         <td>{{ item.email }}</td>
@@ -142,6 +165,8 @@ export default class AdminUsersTable extends Vue {
         return "google";
       case "github.com":
         return "github";
+      case "microsoft.com":
+        return "microsoft";
       case "password":
         return "email";
     }
@@ -224,3 +249,10 @@ export default class AdminUsersTable extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.provider-icon {
+  margin-right: 4px;
+  height: 22px;
+}
+</style>

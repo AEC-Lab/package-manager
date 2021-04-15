@@ -24,9 +24,9 @@
 
 .vo-link {
   cursor: pointer;
-  color: #00897b;
+  color: $voyansi-primary-1;
   &:hover {
-    color: #13aa9b;
+    color: $voyansi-secondary-5;
   }
 }
 

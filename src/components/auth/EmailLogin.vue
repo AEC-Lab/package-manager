@@ -9,7 +9,7 @@
         @submit="signInWithEmail"
         @click="signInWithEmail"
         :loading="btnLoadingSignIn"
-        color="teal darken-1"
+        color="primary"
         dark
       >
         Sign In

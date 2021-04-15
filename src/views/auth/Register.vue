@@ -23,12 +23,12 @@
               />
             </v-form>
             <v-card-actions>
-              <v-btn @submit="register" @click="register" color="teal darken-1" dark :loading="processing">
+              <v-btn @submit="register" @click="register" color="primary" dark :loading="processing">
                 Register
               </v-btn>
               <v-spacer />
               <div class="text-end">
-                <div class="link" @click="() => $router.push('/login')">
+                <div class="vo-link" @click="() => $router.push('/login')">
                   Already registered? Sign in
                 </div>
               </div>
@@ -89,12 +89,4 @@ export default class Register extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-.link {
-  cursor: pointer;
-  color: #00897b;
-  &:hover {
-    color: #13aa9b;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

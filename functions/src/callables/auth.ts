@@ -1,4 +1,5 @@
 import * as functions from "firebase-functions";
+import jwt from "jsonwebtoken";
 import { auth, db } from "../config/fbConfig";
 import { User } from "../../../types/auth";
 import { UserRole } from "../../../types/enums";
@@ -52,4 +53,20 @@ export const getAuthUsers = functions.https.onCall(async (data, context) => {
   await listAllUsers();
 
   return userRecords;
+});
+
+/**
+ * Creates a custom auth token given a JSON web token (e.g. access_token, id_token returned from an external identity provider)
+ */
+export const createCustomToken = functions.https.onCall(async (data, context) => {
+  try {
+    const jwtString: string = data.jwt;
+    const decodedJwt = jwt.decode(jwtString) as { [key: string]: any };
+    const { oid } = decodedJwt;
+    const customToken = await auth.createCustomToken(oid);
+    return customToken && customToken;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 });
