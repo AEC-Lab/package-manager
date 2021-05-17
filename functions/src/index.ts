@@ -52,7 +52,7 @@ export { handleEnterpriseDataChange, handleEnterpriseDeleted } from "./fb-event-
 ///////// HTTPS CALLABLE FUNCTIONS /////////
 ////////////////////////////////////////////
 
-export { isUserEmailVerified, getAuthUsers } from "./callables/auth";
+export { isUserEmailVerified, getAuthUsers, createCustomToken } from "./callables/auth";
 export {
   generateRequestCode,
   getEnterpriseNameByRequestCode,

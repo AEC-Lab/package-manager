@@ -9,7 +9,7 @@
       </v-col>
     </v-row>
     <v-overlay color="white" :opacity="0.75" :value="loading">
-      <v-progress-circular :size="50" color="teal" indeterminate></v-progress-circular>
+      <v-progress-circular :size="50" color="primary" indeterminate></v-progress-circular>
     </v-overlay>
   </v-container>
 </template>
@@ -78,12 +78,15 @@ export default class Login extends Vue {
 
   // LIFECYCLE HOOKS
   async mounted() {
-    //   process.env.NODE_ENV === "production"
-    // ? this.checkForUpdates()
-    // : this.firebaseAuthListener();
+    // Check if redirected (for custom auth provider flow)
+    const result = await fireAuth.getRedirectResult();
+    if (result.user) {
+      this.loading = true;
+    } else {
+      this.checkForUpdates();
+    }
+
     this.unsubscribe = await this.firebaseAuthListener();
-    this.checkForUpdates();
-    // lol
   }
 
   beforeDestroy() {

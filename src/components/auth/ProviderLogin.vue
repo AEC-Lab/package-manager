@@ -5,13 +5,10 @@
       :loading="btnLoadingGoogle"
       class="mb-2"
       large
-      color="teal darken-1"
-      dark
+      color="white"
       width="100%"
     >
-      <v-icon left dark color="white">
-        mdi-google
-      </v-icon>
+      <img src="@/assets/google.svg" alt="" class="provider-icon" />
       <span class="mr-4">
         Sign in with Google
       </span>
@@ -19,16 +16,20 @@
     <v-btn
       @click="signInWithGithub"
       :loading="btnLoadingGithub"
+      class="mb-2"
       large
-      color="teal darken-1"
-      dark
+      color="white"
       width="100%"
     >
-      <v-icon left dark color="white">
-        mdi-github
-      </v-icon>
+      <img src="@/assets/github.png" alt="" class="provider-icon" />
       <span class="mr-4">
         Sign in with GitHub
+      </span>
+    </v-btn>
+    <v-btn @click="signInWithMicrosoft" :loading="btnLoadingMicrosoft" large color="white" width="100%">
+      <img src="@/assets/microsoft.svg" alt="" class="provider-icon" />
+      <span class="mr-4">
+        Sign in with Microsoft
       </span>
     </v-btn>
     <div class="vo-link mt-8" @click="toggleMode">
@@ -48,6 +49,7 @@ export default class ProviderLogin extends Vue {
   // DATA PROPERTIES
   btnLoadingGoogle = false;
   btnLoadingGithub = false;
+  btnLoadingMicrosoft = false;
 
   // METHODS
   async signInWithGoogle() {
@@ -67,7 +69,21 @@ export default class ProviderLogin extends Vue {
       console.log(error);
     }
   }
+
+  async signInWithMicrosoft() {
+    this.btnLoadingMicrosoft = true;
+    try {
+      await this.$store.dispatch("auth/loginWithMicrosoft");
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.provider-icon {
+  margin-right: 10px;
+  height: 25px;
+}
+</style>
