@@ -26,12 +26,12 @@
         Sign in with GitHub
       </span>
     </v-btn>
-    <v-btn @click="signInWithMicrosoft" :loading="btnLoadingMicrosoft" large color="white" width="100%">
+    <!-- <v-btn @click="signInWithMicrosoft" :loading="btnLoadingMicrosoft" large color="white" width="100%">
       <img src="@/assets/microsoft.svg" alt="" class="provider-icon" />
       <span class="mr-4">
         Sign in with Microsoft
       </span>
-    </v-btn>
+    </v-btn> -->
     <div class="vo-link mt-8" @click="toggleMode">
       Sign in with Email and Password
     </div>

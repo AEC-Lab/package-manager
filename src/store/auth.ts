@@ -263,14 +263,14 @@ export const auth: Module<IAuthState, IRootState> = {
  */
 async function _authenticate(provider: Provider) {
   // Handle Microsoft with custom flow
-  if (provider === Provider.Microsoft) {
-    const provider = new firebase.auth.OAuthProvider("microsoft.com");
-    provider.setCustomParameters({
-      prompt: "select_account"
-    });
-    await fireAuth.signInWithRedirect(provider);
-    return;
-  }
+  // if (provider === Provider.Microsoft) {
+  //   const provider = new firebase.auth.OAuthProvider("microsoft.com");
+  //   provider.setCustomParameters({
+  //     prompt: "select_account"
+  //   });
+  //   await fireAuth.signInWithRedirect(provider);
+  //   return;
+  // }
 
   const authParams = _getAuthParams(provider);
   ipcRenderer.send("authenticate", provider, authParams);
