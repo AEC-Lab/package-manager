@@ -19,6 +19,7 @@ import fetch from "node-fetch";
 import fs from "fs";
 import extract from "extract-zip";
 import { PackageConfigFile } from "types/config";
+import { Provider } from "../types/enums";
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -98,68 +99,85 @@ ipcMain.on("maximize", () => {
 
 // setup authenticator in the main process
 ipcMain.on("authenticate", (event, provider, client) => {
-  if (provider === "google") {
-    const oauth2Client = new google.auth.OAuth2(
-      client.id,
-      client.secret,
-      "http://localhost:3000/oauth2callback"
-    );
-    google.options({
-      auth: oauth2Client
-    });
-    const authorizeUrl = oauth2Client.generateAuthUrl({
-      access_type: "offline",
-      prompt: "select_account",
-      scope: "profile email"
-    });
-    const server = http
-      .createServer(async (req: any, res: any) => {
-        if (req.url.indexOf("/oauth2callback") > -1) {
-          const qs = querystring.parse(url.parse(req.url).query!);
+  let authorizeUrl: string;
+  let server: http.Server;
+  let handleCodeCallback: HandleCodeCallback;
 
-          res.end("Successfully Authenticated!  You can close this tab and return to the Ship application!");
-          server.destroy();
-          // @ts-ignore
-          const { tokens } = await oauth2Client.getToken(qs.code);
-          event.sender.send("tokens", tokens);
-        }
-      })
-      .listen(3000, () => {
-        open(authorizeUrl, {
-          wait: false
-        }).then((cp: any) => cp.unref());
+  switch (provider) {
+    case Provider.Google:
+      const oauth2Client = new google.auth.OAuth2(
+        client.id,
+        client.secret,
+        "http://localhost:3000/oauth2callback"
+      );
+      google.options({
+        auth: oauth2Client
       });
-    destroyer(server);
-  } else if (provider === "github") {
-    // https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps
-    const authorizeUrl = _getGithubAuthorizeUrl({
-      client_id: client.id,
-      redirect_uri: "http://localhost:3000/oauth2callback",
-      scope: "read:user"
-    });
-    const server = http
-      .createServer(async (req: any, res: any) => {
-        if (req.url.indexOf("/oauth2callback") > -1) {
-          const qs = querystring.parse(url.parse(req.url).query!);
+      authorizeUrl = oauth2Client.generateAuthUrl({
+        access_type: "offline",
+        prompt: "select_account",
+        scope: "profile email"
+      });
 
-          res.end("Successfully Authenticated!  You can close this tab and return to the Ship application!");
-          server.destroy();
-          const code = qs.code;
-          const params = {
-            client_id: client.id,
-            client_secret: client.secret,
-            code
-          };
-          const token = await _getGithubToken(params);
-          event.sender.send("tokens", token);
-        }
-      })
-      .listen(3000, () => {
-        open(authorizeUrl, {
-          wait: false
-        }).then((cp: any) => cp.unref());
+      handleCodeCallback = async code => {
+        const { tokens } = await oauth2Client.getToken(code as string);
+        return tokens;
+      };
+      server = _oAuthServerWrapper(event, authorizeUrl, handleCodeCallback);
+
+      destroyer(server);
+      break;
+    case Provider.Github:
+      // https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps
+      authorizeUrl = _getGithubAuthorizeUrl({
+        client_id: client.id,
+        redirect_uri: "http://localhost:3000/oauth2callback",
+        scope: "read:user"
       });
-    destroyer(server);
+
+      handleCodeCallback = async code => {
+        const params = {
+          client_id: client.id,
+          client_secret: client.secret,
+          code
+        };
+        return await _getGithubToken(params);
+      };
+      server = _oAuthServerWrapper(event, authorizeUrl, handleCodeCallback);
+
+      destroyer(server);
+      break;
+    case Provider.Microsoft:
+      // NOTE: This OAuth flow for Microsoft can currently only be used to create a custom firebase auth token,
+      // which does not create an official "user" with a provider-based credential;
+      // This flow is currently not being used for Microsoft (using signInWithRedirect instead), but kept here
+      // for reference for potential future OAuth flow efforts
+
+      // https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
+      // https://medium.com/@baba_nadimpalli/flutter-microsoft-active-directory-oauth2-v2-0-login-with-scopes-dc493429c9a6
+      authorizeUrl = _getAzureAuthorizeUrl({
+        client_id: client.id,
+        response_type: "code",
+        redirect_uri: "http://localhost:3000/oauth2callback",
+        scope: "openid",
+        response_mode: "query"
+      });
+
+      handleCodeCallback = async code => {
+        const params = {
+          client_id: client.id,
+          scope: "openid email",
+          code,
+          redirect_uri: "http://localhost:3000/oauth2callback",
+          grant_type: "authorization_code",
+          client_secret: client.secret
+        };
+        return await _getAzureToken(params);
+      };
+      server = _oAuthServerWrapper(event, authorizeUrl, handleCodeCallback);
+
+      destroyer(server);
+      break;
   }
 });
 
@@ -249,6 +267,14 @@ function _getGithubAuthorizeUrl(params: any) {
   return url.href;
 }
 
+function _getAzureAuthorizeUrl(params: any) {
+  const url = new URL("https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
+  for (const p in params) {
+    url.searchParams.append(p, params[p]);
+  }
+  return url.href;
+}
+
 async function _getGithubToken(params: any) {
   try {
     const response = await fetch("https://github.com/login/oauth/access_token", {
@@ -265,6 +291,57 @@ async function _getGithubToken(params: any) {
     console.log(error);
     throw error;
   }
+}
+
+async function _getAzureToken(params: any) {
+  try {
+    const formBody = Object.keys(params)
+      .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
+      .join("&");
+    console.log(formBody);
+    const response = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: formBody
+    });
+    const jsonBody = await response.json();
+    return jsonBody.access_token;
+    // return jsonBody.id_token;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+interface HandleCodeCallback {
+  (code: string | string[]): any;
+}
+
+function _oAuthServerWrapper(
+  event: electron.IpcMainEvent,
+  authorizeUrl: string,
+  handleCode: HandleCodeCallback
+) {
+  const server = http
+    .createServer(async (req: any, res: any) => {
+      if (req.url.indexOf("/oauth2callback") > -1) {
+        const qs = querystring.parse(url.parse(req.url).query!);
+
+        res.end("Successfully Authenticated!  You can close this tab and return to the Ship application!");
+        server.destroy();
+
+        const tokenObj = await handleCode(qs.code);
+        event.sender.send("tokens", tokenObj);
+      }
+    })
+    .listen(3000, () => {
+      open(authorizeUrl, {
+        wait: false
+      }).then((cp: any) => cp.unref());
+    });
+  return server;
 }
 
 // Scheme must be registered before the app is ready

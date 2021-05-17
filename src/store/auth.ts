@@ -2,7 +2,7 @@ import { Module, GetterTree, MutationTree, ActionTree } from "vuex";
 import { ipcRenderer } from "electron";
 import { IRootState } from ".";
 import { User, LoginCredentials, RegisterCredentials } from "../../types/auth";
-import { UserRole } from "../../types/enums";
+import { UserRole, Provider } from "../../types/enums";
 import firebase, { fireAuth, firestore, fireFunc } from "../integrations/firebase";
 
 export interface IAuthState {
@@ -18,10 +18,10 @@ export const getters: GetterTree<IAuthState, IRootState> = {
     return state.user;
   },
   isAdmin: state => {
-    return [UserRole.Admin, UserRole.SuperAdmin].some(role => state.user?.roles.includes(role)) || false;
+    return [UserRole.Admin, UserRole.SuperAdmin].some(role => state.user?.roles?.includes(role)) || false;
   },
   isSuperAdmin: state => {
-    return state.user?.roles.includes(UserRole.SuperAdmin) || false;
+    return state.user?.roles?.includes(UserRole.SuperAdmin) || false;
   }
 };
 
@@ -100,7 +100,7 @@ export const actions: ActionTree<IAuthState, IRootState> = {
    */
   async loginWithGoogle() {
     try {
-      _authenticate("google");
+      _authenticate(Provider.Google);
     } catch (error) {
       console.log(error);
       throw error;
@@ -108,7 +108,15 @@ export const actions: ActionTree<IAuthState, IRootState> = {
   },
   async loginWithGithub() {
     try {
-      _authenticate("github");
+      _authenticate(Provider.Github);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+  async loginWithMicrosoft() {
+    try {
+      _authenticate(Provider.Microsoft);
     } catch (error) {
       console.log(error);
       throw error;
@@ -253,7 +261,17 @@ export const auth: Module<IAuthState, IRootState> = {
  *
  * @param provider - authenticatin provider
  */
-function _authenticate(provider: "google" | "github") {
+async function _authenticate(provider: Provider) {
+  // Handle Microsoft with custom flow
+  if (provider === Provider.Microsoft) {
+    const provider = new firebase.auth.OAuthProvider("microsoft.com");
+    provider.setCustomParameters({
+      prompt: "select_account"
+    });
+    await fireAuth.signInWithRedirect(provider);
+    return;
+  }
+
   const authParams = _getAuthParams(provider);
   ipcRenderer.send("authenticate", provider, authParams);
   ipcRenderer.on("tokens", (event, tokens) => {
@@ -267,14 +285,33 @@ function _authenticate(provider: "google" | "github") {
  * @param provider - authentication provider
  * @param tokens - token(s) from the provider
  */
-async function _signInWithTokens(provider: "google" | "github", tokens: any) {
+async function _signInWithTokens(provider: Provider, tokenObj: any) {
   let credential: firebase.auth.AuthCredential;
-  if (provider === "google") {
-    credential = firebase.auth.GoogleAuthProvider.credential(tokens.id_token, tokens.access_token);
-  } else if (provider === "github") {
-    credential = firebase.auth.GithubAuthProvider.credential(tokens);
-  } else return;
-  await fireAuth.signInWithCredential(credential);
+  switch (provider) {
+    case Provider.Google:
+      credential = firebase.auth.GoogleAuthProvider.credential(tokenObj.id_token, tokenObj.access_token);
+      await fireAuth.signInWithCredential(credential);
+      break;
+    case Provider.Github:
+      credential = firebase.auth.GithubAuthProvider.credential(tokenObj);
+      await fireAuth.signInWithCredential(credential);
+      break;
+    case Provider.Microsoft: {
+      // ARCHIVE: signInWithCredential not working with Microsoft provider credential
+      // const oAuthProvider = new firebase.auth.OAuthProvider("microsoft.com");
+      // const credential = oAuthProvider.credential({ accessToken: tokenObj });
+      // await fireAuth.signInWithCredential(credential);
+
+      // ARCHIVE: custom auth token flow (unable to link to Microsoft)
+      // const customToken = await (await fireFunc.httpsCallable("createCustomToken")({ jwt: tokenObj })).data;
+      // console.log(customToken);
+      // const user = await fireAuth.signInWithCustomToken(customToken);
+      // console.log("user is", user);
+      break;
+    }
+    default:
+      return;
+  }
 }
 
 /**
@@ -284,17 +321,22 @@ async function _signInWithTokens(provider: "google" | "github", tokens: any) {
  *
  * @returns - provider id and secret
  */
-function _getAuthParams(provider: "google" | "github") {
+function _getAuthParams(provider: Provider) {
   switch (provider) {
-    case "google":
+    case Provider.Google:
       return {
         id: process.env.VUE_APP_GOOGLECLIENTID,
         secret: process.env.VUE_APP_GOOGLECLIENTSECRET
       };
-    case "github":
+    case Provider.Github:
       return {
         id: process.env.VUE_APP_GITHUBCLIENTID,
         secret: process.env.VUE_APP_GITHUBCLIENTSECRET
+      };
+    case Provider.Microsoft:
+      return {
+        id: process.env.VUE_APP_AZURECLIENTID,
+        secret: process.env.VUE_APP_AZURECLIENTSECRET
       };
   }
 }

@@ -56,3 +56,11 @@ export enum EnterprisePackageAccess {
   Default = "DEFAULT",
   Custom = "CUSTOM"
 }
+
+// AUTH PROVIDERS
+
+export enum Provider {
+  Google = "GOOGLE",
+  Github = "GITHUB",
+  Microsoft = "MICROSOFT"
+}
